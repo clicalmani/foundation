@@ -1,7 +1,7 @@
 <?php
-namespace Clicalmani\Fundation\Http\Requests;
+namespace Clicalmani\Foundation\Http\Requests;
 
-use Clicalmani\Fundation\Support\Facades\Log;
+use Clicalmani\Foundation\Support\Facades\Log;
 
 /**
  * stream - Handle raw input stream

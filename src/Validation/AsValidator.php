@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Fundation\Validation;
+namespace Clicalmani\Foundation\Validation;
 
 /**
  * Service tag to autoconfigure validators.

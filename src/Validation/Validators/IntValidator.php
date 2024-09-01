@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Fundation\Validation\Validators;
+namespace Clicalmani\Foundation\Validation\Validators;
 
 class IntValidator extends NumericValidator
 {

@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Fundation\Providers;
+namespace Clicalmani\Foundation\Providers;
 
 abstract class AuthServiceProvider extends ServiceProvider
 {

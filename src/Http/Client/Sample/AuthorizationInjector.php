@@ -1,15 +1,15 @@
 <?php
-namespace Clicalmani\Fundation\Http\Client\Sample;
+namespace Clicalmani\Foundation\Http\Client\Sample;
 
-use Clicalmani\Fundation\Http\Client\HttpClient;
-use Clicalmani\Fundation\Http\Client\HttpRequest;
-use Clicalmani\Fundation\Http\Client\Injector;
+use Clicalmani\Foundation\Http\Client\HttpClient;
+use Clicalmani\Foundation\Http\Client\HttpRequest;
+use Clicalmani\Foundation\Http\Client\Injector;
 
 /**
  * Class AuthorizationInjector
  * 
- * @package Clicalmani\Fundation
- * @author @Clicalmani\Fundation
+ * @package Clicalmani\Foundation
+ * @author @Clicalmani\Foundation
  */
 class AuthorizationInjector implements Injector
 {

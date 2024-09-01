@@ -1,11 +1,11 @@
 <?php
-namespace Clicalmani\Fundation\Providers;
+namespace Clicalmani\Foundation\Providers;
 
 /**
  * ContainerServiceProvider class
  * 
- * @package Clicalmani\Fundation/flesco 
- * @author @Clicalmani\Fundation
+ * @package Clicalmani\Foundation/flesco 
+ * @author @Clicalmani\Foundation
  */
 class ContainerServiceProvider extends ServiceProvider
 {
@@ -18,6 +18,6 @@ class ContainerServiceProvider extends ServiceProvider
          * 
          * Classes defined in the app directory will be automatically injected.
          */
-        new \Clicalmani\Fundation\Container\SPL_Loader( root_path() );
+        new \Clicalmani\Foundation\Container\SPL_Loader( root_path() );
     }
 }

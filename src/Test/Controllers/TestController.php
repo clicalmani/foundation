@@ -1,17 +1,17 @@
 <?php 
-namespace Clicalmani\Fundation\Test\Controllers;
+namespace Clicalmani\Foundation\Test\Controllers;
 
 use Clicalmani\Database\Factory\Sequence;
-use Clicalmani\Fundation\Auth\EncryptionServiceProvider;
-use Clicalmani\Fundation\Http\Requests\Request;
-use Clicalmani\Fundation\Test\TestInterface;
+use Clicalmani\Foundation\Auth\EncryptionServiceProvider;
+use Clicalmani\Foundation\Http\Requests\Request;
+use Clicalmani\Foundation\Test\TestInterface;
 
 abstract class TestController implements TestInterface
 {
     /**
      * Request controller
      * 
-     * @var \Clicalmani\Fundation\Http\Requests\RequestController
+     * @var \Clicalmani\Foundation\Http\Requests\RequestController
      */
     protected $controller;
 

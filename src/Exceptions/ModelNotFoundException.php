@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Fundation\Exceptions;
+namespace Clicalmani\Foundation\Exceptions;
 
 class ModelNotFoundException extends \Exception {
 	function __construct($model = ''){

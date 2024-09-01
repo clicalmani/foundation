@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Fundation\Collection;
+namespace Clicalmani\Foundation\Collection;
 
 /**
  * |--------------------------------------------------------------
@@ -8,7 +8,7 @@ namespace Clicalmani\Fundation\Collection;
  * 
  * Collection concept is based on SPL Class ArrayObject
  * 
- * @package Clicalmani\Fundation\Collection
+ * @package Clicalmani\Foundation\Collection
  * @author @clicalmani
  */
 class SPLCollection extends \ArrayObject

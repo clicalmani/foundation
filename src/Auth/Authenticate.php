@@ -1,8 +1,8 @@
 <?php
-namespace Clicalmani\Fundation\Auth;
+namespace Clicalmani\Foundation\Auth;
 
 use Clicalmani\Database\Factory\Models\Model;
-use Clicalmani\Fundation\Providers\ServiceProvider;
+use Clicalmani\Foundation\Providers\ServiceProvider;
 
 abstract class Authenticate extends ServiceProvider implements \JsonSerializable
 {

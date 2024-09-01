@@ -1,7 +1,7 @@
 <?php
-namespace Clicalmani\Fundation\Validation\Validators;
+namespace Clicalmani\Foundation\Validation\Validators;
 
-use Clicalmani\Fundation\Validation\InputValidator;
+use Clicalmani\Foundation\Validation\InputValidator;
 
 class ObjectValidator extends InputValidator
 {
@@ -27,7 +27,7 @@ class ObjectValidator extends InputValidator
         $value = $this->parseString($value);
         
         if ( @ $options['translate'] ) $value = strtr($value, $options['translate']['from'], $options['translate']['to']);
-        if ( @ $options['escape'] ) $value = \Clicalmani\Fundation\Support\Facades\Str::escape($value);
+        if ( @ $options['escape'] ) $value = \Clicalmani\Foundation\Support\Facades\Str::escape($value);
 
         $value = json_decode( $value );
         

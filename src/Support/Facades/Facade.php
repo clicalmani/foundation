@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Fundation\Support\Facades;
+namespace Clicalmani\Foundation\Support\Facades;
 
 class Facade 
 {
@@ -37,14 +37,14 @@ class Facade
     {
         $class = get_called_class();
         
-        if ( $class === \Clicalmani\Fundation\Routing\Route::class )
+        if ( $class === \Clicalmani\Foundation\Routing\Route::class )
             return \Clicalmani\Routing\Routing::class;
 
-        if ( is_subclass_of($class, \Clicalmani\Fundation\Http\Requests\RequestController::class) ) 
-            return \Clicalmani\Fundation\Logic\Internal\RequestController::class;
+        if ( is_subclass_of($class, \Clicalmani\Foundation\Http\Requests\RequestController::class) ) 
+            return \Clicalmani\Foundation\Logic\Internal\RequestController::class;
             
 
-        $class = "Clicalmani\Fundation\Logic\Internal\\" . substr($class, strrpos($class, "\\") + 1);
+        $class = "Clicalmani\Foundation\Logic\Internal\\" . substr($class, strrpos($class, "\\") + 1);
 
         if ( class_exists($class) ) return $class;
 

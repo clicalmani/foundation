@@ -1,7 +1,7 @@
 <?php
-namespace Clicalmani\Fundation\Routing;
+namespace Clicalmani\Foundation\Routing;
 
-use Clicalmani\Fundation\Support\Facades\Facade;
+use Clicalmani\Foundation\Support\Facades\Facade;
 
 /**
  * @method static string[] all()

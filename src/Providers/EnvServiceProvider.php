@@ -1,13 +1,13 @@
 <?php
-namespace Clicalmani\Fundation\Providers;
+namespace Clicalmani\Foundation\Providers;
 
-use Clicalmani\Fundation\Support\Env;
+use Clicalmani\Foundation\Support\Env;
 
 /**
  * EnvServiceProvider class
  * 
- * @package Clicalmani\Fundation/flesco 
- * @author @Clicalmani\Fundation
+ * @package Clicalmani\Foundation/flesco 
+ * @author @Clicalmani\Foundation
  */
 class EnvServiceProvider extends ServiceProvider
 {

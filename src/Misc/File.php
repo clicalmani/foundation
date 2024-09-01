@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Fundation\Misc;
+namespace Clicalmani\Foundation\Misc;
 
 class File 
 {

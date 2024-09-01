@@ -138,7 +138,7 @@ if ( ! function_exists( 'view' ) ) {
      * @return mixed
      */
     function view(string $template, ?array $vars = []) : mixed {
-        return Clicalmani\Fundation\Resources\Views\View::render($template, $vars);
+        return Clicalmani\Foundation\Resources\Views\View::render($template, $vars);
     }
 }
 
@@ -150,7 +150,7 @@ if ( ! function_exists( 'current_route' ) ) {
      * @return string
      */
     function current_route() : string {
-        return Clicalmani\Fundation\Routing\Route::current();
+        return Clicalmani\Foundation\Routing\Route::current();
     }
 }
 
@@ -211,7 +211,7 @@ if ( ! function_exists( 'password' ) ) {
      * @return string
      */
     function password(string $password) : string {
-        return \Clicalmani\Fundation\Auth\EncryptionServiceProvider::password($password);
+        return \Clicalmani\Foundation\Auth\EncryptionServiceProvider::password($password);
     }
 }
 
@@ -224,7 +224,7 @@ if ( ! function_exists( 'create_parameters_hash' ) ) {
      * @return string
      */
     function create_parameters_hash(array $parameters) : string {
-        return (new \Clicalmani\Fundation\Http\Requests\Request)->createParametersHash($parameters);
+        return (new \Clicalmani\Foundation\Http\Requests\Request)->createParametersHash($parameters);
     }
 }
 
@@ -268,10 +268,10 @@ if ( ! function_exists('request') ) {
     function request(?string $param = '', ?string $value = null) : mixed {
 
         if ('' === $param) {
-            return \Clicalmani\Fundation\Http\Requests\Request::all(); 
+            return \Clicalmani\Foundation\Http\Requests\Request::all(); 
         }
         
-        $request = \Clicalmani\Fundation\Http\Requests\Request::currentRequest() ?? (object) \Clicalmani\Fundation\Http\Requests\Request::all();
+        $request = \Clicalmani\Foundation\Http\Requests\Request::currentRequest() ?? (object) \Clicalmani\Foundation\Http\Requests\Request::all();
 
         if ( $request ) {
             if ($value) @$request->{$param} = $value;
@@ -290,7 +290,7 @@ if ( ! function_exists('redirect') ) {
      * @return never
      */
     function redirect() : never {
-        with ( new \Clicalmani\Fundation\Http\Requests\Request )->redirect();
+        with ( new \Clicalmani\Foundation\Http\Requests\Request )->redirect();
     }
 }
 
@@ -299,10 +299,10 @@ if ( ! function_exists('response') ) {
     /**
      * Return an Http response
      * 
-     * @return \Clicalmani\Fundation\Http\Response\HttpResponseHelper
+     * @return \Clicalmani\Foundation\Http\Response\HttpResponseHelper
      */
     function response() {
-        return new \Clicalmani\Fundation\Http\Response\HttpResponseHelper;
+        return new \Clicalmani\Foundation\Http\Response\HttpResponseHelper;
     }
 }
 
@@ -315,7 +315,7 @@ if ( ! function_exists('route') ) {
      * @return mixed
      */
     function route(mixed ...$args) : mixed {
-        return \Clicalmani\Fundation\Routing\Route::resolve(...$args);
+        return \Clicalmani\Foundation\Routing\Route::resolve(...$args);
     }
 }
 
@@ -324,10 +324,10 @@ if ( ! function_exists('collection') ) {
     /**
      * Create a collection
      * 
-     * @return \Clicalmani\Fundation\Collection\Collection
+     * @return \Clicalmani\Foundation\Collection\Collection
      */
     function collection(?array $items = []) {
-        return new \Clicalmani\Fundation\Collection\Collection( $items );
+        return new \Clicalmani\Foundation\Collection\Collection( $items );
     }
 }
 
@@ -340,7 +340,7 @@ if ( ! function_exists('sanitize_attribute') ) {
      * @return mixed
      */
     function sanitize_attribute($attr) : mixed {
-        return preg_replace('/[^0-9a-z-_]+/', '', \Clicalmani\Fundation\Support\Facades\Str::slug($attr));
+        return preg_replace('/[^0-9a-z-_]+/', '', \Clicalmani\Foundation\Support\Facades\Str::slug($attr));
     }
 }
 
@@ -367,7 +367,7 @@ if ( ! function_exists('slug') ) {
      * @return string
      */
     function slug(string $str) : string {
-        return \Clicalmani\Fundation\Support\Facades\Str::slug($str);
+        return \Clicalmani\Foundation\Support\Facades\Str::slug($str);
     }
 }
 
@@ -426,7 +426,7 @@ if ( ! function_exists('mail_smtp') ) {
      */
     function mail_smtp(array $to, array $from, string $subject, string $body, ?array $options = [])
     {
-        $mail = new \Clicalmani\Fundation\Messenger\MailSMTP;
+        $mail = new \Clicalmani\Foundation\Messenger\MailSMTP;
 
         if (@ $options['attachments'])
             foreach ($options['attachments'] as $attachment) {
@@ -629,7 +629,7 @@ if ( ! function_exists('token') ) {
      * @return string
      */
     function token(mixed $jti, int $expiry) : string {
-        $auth = new \Clicalmani\Fundation\Auth\AuthServiceProvider;
+        $auth = new \Clicalmani\Foundation\Auth\AuthServiceProvider;
         $auth->setJti( json_encode($jti) );
         return $auth->generateToken();
     }
@@ -644,7 +644,7 @@ if ( ! function_exists('get_payload') ) {
      * @return mixed
      */
     function get_payload(string $token) : mixed {
-        return with ( new \Clicalmani\Fundation\Auth\AuthServiceProvider )->verifyToken($token);
+        return with ( new \Clicalmani\Foundation\Auth\AuthServiceProvider )->verifyToken($token);
     }
 }
 
@@ -657,7 +657,7 @@ if ( ! function_exists('bearerToken') ) {
      * @return mixed
      */
     function bearerToken() : mixed {
-        return with ( new \Clicalmani\Fundation\Http\Requests\Request )->bearerToken();
+        return with ( new \Clicalmani\Foundation\Http\Requests\Request )->bearerToken();
     }
 }
 
@@ -688,10 +688,10 @@ if ( ! function_exists('jwt') ) {
      * 
      * @param ?string $jti
      * @param mixed $expiry
-     * @return \Clicalmani\Fundation\Auth\JWT
+     * @return \Clicalmani\Foundation\Auth\JWT
      */
     function jwt(?string $jti = null, mixed $expiry = 1) {
-        return new \Clicalmani\Fundation\Auth\AuthServiceProvider($jti, $expiry);
+        return new \Clicalmani\Foundation\Auth\AuthServiceProvider($jti, $expiry);
     }
 }
 
@@ -704,7 +704,7 @@ if ( ! function_exists('encrypt') ) {
      * @return mixed
      */
     function encrypt(string $value) : mixed {
-        return \Clicalmani\Fundation\Auth\EncryptionServiceProvider::encrypt($value);
+        return \Clicalmani\Foundation\Auth\EncryptionServiceProvider::encrypt($value);
     }
 }
 
@@ -717,20 +717,20 @@ if ( ! function_exists('decrypt') ) {
      * @return mixed
      */
     function decrypt(string $value) : mixed {
-        return \Clicalmani\Fundation\Auth\EncryptionServiceProvider::decrypt($value);
+        return \Clicalmani\Foundation\Auth\EncryptionServiceProvider::decrypt($value);
     }
 }
 
 if ( ! function_exists('verify_token') ) {
     function verify_token(string $token) : mixed 
     {
-        return with (new \Clicalmani\Fundation\Auth\AuthServiceProvider)->verifyToken($token);
+        return with (new \Clicalmani\Foundation\Auth\AuthServiceProvider)->verifyToken($token);
     }
 }
 
 if ( ! function_exists('console_log') ) {
     function console_log(mixed ...$args) 
     {
-        \Clicalmani\Fundation\Support\Facades\Log::debug( ...$args );
+        \Clicalmani\Foundation\Support\Facades\Log::debug( ...$args );
     }
 }

@@ -1,20 +1,20 @@
 <?php
-namespace Clicalmani\Fundation\Providers;
+namespace Clicalmani\Foundation\Providers;
 
-use Clicalmani\Fundation\Container\SPL_Loader;
+use Clicalmani\Foundation\Container\SPL_Loader;
 
 /**
  * ServiceProvider class
  * 
- * @package Clicalmani\Fundation/flesco 
- * @author @Clicalmani\Fundation
+ * @package Clicalmani\Foundation
+ * @author @Clicalmani\Foundation
  */
 abstract class ServiceProvider
 {
     /**
      * Service container
      * 
-     * @var \Clicalmani\Fundation\Container\SPL_Loader
+     * @var \Clicalmani\Foundation\Container\SPL_Loader
      */
     protected $container;
 

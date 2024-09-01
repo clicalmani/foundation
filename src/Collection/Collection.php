@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Fundation\Collection;
+namespace Clicalmani\Foundation\Collection;
 
 /**
  * Class Collection
@@ -286,7 +286,7 @@ class Collection extends SPLCollection
     /**
      * Create a new set
      * 
-     * @return \Clicalmani\Fundation\Collection\Set
+     * @return \Clicalmani\Foundation\Collection\Set
      */
     public function asSet() : Set
     {
@@ -296,7 +296,7 @@ class Collection extends SPLCollection
     /**
      * Create a new map
      * 
-     * @return \Clicalmani\Fundation\Collection\Map
+     * @return \Clicalmani\Foundation\Collection\Map
      */
     public function asMap() : Map
     {

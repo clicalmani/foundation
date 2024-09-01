@@ -1,8 +1,8 @@
 <?php
-namespace Clicalmani\Fundation\Validation;
+namespace Clicalmani\Foundation\Validation;
 
-use Clicalmani\Fundation\Providers\InputValidationServiceProvider;
-use Clicalmani\Fundation\Support\Facades\Log;
+use Clicalmani\Foundation\Providers\InputValidationServiceProvider;
+use Clicalmani\Foundation\Support\Facades\Log;
 
 class InputValidator implements ValidatorInterface
 {

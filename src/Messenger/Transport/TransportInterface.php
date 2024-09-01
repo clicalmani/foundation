@@ -1,7 +1,7 @@
 <?php
-namespace Clicalmani\Fundation\Messenger\Transport;
+namespace Clicalmani\Foundation\Messenger\Transport;
 
-use Clicalmani\Fundation\Messenger\Message\MessageInterface;
+use Clicalmani\Foundation\Messenger\Message\MessageInterface;
 
 interface TransportInterface
 {
@@ -15,7 +15,7 @@ interface TransportInterface
     /**
      * Send message
      * 
-     * @param \Clicalmani\Fundation\Messenger\Message\MessageInterface $message
+     * @param \Clicalmani\Foundation\Messenger\Message\MessageInterface $message
      * @return void
      */
     public function send(MessageInterface $message) : void;

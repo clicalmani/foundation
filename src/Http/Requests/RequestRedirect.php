@@ -1,13 +1,13 @@
 <?php
-namespace Clicalmani\Fundation\Http\Requests;
+namespace Clicalmani\Foundation\Http\Requests;
 
-use Clicalmani\Fundation\Routing\Route;
+use Clicalmani\Foundation\Routing\Route;
 
 /**
  * Class RequestRedirect
  * 
- * @package Clicalmani\Fundation
- * @author @Clicalmani\Fundation
+ * @package Clicalmani\Foundation
+ * @author @Clicalmani\Foundation
  */
 class RequestRedirect 
 {

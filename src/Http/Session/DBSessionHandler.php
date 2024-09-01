@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Fundation\Http\Session;
+namespace Clicalmani\Foundation\Http\Session;
 
 use Clicalmani\Database\DB;
 

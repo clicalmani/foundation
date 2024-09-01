@@ -1,7 +1,7 @@
 <?php
-namespace Clicalmani\Fundation\Validation\Validators;
+namespace Clicalmani\Foundation\Validation\Validators;
 
-use Clicalmani\Fundation\Validation\InputValidator;
+use Clicalmani\Foundation\Validation\InputValidator;
 
 class DateValidator extends InputValidator
 {

@@ -1,16 +1,16 @@
 <?php
-namespace Clicalmani\Fundation\Providers;
+namespace Clicalmani\Foundation\Providers;
 
-use Clicalmani\Fundation\Http\Requests\Request;
-use Clicalmani\Fundation\Routing\Route;
+use Clicalmani\Foundation\Http\Requests\Request;
+use Clicalmani\Foundation\Routing\Route;
 use Clicalmani\Routing\Cache;
 use Clicalmani\Routing\Record;
 
 /**
  * RouteServiceProvider class
  * 
- * @package Clicalmani\Fundation/flesco 
- * @author @Clicalmani\Fundation
+ * @package Clicalmani\Foundation/flesco 
+ * @author @Clicalmani\Foundation
  */
 class RouteServiceProvider extends ServiceProvider
 {
@@ -123,7 +123,7 @@ class RouteServiceProvider extends ServiceProvider
         if ( FALSE == inConsoleMode() ) {
             // Generate CSRF token and Store it in $_SESSION global variable
             if ( ! isset($_SESSION['csrf-token']) ) {
-                $_SESSION['csrf-token'] = with ( new \Clicalmani\Fundation\Auth\CSRF )->getToken(); 
+                $_SESSION['csrf-token'] = with ( new \Clicalmani\Foundation\Auth\CSRF )->getToken(); 
             }
         }
     }
@@ -157,7 +157,7 @@ class RouteServiceProvider extends ServiceProvider
      */
     public static function getProvidedTPS(int $service_level = 0) : array 
     {
-        static::$kernel['tps'][0][] = \Clicalmani\Fundation\Messenger\Transport\Service::class;
+        static::$kernel['tps'][0][] = \Clicalmani\Foundation\Messenger\Transport\Service::class;
         return static::$kernel['tps'][$service_level];
     }
 

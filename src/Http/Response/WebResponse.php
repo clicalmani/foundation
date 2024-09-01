@@ -1,13 +1,13 @@
 <?php
-namespace Clicalmani\Fundation\Http\Response;
+namespace Clicalmani\Foundation\Http\Response;
 
-use Clicalmani\Fundation\Http\Requests\Request;
+use Clicalmani\Foundation\Http\Requests\Request;
 
 /**
  * Trait JsonResponse
  * 
- * @package Clicalmani\Fundation
- * @author @Clicalmani\Fundation
+ * @package Clicalmani\Foundation
+ * @author @Clicalmani\Foundation
  */
 Trait WebResponse
 {

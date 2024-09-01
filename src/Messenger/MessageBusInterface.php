@@ -1,7 +1,7 @@
 <?php
-namespace Clicalmani\Fundation\Messenger;
+namespace Clicalmani\Foundation\Messenger;
 
-use Clicalmani\Fundation\Messenger\Envelope\EnvelopeInterface;
+use Clicalmani\Foundation\Messenger\Envelope\EnvelopeInterface;
 
 interface MessageBusInterface
 {

@@ -1,11 +1,11 @@
 <?php
-namespace Clicalmani\Fundation\Providers;
+namespace Clicalmani\Foundation\Providers;
 
 /**
  * EventServiceProvider class
  * 
- * @package Clicalmani\Fundation/flesco 
- * @author @Clicalmani\Fundation
+ * @package Clicalmani\Foundation/flesco 
+ * @author @Clicalmani\Foundation
  */
 abstract class EventServiceProvider extends ServiceProvider
 {

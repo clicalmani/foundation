@@ -1,7 +1,7 @@
 <?php
-namespace Clicalmani\Fundation\Messenger\Handler;
+namespace Clicalmani\Foundation\Messenger\Handler;
 
-use Clicalmani\Fundation\Messenger\Envelope;
+use Clicalmani\Foundation\Messenger\Envelope;
 
 interface HandlersLocatorInterface
 {

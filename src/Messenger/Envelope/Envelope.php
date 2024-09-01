@@ -1,14 +1,14 @@
 <?php
-namespace Clicalmani\Fundation\Messenger\Envelope;
+namespace Clicalmani\Foundation\Messenger\Envelope;
 
-use Clicalmani\Fundation\Messenger\Message\Message;
+use Clicalmani\Foundation\Messenger\Message\Message;
 
 class Envelope implements EnvelopeInterface
 {
     /**
      * Message
      * 
-     * @var \Clicalmani\Fundation\Messenger\Message\Message
+     * @var \Clicalmani\Foundation\Messenger\Message\Message
      */
     private $message;
 

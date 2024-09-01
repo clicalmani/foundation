@@ -1,8 +1,8 @@
 <?php
-namespace Clicalmani\Fundation\Http\Client\Serializer;
+namespace Clicalmani\Foundation\Http\Client\Serializer;
 
-use Clicalmani\Fundation\Http\Client\HttpRequest;
-use Clicalmani\Fundation\Http\Client\Serializer;
+use Clicalmani\Foundation\Http\Client\HttpRequest;
+use Clicalmani\Foundation\Http\Client\Serializer;
 
 class Form implements Serializer
 {

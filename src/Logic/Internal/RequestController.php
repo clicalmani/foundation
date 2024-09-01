@@ -1,16 +1,16 @@
 <?php
-namespace Clicalmani\Fundation\Logic\Internal;
+namespace Clicalmani\Foundation\Logic\Internal;
 
-use Clicalmani\Fundation\Http\Requests\Request;
-use Clicalmani\Fundation\Http\Requests\HttpRequest;
-use Clicalmani\Fundation\Exceptions\ModelNotFoundException;
+use Clicalmani\Foundation\Http\Requests\Request;
+use Clicalmani\Foundation\Http\Requests\HttpRequest;
+use Clicalmani\Foundation\Exceptions\ModelNotFoundException;
 use Clicalmani\Database\Factory\Models\Model;
-use Clicalmani\Fundation\Http\Requests\RequestReflection;
-use Clicalmani\Fundation\Providers\RouteServiceProvider;
-use Clicalmani\Fundation\Routing\Exceptions\RouteNotFoundException;
-use Clicalmani\Fundation\Routing\Route;
-use Clicalmani\Fundation\Test\Controllers\TestController;
-use Clicalmani\Fundation\Validation\AsValidator;
+use Clicalmani\Foundation\Http\Requests\RequestReflection;
+use Clicalmani\Foundation\Providers\RouteServiceProvider;
+use Clicalmani\Foundation\Routing\Exceptions\RouteNotFoundException;
+use Clicalmani\Foundation\Routing\Route;
+use Clicalmani\Foundation\Test\Controllers\TestController;
+use Clicalmani\Foundation\Validation\AsValidator;
 use Clicalmani\Routing\Cache;
 
 /**
@@ -22,7 +22,7 @@ use Clicalmani\Routing\Cache;
 
  $root_path = dirname( __DIR__, 6 );
 
- \Clicalmani\Fundation\Providers\ServiceProvider::init(
+ \Clicalmani\Foundation\Providers\ServiceProvider::init(
 	 require $root_path . '/config/app.php',
 	 require $root_path . '/bootstrap/kernel.php',
 	 require $root_path . '/app/Http/kernel.php'
@@ -31,8 +31,8 @@ use Clicalmani\Routing\Cache;
 /**
  * RequestController class
  * 
- * @package Clicalmani\Fundation/flesco 
- * @author @Clicalmani\Fundation
+ * @package Clicalmani\Foundation/flesco 
+ * @author @Clicalmani\Foundation
  */
 class RequestController extends HttpRequest
 {
@@ -130,7 +130,7 @@ class RequestController extends HttpRequest
 	/**
 	 * Get request response
 	 * 
-	 * @param \Clicalmani\Fundation\Http\Requests\Request
+	 * @param \Clicalmani\Foundation\Http\Requests\Request
 	 * @return mixed
 	 */
 	private function getResponse(Request $request) : mixed
@@ -199,7 +199,7 @@ class RequestController extends HttpRequest
 				}
 			}
 			
-			/** @var \Clicalmani\Fundation\Http\Requests\Request */
+			/** @var \Clicalmani\Foundation\Http\Requests\Request */
 			$request = new $requestClass;
 			$this->validateRequest(new $request);
 		}
@@ -224,7 +224,7 @@ class RequestController extends HttpRequest
 	/**
 	 * Validate request
 	 * 
-	 * @param \Clicalmani\Fundation\Http\Requests\Request
+	 * @param \Clicalmani\Foundation\Http\Requests\Request
 	 * @return mixed
 	 */
 	private function validateRequest(Request $request) : mixed
@@ -265,7 +265,7 @@ class RequestController extends HttpRequest
 			} elseif ($type) {
 				$obj = new $type;
 
-				if (is_subclass_of($obj, \Clicalmani\Fundation\Http\Requests\Request::class)) {
+				if (is_subclass_of($obj, \Clicalmani\Foundation\Http\Requests\Request::class)) {
 					$this->validateRequest($obj);
 					Request::currentRequest($obj); // Current request
 
@@ -284,7 +284,7 @@ class RequestController extends HttpRequest
 	/**
 	 * Gather request parameters
 	 * 
-	 * @param \Clicalmani\Fundation\Http\Requests\Request
+	 * @param \Clicalmani\Foundation\Http\Requests\Request
 	 * @return array
 	 */
 	private function getParameters(Request $request) : array
@@ -508,7 +508,7 @@ class RequestController extends HttpRequest
 	 * Controller test
 	 * 
 	 * @param string $action Test action
-	 * @return \Clicalmani\Fundation\Test\Controllers\TestController
+	 * @return \Clicalmani\Foundation\Test\Controllers\TestController
 	 */
 	public function test(string $action)
 	{

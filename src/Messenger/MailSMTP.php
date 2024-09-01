@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Fundation\Messenger;
+namespace Clicalmani\Foundation\Messenger;
 
 /**
  * Class MailSMTP
@@ -99,6 +99,6 @@ class MailSMTP
 
         if ( in_array($method, $mailer_methods) ) {
             return $this->mail->{$method}(...$args);
-        } else throw new \Clicalmani\Fundation\Exceptions\MailException("Unsupported method $method has been called on " . static::class);
+        } else throw new \Clicalmani\Foundation\Exceptions\MailException("Unsupported method $method has been called on " . static::class);
     }
 }

@@ -1,10 +1,10 @@
 <?php
-namespace Clicalmani\Fundation\Messenger\Transport;
+namespace Clicalmani\Foundation\Messenger\Transport;
 
 use App\Authenticate\Notify;
 use App\Providers\RouteServiceProvider;
-use Clicalmani\Fundation\Http\Requests\Request;
-use Clicalmani\Fundation\Providers\RouteTPS;
+use Clicalmani\Foundation\Http\Requests\Request;
+use Clicalmani\Foundation\Providers\RouteTPS;
 use GuzzleHttp\Client;
 
 class Service extends RouteTPS

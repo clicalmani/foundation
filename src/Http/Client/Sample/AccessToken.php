@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Fundation\Http\Client\Sample;
+namespace Clicalmani\Foundation\Http\Client\Sample;
 
 class AccessToken 
 {

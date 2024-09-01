@@ -1,7 +1,7 @@
 <?php
-namespace Clicalmani\Fundation\Providers;
+namespace Clicalmani\Foundation\Providers;
 
-use Clicalmani\Fundation\Messenger\Handler\HandlersLocatorInterface;
+use Clicalmani\Foundation\Messenger\Handler\HandlersLocatorInterface;
 
 abstract class MessageServiceProvider extends ServiceProvider
 {

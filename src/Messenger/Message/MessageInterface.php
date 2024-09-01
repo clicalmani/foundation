@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Fundation\Messenger\Message;
+namespace Clicalmani\Foundation\Messenger\Message;
 
 interface MessageInterface
 {

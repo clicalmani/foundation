@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Fundation\Container;
+namespace Clicalmani\Foundation\Container;
 
 abstract class Manager
 {

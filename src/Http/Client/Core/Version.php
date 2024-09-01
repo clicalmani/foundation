@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Fundation\Http\Client\Core;
+namespace Clicalmani\Foundation\Http\Client\Core;
 
 class Version
 {

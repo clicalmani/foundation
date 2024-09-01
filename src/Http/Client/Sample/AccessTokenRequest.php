@@ -1,7 +1,7 @@
 <?php
-namespace Clicalmani\Fundation\Http\Client\Sample;
+namespace Clicalmani\Foundation\Http\Client\Sample;
 
-use Clicalmani\Fundation\Http\Client\HttpRequest;
+use Clicalmani\Foundation\Http\Client\HttpRequest;
 
 class AccessTokenRequest extends HttpRequest
 {

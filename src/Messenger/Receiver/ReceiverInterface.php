@@ -1,19 +1,19 @@
 <?php
-namespace Clicalmani\Fundation\Messenger\Receiver;
+namespace Clicalmani\Foundation\Messenger\Receiver;
 
-use Clicalmani\Fundation\Messenger\Envelope\EnvelopeInterface;
+use Clicalmani\Foundation\Messenger\Envelope\EnvelopeInterface;
 
 interface ReceiverInterface
 {
     /**
-     * @return iterable<int, \Clicalmani\Fundation\Messenger\Message\MessageInterface>
+     * @return iterable<int, \Clicalmani\Foundation\Messenger\Message\MessageInterface>
      */
     public function get() : iterable;
 
     /**
      * Store new message
      * 
-     * @param \Clicalmani\Fundation\Messenger\Envelope\EnvelopeInterface $envelope
+     * @param \Clicalmani\Foundation\Messenger\Envelope\EnvelopeInterface $envelope
      */
     public function store(EnvelopeInterface $envelope) : void;
 }

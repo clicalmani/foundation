@@ -1,13 +1,13 @@
 <?php
-namespace Clicalmani\Fundation\Support\Facades;
+namespace Clicalmani\Foundation\Support\Facades;
 
-use Clicalmani\Fundation\Support\Facades\Facade;
+use Clicalmani\Foundation\Support\Facades\Facade;
 
 /**
  * Class Str
  * 
- * @package Clicalmani\Fundation
- * @author @Clicalmani\Fundation
+ * @package Clicalmani\Foundation
+ * @author @Clicalmani\Foundation
  * 
  * @method static string slug(mixed $value, ?string $fallback_value = '' )
  * @method static string removeAccents(string $string, ?string $locale = '' )

@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Fundation\Messenger;
+namespace Clicalmani\Foundation\Messenger;
 
 use Symfony\Component\Messenger\Handler\HandlersLocatorInterface;
 

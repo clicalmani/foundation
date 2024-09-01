@@ -1,11 +1,11 @@
 <?php 
-namespace Clicalmani\Fundation\Logic\Internal;
+namespace Clicalmani\Foundation\Logic\Internal;
 
 /**
  * Log Class
  * 
- * @package Clicalmani\Fundation/flesco 
- * @author @Clicalmani\Fundation
+ * @package Clicalmani\Foundation/flesco 
+ * @author @Clicalmani\Foundation
  */
 class Log
 {

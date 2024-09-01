@@ -1,18 +1,18 @@
 <?php
-namespace Clicalmani\Fundation\Http\Client;
+namespace Clicalmani\Foundation\Http\Client;
 
-use Clicalmani\Fundation\Http\Client\Serializer\Form;
-use Clicalmani\Fundation\Http\Client\Serializer\Json;
-use Clicalmani\Fundation\Http\Client\Serializer\Multipart;
-use Clicalmani\Fundation\Http\Client\Serializer\Text;
+use Clicalmani\Foundation\Http\Client\Serializer\Form;
+use Clicalmani\Foundation\Http\Client\Serializer\Json;
+use Clicalmani\Foundation\Http\Client\Serializer\Multipart;
+use Clicalmani\Foundation\Http\Client\Serializer\Text;
 
 /**
  * Class Encoder
  * 
  * Encoding class for serializing and deserializing request/response.
  * 
- * @package Clicalmani\Fundation
- * @author @Clicalmani\Fundation
+ * @package Clicalmani\Foundation
+ * @author @Clicalmani\Foundation
  */
 class Encoder
 {

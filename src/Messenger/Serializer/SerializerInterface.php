@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Fundation\Messenger\Serializer;
+namespace Clicalmani\Foundation\Messenger\Serializer;
 
 interface SerializerInterface
 {

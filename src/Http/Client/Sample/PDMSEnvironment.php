@@ -1,13 +1,13 @@
 <?php
-namespace Clicalmani\Fundation\Http\Client\Sample;
+namespace Clicalmani\Foundation\Http\Client\Sample;
 
-use Clicalmani\Fundation\Http\Client\Environment;
+use Clicalmani\Foundation\Http\Client\Environment;
 
 /**
  * Class PDMSEnvironment
  * 
- * @package Clicalmani\Fundation
- * @author @Clicalmani\Fundation
+ * @package Clicalmani\Foundation
+ * @author @Clicalmani\Foundation
  */
 abstract class PDMSEnvironment implements Environment
 {

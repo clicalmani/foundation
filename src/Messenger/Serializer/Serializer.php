@@ -1,7 +1,7 @@
 <?php
-namespace Clicalmani\Fundation\Messenger\Serializer;
+namespace Clicalmani\Foundation\Messenger\Serializer;
 
-use Clicalmani\Fundation\Messenger\Serializer\SerializerInterface;
+use Clicalmani\Foundation\Messenger\Serializer\SerializerInterface;
 
 class Serializer implements SerializerInterface
 {

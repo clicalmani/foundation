@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Fundation\Http\Client\Serializer;
+namespace Clicalmani\Foundation\Http\Client\Serializer;
 
 class FormPart
 {

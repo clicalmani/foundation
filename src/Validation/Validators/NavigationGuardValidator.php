@@ -1,7 +1,7 @@
 <?php
-namespace Clicalmani\Fundation\Validation\Validators;
+namespace Clicalmani\Foundation\Validation\Validators;
 
-use Clicalmani\Fundation\Validation\InputValidator as Validator;
+use Clicalmani\Foundation\Validation\InputValidator as Validator;
 use Clicalmani\Routing\Cache;
 
 class NavigationGuardValidator extends Validator

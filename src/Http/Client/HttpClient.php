@@ -1,15 +1,15 @@
 <?php
-namespace Clicalmani\Fundation\Http\Client;
+namespace Clicalmani\Foundation\Http\Client;
 
-use Clicalmani\Fundation\Http\Client\Curl;
+use Clicalmani\Foundation\Http\Client\Curl;
 
 /**
  * Class HttpClient
  * 
  * Client used to make HTTP requests.
  * 
- * @package Clicalmani\Fundation
- * @author @Clicalmani\Fundation
+ * @package Clicalmani\Foundation
+ * @author @Clicalmani\Foundation
  */
 class HttpClient
 {

@@ -1,13 +1,13 @@
 <?php
-namespace Clicalmani\Fundation\Http\Response;
+namespace Clicalmani\Foundation\Http\Response;
 
-use Clicalmani\Fundation\Routing\Route;
+use Clicalmani\Foundation\Routing\Route;
 
 /**
  * Class Response
  * 
- * @package Clicalmani\Fundation
- * @author @Clicalmani\Fundation
+ * @package Clicalmani\Foundation
+ * @author @Clicalmani\Foundation
  */
 class Response extends HttpResponse
 {

@@ -1,10 +1,10 @@
 <?php 
-namespace Clicalmani\Fundation\Collection;
+namespace Clicalmani\Foundation\Collection;
 
 /**
  * Class Map
  * 
- * @package Clicalmani\Fundation\Collection
+ * @package Clicalmani\Foundation\Collection
  * @author @clicalmani
  */
 class Map extends Collection

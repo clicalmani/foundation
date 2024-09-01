@@ -1,11 +1,11 @@
 <?php
-namespace Clicalmani\Fundation\Maker;
+namespace Clicalmani\Foundation\Maker;
 
 /**
  * Make an application
  * 
- * @package Clicalmani\Fundation
- * @author Clicalmani\Fundation
+ * @package Clicalmani\Foundation
+ * @author Clicalmani\Foundation
  */
 class Application extends \Symfony\Component\Console\Application
 {

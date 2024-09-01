@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Fundation\Providers;
+namespace Clicalmani\Foundation\Providers;
 
 class InputValidationServiceProvider extends ServiceProvider
 {
@@ -17,7 +17,7 @@ class InputValidationServiceProvider extends ServiceProvider
 	 */
     public function boot() : void
 	{
-        $validators = ( new \Clicalmani\Fundation\Validation\Kernel )->validators();
+        $validators = ( new \Clicalmani\Foundation\Validation\Kernel )->validators();
         $custom_validators = @ static::$http_kernel['validators'];
 
         /**

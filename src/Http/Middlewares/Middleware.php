@@ -1,24 +1,24 @@
 <?php
-namespace Clicalmani\Fundation\Http\Middlewares;
+namespace Clicalmani\Foundation\Http\Middlewares;
 
-use Clicalmani\Fundation\Container\SPL_Loader;
-use Clicalmani\Fundation\Http\Requests\Request;
-use Clicalmani\Fundation\Http\Response\Response;
+use Clicalmani\Foundation\Container\SPL_Loader;
+use Clicalmani\Foundation\Http\Requests\Request;
+use Clicalmani\Foundation\Http\Response\Response;
 use Clicalmani\Routing\Group;
 
 /**
  * Class Middleware
  * 
- * @package Clicalmani\Fundation
- * @author @Clicalmani\Fundation
+ * @package Clicalmani\Foundation
+ * @author @Clicalmani\Foundation
  */
 abstract class Middleware 
 {
     /**
      * Handler
      * 
-     * @param \Clicalmani\Fundation\Http\Requests\Request $request Request object
-     * @param \Clicalmani\Fundation\Http\Response\Response $response Response object
+     * @param \Clicalmani\Foundation\Http\Requests\Request $request Request object
+     * @param \Clicalmani\Foundation\Http\Response\Response $response Response object
      * @param callable $next Next middleware function
      * @return int|false
      */

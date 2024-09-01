@@ -1,11 +1,11 @@
 <?php
-namespace Clicalmani\Fundation\Http\Client\Sample;
+namespace Clicalmani\Foundation\Http\Client\Sample;
 
 /**
  * Class ProductionEnvironment
  * 
- * @package Clicalmani\Fundation
- * @author @Clicalmani\Fundation
+ * @package Clicalmani\Foundation
+ * @author @Clicalmani\Foundation
  */
 class ProductionEnvironment extends PDMSEnvironment
 {

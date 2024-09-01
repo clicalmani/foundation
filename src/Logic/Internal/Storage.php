@@ -1,8 +1,8 @@
 <?php 
-namespace Clicalmani\Fundation\Logic\Internal;
+namespace Clicalmani\Foundation\Logic\Internal;
 
-use Clicalmani\Fundation\Support\Facades\Facade;
-use Clicalmani\Fundation\Support\Facades\Tonka;
+use Clicalmani\Foundation\Support\Facades\Facade;
+use Clicalmani\Foundation\Support\Facades\Tonka;
 
 class Storage extends Facade
 {

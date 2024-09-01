@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Fundation\Support\Facades;
+namespace Clicalmani\Foundation\Support\Facades;
 
 /**
  * @method static void migrate(string $filename)

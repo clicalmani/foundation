@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Fundation\Messenger\Handler;
+namespace Clicalmani\Foundation\Messenger\Handler;
 
 class HandlersLocator implements HandlersLocatorInterface
 {

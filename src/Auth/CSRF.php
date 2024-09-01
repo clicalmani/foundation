@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Fundation\Auth;
+namespace Clicalmani\Foundation\Auth;
 
 class CSRF
 {

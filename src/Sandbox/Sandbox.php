@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Fundation\Sandbox;
+namespace Clicalmani\Foundation\Sandbox;
 
 class Sandbox
 {

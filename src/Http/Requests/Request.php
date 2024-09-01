@@ -1,11 +1,11 @@
 <?php
-namespace Clicalmani\Fundation\Http\Requests;
+namespace Clicalmani\Foundation\Http\Requests;
 
-use Clicalmani\Fundation\Auth\EncryptionServiceProvider;
-use Clicalmani\Fundation\Http\Requests\UploadedFile;
-use Clicalmani\Fundation\Http\Requests\RequestRedirect;
-use Clicalmani\Fundation\Providers\AuthServiceProvider;
-use Clicalmani\Fundation\Routing\Route;
+use Clicalmani\Foundation\Auth\EncryptionServiceProvider;
+use Clicalmani\Foundation\Http\Requests\UploadedFile;
+use Clicalmani\Foundation\Http\Requests\RequestRedirect;
+use Clicalmani\Foundation\Providers\AuthServiceProvider;
+use Clicalmani\Foundation\Routing\Route;
 
 class Request implements RequestInterface, \ArrayAccess, \JsonSerializable 
 {
@@ -19,7 +19,7 @@ class Request implements RequestInterface, \ArrayAccess, \JsonSerializable
     /**
      * Validator
      * 
-     * @var \Clicalmani\Fundation\Fundation\Validation\InputValidator
+     * @var \Clicalmani\Foundation\Fundation\Validation\InputValidator
      */
     private $validator;
 
@@ -78,13 +78,13 @@ class Request implements RequestInterface, \ArrayAccess, \JsonSerializable
      */
     public function __construct(private ?array $signatures = []) 
     {
-        $this->validator = new \Clicalmani\Fundation\Validation\InputValidator;
+        $this->validator = new \Clicalmani\Foundation\Validation\InputValidator;
 
         if (Route::isApi() AND in_array(self::getMethod(), ['patch', 'put'])) {
             
             // Parse input stream
             $params = [];
-            new \Clicalmani\Fundation\Http\Requests\ParseInputStream($params);
+            new \Clicalmani\Foundation\Http\Requests\ParseInputStream($params);
             
             /**
              * Header application/json
@@ -130,7 +130,7 @@ class Request implements RequestInterface, \ArrayAccess, \JsonSerializable
      * Request file
      * 
      * @param string $name File name
-     * @return \Clicalmani\Fundation\Http\Requests\UploadedFile|null
+     * @return \Clicalmani\Foundation\Http\Requests\UploadedFile|null
      */
     public function file(string $name) : UploadedFile|null
     {
@@ -308,7 +308,7 @@ class Request implements RequestInterface, \ArrayAccess, \JsonSerializable
     {
         return tap(
             EncryptionServiceProvider::createParametersHash($params), 
-            fn(string $hash) => $_REQUEST[\Clicalmani\Fundation\Auth\EncryptionServiceProvider::hashParameter()] = $hash
+            fn(string $hash) => $_REQUEST[\Clicalmani\Foundation\Auth\EncryptionServiceProvider::hashParameter()] = $hash
         );
     }
 
@@ -398,7 +398,7 @@ class Request implements RequestInterface, \ArrayAccess, \JsonSerializable
     public function user() : mixed
     {
         if ($authenticatorClass = AuthServiceProvider::userAuthenticator()) {
-            /** @var \Clicalmani\Fundation\Auth\Authenticate */
+            /** @var \Clicalmani\Foundation\Auth\Authenticate */
             $authenticator = new $authenticatorClass;
             $user_id = $authenticator->getConnectedUserID();
 
@@ -440,7 +440,7 @@ class Request implements RequestInterface, \ArrayAccess, \JsonSerializable
     /**
      * Redirect route
      * 
-     * @return \Clicalmani\Fundation\Http\Requests\RequestRedirect
+     * @return \Clicalmani\Foundation\Http\Requests\RequestRedirect
      */
     public function redirect() : RequestRedirect
     {
@@ -466,7 +466,7 @@ class Request implements RequestInterface, \ArrayAccess, \JsonSerializable
      */
     public function where(?array $exclude = []) : array
     {
-        $exclude[] = \Clicalmani\Fundation\Auth\EncryptionServiceProvider::hashParameter(); // Default
+        $exclude[] = \Clicalmani\Foundation\Auth\EncryptionServiceProvider::hashParameter(); // Default
         $filters = [];
 
         if ( request() ) {
@@ -484,7 +484,7 @@ class Request implements RequestInterface, \ArrayAccess, \JsonSerializable
     /**
      * Route request
      * 
-     * @return \Clicalmani\Fundation\Http\Requests\RequestRoute
+     * @return \Clicalmani\Foundation\Http\Requests\RequestRoute
      */
     public function route() : RequestRoute
     {

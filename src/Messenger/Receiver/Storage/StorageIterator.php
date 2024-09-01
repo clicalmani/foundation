@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Fundation\Messenger\Receiver\Storage;
+namespace Clicalmani\Foundation\Messenger\Receiver\Storage;
 
 class StorageIterator extends \ArrayIterator
 {

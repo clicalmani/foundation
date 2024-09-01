@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Fundation\Auth;
+namespace Clicalmani\Foundation\Auth;
 
 abstract class Tokenizer extends Authenticate
 {
@@ -13,7 +13,7 @@ abstract class Tokenizer extends Authenticate
 
     public function getConnectedUserID(): mixed
     {
-        if ($payload = with( new \Clicalmani\Fundation\Auth\AuthServiceProvider )->verifyToken( bearerToken() )) {
+        if ($payload = with( new \Clicalmani\Foundation\Auth\AuthServiceProvider )->verifyToken( bearerToken() )) {
             return $payload->jti;
         }
 

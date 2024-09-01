@@ -1,7 +1,7 @@
 <?php
-namespace Clicalmani\Fundation\Providers;
+namespace Clicalmani\Foundation\Providers;
 
-use Clicalmani\Fundation\Routing\Route;
+use Clicalmani\Foundation\Routing\Route;
 
 /**
  * SessionStorageServiceProvider Class
@@ -22,7 +22,7 @@ abstract class SessionStorageServiceProvider extends ServiceProvider
      * 
      * @var string
      */
-    protected static $driver = \Clicalmani\Fundation\Http\Session\FileSessionHandler::class;
+    protected static $driver = \Clicalmani\Foundation\Http\Session\FileSessionHandler::class;
 
     /**
      * Here you may specify the number of seconds that you wish the session

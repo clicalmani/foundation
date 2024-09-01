@@ -1,8 +1,8 @@
 <?php
-namespace Clicalmani\Fundation\Routing\Exceptions;
+namespace Clicalmani\Foundation\Routing\Exceptions;
 
-use Clicalmani\Fundation\Http\Response\Response;
-use Clicalmani\Fundation\Routing\Route;
+use Clicalmani\Foundation\Http\Response\Response;
+use Clicalmani\Foundation\Routing\Route;
 
 /**
  * Class RouteNotFoundException

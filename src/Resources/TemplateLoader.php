@@ -1,7 +1,7 @@
 <?php
-namespace Clicalmani\Fundation\Resources;
+namespace Clicalmani\Foundation\Resources;
 
-use Clicalmani\Fundation\Exceptions\ResourceViewException;
+use Clicalmani\Foundation\Exceptions\ResourceViewException;
 use Twig\Loader\LoaderInterface;
 use Twig\Source;
 

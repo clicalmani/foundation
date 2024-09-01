@@ -1,14 +1,14 @@
 <?php
-namespace Clicalmani\Fundation\Http\Client\Sample;
+namespace Clicalmani\Foundation\Http\Client\Sample;
 
-use Clicalmani\Fundation\Http\Client\Core\UserAgent;
-use Clicalmani\Fundation\Http\Client\HttpClient;
+use Clicalmani\Foundation\Http\Client\Core\UserAgent;
+use Clicalmani\Foundation\Http\Client\HttpClient;
 
 /**
  * Class PDMSHttpClient
  * 
- * @package Clicalmani\Fundation
- * @author @Clicalmani\Fundation
+ * @package Clicalmani\Foundation
+ * @author @Clicalmani\Foundation
  */
 class PDMSHttpClient extends HttpClient
 {

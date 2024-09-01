@@ -1,7 +1,7 @@
 <?php
-namespace Clicalmani\Fundation\Messenger\Receiver\Storage;
+namespace Clicalmani\Foundation\Messenger\Receiver\Storage;
 
-use Clicalmani\Fundation\Messenger\Message\MessageInterface;
+use Clicalmani\Foundation\Messenger\Message\MessageInterface;
 
 interface StorageInterface
 {
@@ -9,7 +9,7 @@ interface StorageInterface
      * Gets a stored message by index
      * 
      * @param int $index
-     * @return \Clicalmani\Fundation\Messenger\Message\MessageInterface
+     * @return \Clicalmani\Foundation\Messenger\Message\MessageInterface
      */
     public function get(int $index) : MessageInterface|null;
 
@@ -17,7 +17,7 @@ interface StorageInterface
      * Store or update a message by index
      * 
      * @param int $index
-     * @param Clicalmani\Fundation\Messenger\Message\MessageInterface $message
+     * @param Clicalmani\Foundation\Messenger\Message\MessageInterface $message
      * @return void
      */
     public function set(int $index, MessageInterface $message) : void;

@@ -1,11 +1,11 @@
 <?php
-namespace Clicalmani\Fundation\Auth;
+namespace Clicalmani\Foundation\Auth;
 
 /**
  * AuthServiceProvider Class
  * 
- * @package Clicalmani\Fundation
- * @author @Clicalmani\Fundation
+ * @package Clicalmani\Foundation
+ * @author @Clicalmani\Foundation
  */
 class AuthServiceProvider
 {

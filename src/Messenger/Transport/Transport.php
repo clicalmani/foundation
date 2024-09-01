@@ -1,9 +1,9 @@
 <?php
-namespace Clicalmani\Fundation\Messenger\Transport;
+namespace Clicalmani\Foundation\Messenger\Transport;
 
 use App\Providers\MessageServiceProvider;
-use Clicalmani\Fundation\Messenger\Envelope\Envelope;
-use Clicalmani\Fundation\Messenger\Message\MessageInterface;
+use Clicalmani\Foundation\Messenger\Envelope\Envelope;
+use Clicalmani\Foundation\Messenger\Message\MessageInterface;
 
 abstract class Transport implements TransportInterface
 {

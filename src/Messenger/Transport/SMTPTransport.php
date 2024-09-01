@@ -1,9 +1,9 @@
 <?php
-namespace Clicalmani\Fundation\Messenger\Transport;
+namespace Clicalmani\Foundation\Messenger\Transport;
 
 use App\Providers\MessageServiceProvider;
-use Clicalmani\Fundation\Messenger\Envelope\EnvelopeInterface;
-use Clicalmani\Fundation\Messenger\Message\MessageInterface;
+use Clicalmani\Foundation\Messenger\Envelope\EnvelopeInterface;
+use Clicalmani\Foundation\Messenger\Message\MessageInterface;
 
 class SMTPTransport extends Transport
 {

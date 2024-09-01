@@ -1,11 +1,11 @@
 <?php
-namespace Clicalmani\Fundation\Providers;
+namespace Clicalmani\Foundation\Providers;
 
 /**
  * LogServiceProvider class
  * 
- * @package Clicalmani\Fundation/flesco 
- * @author @Clicalmani\Fundation
+ * @package Clicalmani\Foundation/flesco 
+ * @author @Clicalmani\Foundation
  */
 class LogServiceProvider extends ServiceProvider
 {
@@ -14,6 +14,6 @@ class LogServiceProvider extends ServiceProvider
         /**
          * Error log
          */
-        \Clicalmani\Fundation\Support\Facades\Log::init( root_path() );
+        \Clicalmani\Foundation\Support\Facades\Log::init( root_path() );
     }
 }

@@ -1,11 +1,11 @@
 <?php
-namespace Clicalmani\Fundation\Providers;
+namespace Clicalmani\Foundation\Providers;
 
 /**
  * HelpersServiceProvider class
  * 
- * @package Clicalmani\Fundation/flesco 
- * @author @Clicalmani\Fundation
+ * @package Clicalmani\Foundation/flesco 
+ * @author @Clicalmani\Foundation
  */
 class HelpersServiceProvider extends ServiceProvider
 {
@@ -21,6 +21,6 @@ class HelpersServiceProvider extends ServiceProvider
          * 
          */
 
-        \Clicalmani\Fundation\Support\Helper::include();
+        \Clicalmani\Foundation\Support\Helper::include();
     }
 }

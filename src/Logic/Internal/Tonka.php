@@ -1,8 +1,8 @@
 <?php
-namespace Clicalmani\Fundation\Logic\Internal;
+namespace Clicalmani\Foundation\Logic\Internal;
 
 use Clicalmani\Database\DB;
-use Clicalmani\Fundation\Misc\RecursiveFilter;
+use Clicalmani\Foundation\Misc\RecursiveFilter;
 use Clicalmani\XPower\XDTNodeList;
 
 class Tonka

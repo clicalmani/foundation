@@ -1,11 +1,11 @@
 <?php
-namespace Clicalmani\Fundation\Logic\Internal;
+namespace Clicalmani\Foundation\Logic\Internal;
 
 /**
  * Class Str
  * 
- * @package Clicalmani\Fundation
- * @author @Clicalmani\Fundation
+ * @package Clicalmani\Foundation
+ * @author @Clicalmani\Foundation
  */
 class Str
 {

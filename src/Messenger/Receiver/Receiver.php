@@ -1,10 +1,10 @@
 <?php
-namespace Clicalmani\Fundation\Messenger\Receiver;
+namespace Clicalmani\Foundation\Messenger\Receiver;
 
-use Clicalmani\Fundation\Messenger\Envelope\EnvelopeInterface;
-use Clicalmani\Fundation\Messenger\Receiver\ReceiverInterface;
-use Clicalmani\Fundation\Messenger\Receiver\Storage\Storage;
-use Clicalmani\Fundation\Messenger\Receiver\Storage\StorageInterface;
+use Clicalmani\Foundation\Messenger\Envelope\EnvelopeInterface;
+use Clicalmani\Foundation\Messenger\Receiver\ReceiverInterface;
+use Clicalmani\Foundation\Messenger\Receiver\Storage\Storage;
+use Clicalmani\Foundation\Messenger\Receiver\Storage\StorageInterface;
 
 class Receiver implements ReceiverInterface
 {

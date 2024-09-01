@@ -1,11 +1,11 @@
 <?php
-namespace Clicalmani\Fundation\Http\Requests;
+namespace Clicalmani\Foundation\Http\Requests;
 
 /**
  * HttpRequest class
  * 
- * @package Clicalmani\Fundation/flesco 
- * @author @Clicalmani\Fundation
+ * @package Clicalmani\Foundation/flesco 
+ * @author @Clicalmani\Foundation
  */
 abstract class HttpRequest 
 {

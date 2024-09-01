@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Fundation\Http\Client;
+namespace Clicalmani\Foundation\Http\Client;
 
 /**
  * Interface Injector

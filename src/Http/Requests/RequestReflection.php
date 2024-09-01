@@ -1,11 +1,11 @@
 <?php
-namespace Clicalmani\Fundation\Http\Requests;
+namespace Clicalmani\Foundation\Http\Requests;
 
 /**
  * Class RequestReflection
  * 
- * @package Clicalmani\Fundation
- * @author @Clicalmani\Fundation
+ * @package Clicalmani\Foundation
+ * @author @Clicalmani\Foundation
  */
 class RequestReflection 
 {

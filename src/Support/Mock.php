@@ -1,5 +1,5 @@
 <?php 
-namespace Clicalmani\Fundation\Support;
+namespace Clicalmani\Foundation\Support;
 
 /**
  * Mock class
@@ -7,8 +7,8 @@ namespace Clicalmani\Fundation\Support;
  * Mock allows us to call a non-static method as static one and take advantage of the class object. 
  * Method name start with an underscore (_) to differentiate it from the calling method name.
  * 
- * @package Clicalmani\Fundation/flesco 
- * @author @Clicalmani\Fundation
+ * @package Clicalmani\Foundation/flesco 
+ * @author @Clicalmani\Foundation
  */
 class Mock 
 {

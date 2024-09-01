@@ -1,5 +1,5 @@
 <?php 
-namespace Clicalmani\Fundation\Providers;
+namespace Clicalmani\Foundation\Providers;
 
 abstract class RouteTPS 
 {
@@ -13,13 +13,13 @@ abstract class RouteTPS
     /**
      * Request object
      * 
-     * @var \Clicalmani\Fundation\Http\Requests\Request
+     * @var \Clicalmani\Foundation\Http\Requests\Request
      */
     protected $request;
 
     public function __construct()
     {
-        $this->request = new \Clicalmani\Fundation\Http\Requests\Request;
+        $this->request = new \Clicalmani\Foundation\Http\Requests\Request;
     }
 
     /**

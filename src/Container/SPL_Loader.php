@@ -1,10 +1,10 @@
 <?php
-namespace Clicalmani\Fundation\Container;
+namespace Clicalmani\Foundation\Container;
 
 /**
  * Class SPL_Loader
  * 
- * @package Clicalmani\Fundation\Container
+ * @package Clicalmani\Foundation\Container
  * @author @clicalmani
  */
 class SPL_Loader extends Manager

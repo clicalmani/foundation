@@ -1,5 +1,5 @@
 <?php 
-namespace Clicalmani\Fundation\Collection;
+namespace Clicalmani\Foundation\Collection;
 
 class Set extends Collection
 {

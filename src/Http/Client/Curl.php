@@ -1,12 +1,12 @@
 <?php
-namespace Clicalmani\Fundation\Http\Client;
+namespace Clicalmani\Foundation\Http\Client;
 
 /**
  * Class Curl
  * 
  * Curl wrapper used by HttpClient to make curl requests.
- * @package Clicalmani\Fundation
- * @author @Clicalmani\Fundation
+ * @package Clicalmani\Foundation
+ * @author @Clicalmani\Foundation
  */
 class Curl
 {

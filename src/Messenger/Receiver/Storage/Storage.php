@@ -1,7 +1,7 @@
 <?php
-namespace Clicalmani\Fundation\Messenger\Receiver\Storage;
+namespace Clicalmani\Foundation\Messenger\Receiver\Storage;
 
-use Clicalmani\Fundation\Messenger\Message\MessageInterface;
+use Clicalmani\Foundation\Messenger\Message\MessageInterface;
 
 class Storage extends AbstractStorage implements StorageInterface
 {

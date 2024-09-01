@@ -1,5 +1,5 @@
 <?php 
-namespace Clicalmani\Fundation\Support;
+namespace Clicalmani\Foundation\Support;
 
 use Dotenv\Dotenv;
 use Dotenv\Repository\Adapter\EnvConstAdapter;
@@ -11,8 +11,8 @@ global $dotenv;
 /**
  * Class Env
  * 
- * @package Clicalmani\Fundation
- * @author @Clicalmani\Fundation
+ * @package Clicalmani\Foundation
+ * @author @Clicalmani\Foundation
  */
 class Env 
 {

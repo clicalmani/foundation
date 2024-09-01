@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Fundation\Http\Requests;
+namespace Clicalmani\Foundation\Http\Requests;
 
 interface RequestInterface 
 {

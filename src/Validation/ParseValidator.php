@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Fundation\Validation;
+namespace Clicalmani\Foundation\Validation;
 
 trait ParseValidator
 {

@@ -1,7 +1,7 @@
 <?php
-namespace Clicalmani\Fundation\Resources\Views;
+namespace Clicalmani\Foundation\Resources\Views;
 
-use Clicalmani\Fundation\Resources\TemplateLoader;
+use Clicalmani\Foundation\Resources\TemplateLoader;
 
 class View
 {

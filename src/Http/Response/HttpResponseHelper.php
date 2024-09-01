@@ -1,11 +1,11 @@
 <?php
-namespace Clicalmani\Fundation\Http\Response;
+namespace Clicalmani\Foundation\Http\Response;
 
 /**
  * Class HttpResponseHelper
  * 
- * @package Clicalmani\Fundation
- * @author @Clicalmani\Fundation
+ * @package Clicalmani\Foundation
+ * @author @Clicalmani\Foundation
  */
 class HttpResponseHelper 
 {
