@@ -12,7 +12,7 @@
     "license": "proprietary",
     "autoload": {
         "psr-4": {
-            "Clicalmani\\Fundation\\": "src/"
+            "Clicalmani\\Foundation\\": "src/"
         }
     },
     "authors": [
