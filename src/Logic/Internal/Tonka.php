@@ -43,7 +43,7 @@ class Tonka
      */
     public function migrate(string $filename) : void
     {
-        $this->maybeCreate($filename);
+        $this->maybeGenerateManifest($filename);
 
         $xdt = xdt();
         $xdt->setDirectory(database_path('/migrations'));
@@ -58,9 +58,9 @@ class Tonka
         }
 
         /** @var \Clicalmani\XPower\XDTNodeList[] */
-        $skiped = $this->migrateProcess($nodes);
+        $skiped = $this->processMigrate($nodes);
         
-        while ( count($skiped) ) $skiped = $this->migrateProcess($skiped);
+        while ( count($skiped) ) $skiped = $this->processMigrate($skiped);
 
         $xdt->close();
         unset($skiped);
@@ -75,7 +75,7 @@ class Tonka
      */
     public function clearDB(string $filename) : void
     {
-        $this->maybeCreate($filename);
+        $this->maybeGenerateManifest($filename);
 
         $xdt = xdt();
         $xdt->setDirectory(database_path('/migrations'));
@@ -89,9 +89,9 @@ class Tonka
             $nodes[] = $node;
         }
 
-        $skiped = $this->dropProcess($nodes);
+        $skiped = $this->processDrop($nodes);
         
-        while ( count($skiped) ) $skiped = $this->dropProcess($skiped);
+        while ( count($skiped) ) $skiped = $this->processDrop($skiped);
 
         $xdt->close();
         unset($skiped);
@@ -210,44 +210,6 @@ class Tonka
             $this->writeln($e->getMessage(), false);
             return false;
         }
-
-        // try {
-        //     $seeders_dir = new \RecursiveDirectoryIterator( database_path('/seeders') );
-        //     $filter = new RecursiveFilter($seeders_dir);
-        //     $filter->setPattern("\\.php$");
-
-        //     $this->writeln('Seeding the database');
-
-        //     foreach (new \RecursiveIteratorIterator($filter) as $file) { 
-        //         $pathname = $file->getPathname();
-
-        //         if($file->isFile()) {
-        //             $filename = $file->getFileName();
-        //             $class = substr($filename, 0, strlen($filename) - 4); 
-                    
-        //             if(is_readable($pathname)) {
-        //                 require database_path("/seeders/$class.php");
-
-        //                 $classNs = "\Database\Seeders\\$class";
-        //                 $seeder = new $classNs;
-
-        //                 $this->writeln('Running ' . $class);
-
-        //                 if ( $this->runSeed($seeder) ) {
-        //                     $this->writeln('success');
-        //                 } else {
-        //                     $this->writeln('failure');
-        //                 }
-        //             }
-        //         }
-        //     }
-
-        //     return true;
-
-        // } catch(\PDOException $e) {
-        //     $this->writeln($e->getMessage(), false);
-        //     return false;
-        // }
     }
 
     /**
@@ -385,7 +347,7 @@ class Tonka
      * @param string $filename File name
      * @return bool TRUE on success, FALSE otherwise.
      */
-    private function genMigrationFile(string $filename) : bool
+    private function generateManifest(string $filename) : bool
     {
         $models_path = app_path('/Models');
         $migrations_path = database_path('/migrations');
@@ -404,12 +366,15 @@ class Tonka
         /**
          * Walkthrough models
          * Keep a track of each model and its entity.
+         * 
+         * @var \RecursiveDirectoryIterator $file 
          */
         foreach (new \RecursiveIteratorIterator($filter) as $file) {
             $modelClass = "App\\" . substr($file->getPathname(), strlen( root_path() ) + 4);
             $modelClass = str_replace('/', '\\', $modelClass);
             $modelClass = substr($modelClass, 0, strlen($modelClass) - 4);
 
+            /** @var \Clicalmani\Database\Factory\Models\Model */
             $model = new $modelClass;
             $entity = $model->getEntity();
 
@@ -420,9 +385,12 @@ class Tonka
         /**
          * Establish relationship
          * Each entity must have its dependences migrated before migrating itself.
+         * 
+         * @var \DOMNode $node
          */
         foreach ($xdt->select('entity') as $node) {
             $node = $xdt->parse($node);
+            /** @var \Clicalmani\Database\Factory\Models\Model */
             $modelClass = $node->attr('model');
             $model = new $modelClass;
             $entity = $model->getEntity();
@@ -442,7 +410,9 @@ class Tonka
 
                         $depModelClass = $tables[$table];
 
-                        $node->children()->first()->append('<entity model="' . $depModelClass . '">' . get_class(( new $depModelClass )->getEntity()) . '</entity>');
+                        // Avoid refercing a model by itself
+                        if ($node->attr('model') !== $depModelClass) 
+                            $node->children()->first()->append('<entity model="' . $depModelClass . '">' . get_class(( new $depModelClass )->getEntity()) . '</entity>');
                     }
                 }
             }
@@ -457,6 +427,7 @@ class Tonka
 
         $seeders = [];
 
+        /** @var \RecursiveDirectoryIterator $file */
         foreach (new \RecursiveIteratorIterator($filter) as $file) { 
             $pathname = $file->getPathname();
             
@@ -556,7 +527,7 @@ class Tonka
      * @param \Clicalmani\XPower\XDTNodeList[] $nodes
      * @return \Clicalmani\XPower\XDTNodeList[]
      */
-    private function migrateProcess(array $nodes) : array
+    private function processMigrate(array $nodes) : array
     {
         /**
          * Start by non dependent and no reference.
@@ -658,8 +629,9 @@ class Tonka
      */
     private function execute(XDTNodeList $node, ?string $command = 'migrate') : void
     {
-        /** @var \Clicalmani\Database\Factory\Models\Model */
+        /** @var string */
         $modelClass = $node->attr('model');
+        /** @var \Clicalmani\Database\Factory\Models\Model */
         $model = new $modelClass;
         $entity = $model->getEntity();
         $entity->setModel($model);
@@ -691,7 +663,7 @@ class Tonka
              * | of a foreign key relationship, without addressing the dependency first.
              * | 23000 Integraty constraint violation
              */
-            if (in_array($e->getCode(), ['HY000', '1217', '23000'])) $this->writeln('Failed'); 
+            if (in_array($e->getCode(), ['HY000', '1217', '23000'])) $this->writeln($e->getMessage()); 
             else throw new \Exception($e->getMessage(), (int)$e->getCode(), $e);
         }
     }
@@ -730,8 +702,10 @@ class Tonka
      * @param \Clicalmani\XPower\XDTNodeList[] $nodes
      * @return \Clicalmani\XPower\XDTNodeList[]
      */
-    private function dropProcess(array $nodes) : array
+    private function processDrop(array $nodes) : array
     {
+        DB::getInstance()->getPdo()->query('SET FOREIGN_KEY_CHECKS = 0');
+
         /**
          * Search for independent nodes
          * Node that has no dependency and not referenced by
@@ -788,6 +762,8 @@ class Tonka
             }
         }
 
+        DB::getInstance()->getPdo()->query('SET FOREIGN_KEY_CHECKS = 1');
+
         return collection($nodes)->filter(fn(XDTNodeList $node) => !$this->isDroped($node))->toArray();;
     }
 
@@ -817,15 +793,15 @@ class Tonka
     }
 
     /**
-     * May be create migration file
+     * May be generate manifeste
      * 
      * @param string $filename
      * @return void
      */
-    private function maybeCreate(string $filename) : void
+    private function maybeGenerateManifest(string $filename) : void
     {
         /** @var string */
         $migrations_path = database_path('/migrations');
-        if ( !file_exists("$migrations_path/$filename.xml") ) $this->genMigrationFile($filename);
+        if ( !file_exists("$migrations_path/$filename.xml") ) $this->generateManifest($filename);
     }
 }
