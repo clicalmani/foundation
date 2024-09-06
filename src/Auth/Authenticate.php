@@ -2,6 +2,7 @@
 namespace Clicalmani\Foundation\Auth;
 
 use Clicalmani\Database\Factory\Models\Model;
+use Clicalmani\Foundation\Http\Requests\Request;
 use Clicalmani\Foundation\Providers\ServiceProvider;
 
 abstract class Authenticate extends ServiceProvider implements \JsonSerializable
@@ -53,9 +54,10 @@ abstract class Authenticate extends ServiceProvider implements \JsonSerializable
 	/**
 	 * Get connected user ID
 	 * 
+	 * @param \Clicalmani\Foundation\Http\Requests\Request $request
 	 * @return mixed
 	 */
-	public function getConnectedUserID() : mixed
+	public function getConnectedUserID(Request $request) : mixed
 	{
 		throw new \Exception(sprintf("%s::%s must be overriden. Thrown in %s at line %d", __CLASS__, __METHOD__, static::class, __LINE__));
 	}
@@ -88,11 +90,16 @@ abstract class Authenticate extends ServiceProvider implements \JsonSerializable
 	{
 		return $this->user?->{$attribute};
 	}
-
+	
 	public function __toString()
 	{
 		if ($this->serializer) return call($this->serializer);
 
 		return null;
+	}
+
+	public function boot(): void
+	{
+		//
 	}
 }

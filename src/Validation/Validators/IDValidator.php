@@ -47,7 +47,7 @@ class IDValidator extends InputValidator
         $instance = $this->model::find($value);
         $this->primaryKey = @ $options['primary'] ? $options['primary']: $instance?->getKey();
         
-        if ( class_exists($this->model) ) {
+        if ( class_exists($this->model) && $this->primaryKey ) {
             
             if ( is_array($this->primaryKey) ) $value = explode(',', $value);
             

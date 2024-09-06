@@ -625,10 +625,9 @@ if ( ! function_exists('token') ) {
      * Generate a token
      * 
      * @param mixed $jti
-     * @param int $expiry Expiry in seconds
      * @return string
      */
-    function token(mixed $jti, int $expiry) : string {
+    function token(mixed $jti) : string {
         $auth = new \Clicalmani\Foundation\Auth\AuthServiceProvider;
         $auth->setJti( json_encode($jti) );
         return $auth->generateToken();

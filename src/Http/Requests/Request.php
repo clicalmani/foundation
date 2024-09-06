@@ -400,8 +400,8 @@ class Request implements RequestInterface, \ArrayAccess, \JsonSerializable
         if ($authenticatorClass = AuthServiceProvider::userAuthenticator()) {
             /** @var \Clicalmani\Foundation\Auth\Authenticate */
             $authenticator = new $authenticatorClass;
-            $user_id = $authenticator->getConnectedUserID();
-
+            $user_id = $authenticator->getConnectedUserID($this);
+            
             /**
              * |----------------------------------------------------
              * | Test User
@@ -410,7 +410,7 @@ class Request implements RequestInterface, \ArrayAccess, \JsonSerializable
              * | may be specified.
              */
             if ( inConsoleMode() ) $user_id = $this->test_user_id;
-
+            
             return $authenticator->createUser($user_id);
         }
 

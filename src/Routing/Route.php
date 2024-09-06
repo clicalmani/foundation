@@ -14,6 +14,7 @@ use Clicalmani\Foundation\Support\Facades\Facade;
  * @method static \Clicalmani\Routing\Group controller(string $class)
  * @method static \Clicalmani\Routing\Validator|\Clicalmani\Routing\Group get(string $route, mixed $action = null)
  * @method static \Clicalmani\Routing\Resource apiResource(mixed $resource, ?string $controller = null, ?array $actions = [])
+ * @method static void middleware(string $name_or_class, mixed $callback = null)
  */
 class Route extends Facade
 {}
