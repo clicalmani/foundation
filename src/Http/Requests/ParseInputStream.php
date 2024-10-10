@@ -149,9 +149,9 @@ class ParseInputStream
 
         if ( preg_match('/name=\"([^\"]*)\"[\n|\r]+([^\n\r].*)?\r$/s', $entry, $matches) ) {
 	        if (preg_match('/^(.*)\[\]$/i', $matches[1], $tmp)) { 
-	            $data[$tmp[1]][] = ($matches[2] !== NULL ? $matches[2] : '');
+	            $data[$tmp[1]][] = (@$matches[2] ?? '');
 	        } else {
-	            $data[$matches[1]] = (@ $matches[2] !== NULL ? $matches[2] : '');
+	            $data[$matches[1]] = (@$matches[2] ?? '');
 	        }
 		}
 

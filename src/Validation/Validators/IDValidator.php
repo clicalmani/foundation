@@ -42,6 +42,8 @@ class IDValidator extends InputValidator
 
     public function validate(mixed &$value, ?array $options = []) : bool
     {
+        if (!$value) return false;
+        
         $this->model = trim("\\App\\Models\\" . $options['model']);
         /** @var \Clicalmani\Database\Factory\Models\Model */
         $instance = $this->model::find($value);

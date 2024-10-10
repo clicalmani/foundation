@@ -98,6 +98,11 @@ abstract class Authenticate extends ServiceProvider implements \JsonSerializable
 		return null;
 	}
 
+	public function __call($name, $arguments)
+	{
+		return $this->user?->{$name}(...$arguments);
+	}
+
 	public function boot(): void
 	{
 		//

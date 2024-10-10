@@ -113,7 +113,7 @@ class RequestController extends HttpRequest
 				
 				switch($response_code) {
 					case 401: $this->sendStatus($response_code, 'UNAUTHORIZED_REQUEST_ERROR', 'Request Unauthorized'); break;
-					case 403: $this->sendStatus($response_code, 'FORBIDEN', 'Request Forbiden'); break;
+					case 403: $this->sendStatus($response_code, 'FORBIDEN', '403 Forbiden'); break;
 					case 404: $this->sendStatus($response_code, 'NOT FOUND', 'Not Found'); break;
 					default: $this->sendStatus($response_code, 'UNKNOW', 'Unknow'); break;
 				}
@@ -231,7 +231,8 @@ class RequestController extends HttpRequest
 	{
 		if (method_exists($request, 'authorize')) {
 			if (false == $request->authorize()) {
-				return response()->status(403, 'FORBIDEN', 'Unauthorized Request');		// Forbiden
+				response()->status(403, 'FORBIDEN', '403 Forbiden');		// Forbiden
+				die();
 			}
 		}
 

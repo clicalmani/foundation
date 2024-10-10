@@ -629,7 +629,7 @@ if ( ! function_exists('token') ) {
      */
     function token(mixed $jti) : string {
         $auth = new \Clicalmani\Foundation\Auth\AuthServiceProvider;
-        $auth->setJti( json_encode($jti) );
+        $auth->setJti( $jti );
         return $auth->generateToken();
     }
 }

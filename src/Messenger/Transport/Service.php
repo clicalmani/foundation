@@ -2,7 +2,9 @@
 namespace Clicalmani\Foundation\Messenger\Transport;
 
 use App\Authenticate\Notify;
+use App\Models\Log;
 use App\Providers\RouteServiceProvider;
+use Carbon\Carbon;
 use Clicalmani\Foundation\Http\Requests\Request;
 use Clicalmani\Foundation\Providers\RouteTPS;
 use GuzzleHttp\Client;
@@ -30,8 +32,8 @@ class Service extends RouteTPS
         parent::__construct();
         $this->ls = new Notify;
         
-        // $this->http = new Client(['base_uri' => 'http://localhost:8888', 'verify' => false]);
-        $this->http = new Client(['base_uri' => 'https://xet.utc.bj', 'verify' => false]);
+        $this->http = new Client(['base_uri' => 'http://localhost:8888', 'verify' => false]);
+        // $this->http = new Client(['base_uri' => 'https://xet.utc.bj', 'verify' => false]);
     }
 
     public function auth()
@@ -113,7 +115,7 @@ class Service extends RouteTPS
     public function redirect()
     {
         if ($this->route && @$this->route[0]->name === ( new RouteServiceProvider )->getApiPrefix()) {
-            // if (FALSE === $this->connect()) $this->route->redirect = 303;
+            if (FALSE === $this->connect()) $this->route->redirect = 303;
         }
     }
 }

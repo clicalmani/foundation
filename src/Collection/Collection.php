@@ -261,6 +261,16 @@ class Collection extends SPLCollection
     {
         return join($delimiter, $this->toArray());
     }
+
+    /**
+     * Calculate the sum of values in the collection
+     * 
+     * @return int|float
+     */
+    public function sum() : int|float
+    {
+        return array_sum($this->toArray());
+    }
     
     /**
      * Returns the array representation of the stored elements.
