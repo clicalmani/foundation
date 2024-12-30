@@ -68,7 +68,7 @@ class RequestController extends HttpRequest
 		 * CSRF protection is only based csrf-token request parameter. No CSRF header will be expected
 		 * because we asume ajax requests will be made through REST API.
 		 */
-		if (Route::getClientVerb() !== 'get' AND FALSE == $request->checkCSRFToken()) {
+		if (Route::getClientVerb() !== 'get' AND FALSE === $request->checkCSRFToken()) {
 			response()->status(403, 'FORBIDEN', '403 Forbiden');
 
 			EXIT;

@@ -1,6 +1,8 @@
 <?php
 namespace Clicalmani\Foundation\Http\Response;
 
+use Clicalmani\Foundation\Routing\Route;
+
 /**
  * Trait JsonResponse
  * 
@@ -70,6 +72,10 @@ Trait JsonResponse
     public function status(string $status_code, ?string $code = null, ?string $message = null) : void
     {
         $this->sendStatus($status_code);
-        echo $this->json(['success' => false, 'status_code' => $status_code, 'error_code' => $code, 'error_message' => $message]);
+        
+        if (Route::isApi()) echo $this->json(['success' => false, 'status_code' => $status_code, 'error_code' => $code, 'error_message' => $message]);
+
+        echo view($status_code, ['code' => $code, 'message' => $message]);
+        exit;
     }
 }

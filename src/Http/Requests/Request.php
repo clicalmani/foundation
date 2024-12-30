@@ -339,11 +339,7 @@ class Request implements RequestInterface, \ArrayAccess, \JsonSerializable
      */
     public function session() : object
     {
-        return new class {
-            public function token() { return csrf_token(); }
-            public function __get(string $name) { return @$_SESSION[$name]; } 
-            public function __set(string $name, mixed $value) { return $_SESSION[$name] = $value; }
-        };
+        return new \Clicalmani\Foundation\Http\Session\Session;
     }
 
     /**

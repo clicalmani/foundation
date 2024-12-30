@@ -25,7 +25,7 @@ class Log
      */
     public function init() : void
     {
-        static::$is_debug_mode = env('APP_DEBUG', true);
+        static::$is_debug_mode = env('APP_DEBUG', false);
         
         ini_set('log_errors', 1);
         ini_set('error_log', storage_path('/errors/' . static::ERROR_LOG) );
@@ -71,7 +71,7 @@ class Log
 
         $message = sprintf("[%s] %s: %s in %s at line %d\n", date('Y-M-d H:i:s T', time()), $error_type, $error_message, $file, $line);
         
-        if ('false' === strtolower(static::$is_debug_mode)) error_log($message, 3, $this->maybeCreateLog());
+        if (FALSE === static::$is_debug_mode) error_log($message, 3, $this->maybeCreateLog());
         else {
             if (TRUE === @ $EXIT) throw new \Exception($message);
             echo $message;

@@ -287,10 +287,10 @@ if ( ! function_exists('redirect') ) {
     /**
      * Do a redirect
      * 
-     * @return never
+     * @return \Clicalmani\Foundation\Http\Requests\RequestRedirect
      */
-    function redirect() : never {
-        with ( new \Clicalmani\Foundation\Http\Requests\Request )->redirect();
+    function redirect() {
+        return with ( new \Clicalmani\Foundation\Http\Requests\Request )->redirect();
     }
 }
 
@@ -489,15 +489,20 @@ if ( ! function_exists('mail_smtp') ) {
             }
 		}
 
-		if (@ $options['bc']) {
-            foreach ($options['bc'] as $bc) {
-                $mail->addBC($bc['email'], $bc['name']);
+		if (@ $options['bcc']) {
+            foreach ($options['bcc'] as $bcc) {
+                $mail->addBC($bcc['email'], $bcc['name']);
             }
 		}
 
 		$mail->isHTML(true);
         
-        return $mail->send();
+        $success = $mail->send();
+
+        return [
+            'success' => $success,
+            'message' => $mail->getSentMIMEMessage()
+        ];
     }
 }
 

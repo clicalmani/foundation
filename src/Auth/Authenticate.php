@@ -54,10 +54,10 @@ abstract class Authenticate extends ServiceProvider implements \JsonSerializable
 	/**
 	 * Get connected user ID
 	 * 
-	 * @param \Clicalmani\Foundation\Http\Requests\Request $request
+	 * @param ?\Clicalmani\Foundation\Http\Requests\Request $request
 	 * @return mixed
 	 */
-	public function getConnectedUserID(Request $request) : mixed
+	public function getConnectedUserID(?Request $request) : mixed
 	{
 		throw new \Exception(sprintf("%s::%s must be overriden. Thrown in %s at line %d", __CLASS__, __METHOD__, static::class, __LINE__));
 	}

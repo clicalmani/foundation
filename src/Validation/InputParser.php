@@ -55,7 +55,7 @@ trait InputParser
      */
     public function parseArray(mixed $value) : array
     {
-        return tap($value, fn($value) => settype($value, 'array'));
+        return tap($value, fn(&$value) => settype($value, 'array'));
     }
 
     /**

@@ -33,7 +33,7 @@ class FileSessionHandler extends SessionHandler
     {
         $file = "$this->savePath/sess_$id";
         if (file_exists($file)) {
-            unlink($file);
+            @unlink($file);
         }
 
         return true;

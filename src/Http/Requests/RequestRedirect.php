@@ -30,7 +30,7 @@ class RequestRedirect
      */
     public function back() : never
     {
-        $this->route($_SERVER['HTTP_REFERER']);
+        $this->route($_SERVER['PHP_SELF']);
     }
 
     /**
@@ -63,5 +63,20 @@ class RequestRedirect
     public function success(?string $success_message = '') : never
     {
         $this->route($_SERVER['HTTP_REFERER'] . '?success=' . $success_message);
+    }
+
+    /**
+     * Redirect with
+     * 
+     * @param mixed ...$args
+     * @return never
+     */
+    public function with(... $args) : mixed
+    {
+        foreach ($args as $key => $value) {
+            $_SESSION[$key] = $value;
+        }
+
+        return $this->route(...$args);
     }
 }

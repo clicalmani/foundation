@@ -30,7 +30,7 @@ abstract class SessionStorageServiceProvider extends ServiceProvider
      * 
      * @var int
      */
-    protected static $lifetime = 100;
+    protected static $lifetime = 300;
 
     /**
      * Here you may specify the maximum number of seconds that you wish the session
@@ -38,7 +38,7 @@ abstract class SessionStorageServiceProvider extends ServiceProvider
      * 
      * @var int
      */
-    protected static $max_lifetime = 300;
+    protected static $max_lifetime = 900;
 
     /**
      * If you want session to immediately expire on the browser closing, set that option.
@@ -57,15 +57,6 @@ abstract class SessionStorageServiceProvider extends ServiceProvider
     protected static $encrypt = false;
 
     /**
-     * When using the native session driver, we need a location where session
-     * files may be stored. A default has been set for you but a different
-     * location may be specified. This is only needed for file sessions.
-     * 
-     * @var string
-     */
-    protected static $files = './';
-
-    /**
      * When using the "database" or "redis" session drivers, you may specify a
      * connection that should be used to manage these sessions. This should
      * correspond to a connection in your database configuration options.
@@ -82,17 +73,6 @@ abstract class SessionStorageServiceProvider extends ServiceProvider
      * @var string
      */
     protected static $table = 'sessions';
-
-    /**
-     * While using one of the framework's cache driven session backends you may
-     * list a cache store that should be used for these sessions. This value
-     * must match with one of the application's configured cache "stores".
-     *
-     * Affects: "apc", "dynamodb", "memcached", "redis"
-     * 
-     * @var array
-     */
-    protected static $store = [];
 
     /**
      * Some session drivers must manually sweep their storage location to get

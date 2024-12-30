@@ -94,7 +94,8 @@ class MailSMTP
             'addCC',
             'addBC',
             'isHTML',
-            'send'
+            'send',
+            'getSentMIMEMessage'
         ];
 
         if ( in_array($method, $mailer_methods) ) {
