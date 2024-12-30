@@ -75,7 +75,9 @@ Trait JsonResponse
         
         if (Route::isApi()) echo $this->json(['success' => false, 'status_code' => $status_code, 'error_code' => $code, 'error_message' => $message]);
 
-        echo view($status_code, ['code' => $code, 'message' => $message]);
-        exit;
+        else {
+            echo view($status_code, ['code' => $code, 'message' => $message]);
+            exit;
+        }
     }
 }
