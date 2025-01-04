@@ -1,7 +1,7 @@
 <?php
 namespace Clicalmani\Foundation\Providers;
 
-use Clicalmani\Foundation\Support\Env;
+use Clicalmani\Foundation\Support\Facades\Env;
 
 /**
  * EnvServiceProvider class

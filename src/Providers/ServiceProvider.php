@@ -125,6 +125,26 @@ abstract class ServiceProvider
         return static::$app;
     }
 
+    /**
+     * Returns http config
+     * 
+     * @return array
+     */
+    public static function getHttpConfig() : array
+    {
+        return static::$http_kernel;
+    }
+
+    /**
+     * Returns http config
+     * 
+     * @return array
+     */
+    public static function getBootstrapConfig() : array
+    {
+        return static::$kernel;
+    }
+
     private static function getServiceProviders()
     {
         return @ static::$app['providers'] ?? [];

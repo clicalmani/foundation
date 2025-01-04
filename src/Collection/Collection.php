@@ -312,4 +312,14 @@ class Collection extends SPLCollection
     {
         return new Map;
     }
+
+    public function plunk(string $key, string $value) : Map
+    {
+        $map = new Map;
+        foreach ($this as $element) {
+            $map->put($element[$key], $element[$value]);
+        }
+
+        return $map;
+    }
 }

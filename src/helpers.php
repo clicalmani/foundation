@@ -1,6 +1,7 @@
 <?php
 
 use Carbon\Carbon;
+use Clicalmani\Foundation\Resources\View;
 
 if ( ! function_exists( 'root_path' ) ) {
 
@@ -135,10 +136,10 @@ if ( ! function_exists( 'view' ) ) {
      * 
      * @param string $template Template name
      * @param ?array $vars Variables
-     * @return mixed
+     * @return \Clicalmani\Foundation\Resources\View
      */
-    function view(string $template, ?array $vars = []) : mixed {
-        return Clicalmani\Foundation\Resources\Views\View::render($template, $vars);
+    function view(string $template, ?array $vars = []) : \Clicalmani\Foundation\Resources\View {
+        return new \Clicalmani\Foundation\Resources\View($template, $vars);
     }
 }
 
@@ -162,8 +163,8 @@ if ( ! function_exists( 'csrf_token' ) ) {
      * @return mixed
      */
     function csrf_token() : mixed {
-        if ( isset($_SESSION['csrf-token']) ) {
-            return $_SESSION['csrf-token'];
+        if ( isset($_SESSION['csrf_token']) ) {
+            return $_SESSION['csrf_token'];
         }
 
         return null;
@@ -180,7 +181,7 @@ if ( ! function_exists( 'env' ) ) {
      * @return string
      */
     function env(string $key, ?string $default = '') : string {
-        return isset($_ENV[$key]) ? $_ENV[$key]: $default;
+        return \Clicalmani\Foundation\Support\Facades\Env::get($key, $default);
     }
 }
 
@@ -420,11 +421,11 @@ if ( ! function_exists('mail_smtp') ) {
      * @param array $to
      * @param array $from
      * @param string $subject
-     * @param string $body
+     * @param string|\Clicalmani\Foundation\Resources\View $body
      * @param ?array $options Mail options
      * @return mixed
      */
-    function mail_smtp(array $to, array $from, string $subject, string $body, ?array $options = [])
+    function mail_smtp(array $to, array $from, string $subject, string|View $body, ?array $options = [])
     {
         $mail = new \Clicalmani\Foundation\Messenger\MailSMTP;
 
@@ -736,5 +737,15 @@ if ( ! function_exists('console_log') ) {
     function console_log(mixed ...$args) 
     {
         \Clicalmani\Foundation\Support\Facades\Log::debug( ...$args );
+    }
+}
+
+if ( ! function_exists('config') ) {
+    function config(string $key = null) : mixed
+    {
+        $config = new \Clicalmani\Foundation\Maker\Logic\Config;
+        $key_parts = explode('.', $key);
+        $method = array_shift($key_parts);
+        return $key ? $config->{$method}(join('.', $key_parts)) : $config;
     }
 }

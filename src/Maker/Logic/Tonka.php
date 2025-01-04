@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Foundation\Logic\Internal;
+namespace Clicalmani\Foundation\Maker\Logic;
 
 use Clicalmani\Database\DB;
 use Clicalmani\Foundation\Misc\RecursiveFilter;

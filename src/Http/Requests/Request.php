@@ -289,13 +289,13 @@ class Request implements RequestInterface, \ArrayAccess, \JsonSerializable
     }
 
     /**
-     * Check CSRF validity by testing the csrf-token parameter's value.
+     * Check CSRF validity by testing the csrf_token parameter's value.
      * 
      * @return bool
      */
     public function checkCSRFToken() : bool
     {
-        return @ $this->{'csrf-token'} === csrf_token();
+        return @ $this->{'csrf_token'} === csrf_token();
     }
 
     /**

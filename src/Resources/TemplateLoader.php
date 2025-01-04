@@ -23,7 +23,7 @@ class TemplateLoader implements LoaderInterface
             return new Source('', $name, '');
         }
         
-        return new Source(file_get_contents($path), $name, $path);
+        return new Source($this->getContent($path), $name, $path);
     }
 
     public function getCacheKey(string $name): string
@@ -92,5 +92,21 @@ class TemplateLoader implements LoaderInterface
     private function normalizeName(string $name): string
     {
         return preg_replace('#/{2,}#', '/', str_replace('\\', '/', $name));
+    }
+
+    private function getContent(string $template_path): string
+    {
+        $content = file_get_contents($template_path);
+
+        foreach ($this->getavailableTemplateTags() as $tag) {
+            $content = (new $tag)->bind($content);
+        }
+
+        return $content;
+    }
+
+    private function getavailableTemplateTags(): array
+    {
+        return \Clicalmani\Foundation\Resources\Kernel::$template_tags;
     }
 }

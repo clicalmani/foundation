@@ -22,6 +22,13 @@ class RouteServiceProvider extends ServiceProvider
     protected $api_prefix = 'api';
 
     /**
+     * Parameter prefix
+     * 
+     * @var string 
+     */
+    protected $parameter_prefix = ':';
+
+    /**
      * Default api handler
      * 
      * @var string
@@ -48,6 +55,13 @@ class RouteServiceProvider extends ServiceProvider
      * @var array
      */
     private static $cors_settings;
+
+    /**
+     * Route settings
+     * 
+     * @var array
+     */
+    private static $route_settings;
     
     /**
      * Initialize route service
@@ -75,6 +89,36 @@ class RouteServiceProvider extends ServiceProvider
     public function getApiPrefix()
     {
         return $this->api_prefix;
+    }
+
+    /**
+     * Get parameter prefix
+     * 
+     * @return string
+     */
+    public function getParameterPrefix()
+    {
+        return $this->parameter_prefix;
+    }
+
+    /**
+     * Get api handler
+     * 
+     * @return string
+     */
+    public function getApiHandler()
+    {
+        return $this->api_handler;
+    }
+
+    /**
+     * Get web handler
+     * 
+     * @return string
+     */
+    public function getWebHandler()
+    {
+        return $this->web_handler;
     }
 
     /**
@@ -122,8 +166,8 @@ class RouteServiceProvider extends ServiceProvider
         // Escape console mode
         if ( FALSE == inConsoleMode() ) {
             // Generate CSRF token and Store it in $_SESSION global variable
-            if ( ! isset($_SESSION['csrf-token']) ) {
-                $_SESSION['csrf-token'] = with ( new \Clicalmani\Foundation\Auth\CSRF )->getToken(); 
+            if ( ! isset($_SESSION['csrf_token']) ) {
+                $_SESSION['csrf_token'] = with ( new \Clicalmani\Foundation\Auth\CSRF )->getToken(); 
             }
         }
     }
@@ -174,8 +218,29 @@ class RouteServiceProvider extends ServiceProvider
         }
     }
 
+    /**
+     * Get default builder
+     * 
+     * @return string
+     */
+    public function getDefaultBuilder() : string
+    {
+        return static::$route_settings['default_builder'];
+    }
+
+    /**
+     * Get builders
+     * 
+     * @return array
+     */
+    public function getBuilders() : array 
+    {
+        return static::$route_settings['builders'];
+    }
+
     public function boot(): void
     {
+        static::$route_settings = require_once config_path('/routing.php');
         static::$cors_settings = require_once config_path('/cors.php');
         
         Cache::setRoutes(

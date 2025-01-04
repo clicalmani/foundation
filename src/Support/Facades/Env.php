@@ -1,6 +1,7 @@
 <?php 
-namespace Clicalmani\Foundation\Support;
+namespace Clicalmani\Foundation\Support\Facades;
 
+use Clicalmani\Foundation\Support\Facades\Facade;
 use Dotenv\Dotenv;
 use Dotenv\Repository\Adapter\EnvConstAdapter;
 use Dotenv\Repository\Adapter\PutenvAdapter;
@@ -14,7 +15,7 @@ global $dotenv;
  * @package Clicalmani\Foundation
  * @author @Clicalmani\Foundation
  */
-class Env 
+class Env extends Facade
 {
     /**
      * Indicate if the putenv adapter is enabled.
@@ -73,5 +74,29 @@ class Env
         }
         
         return static::$repository;
+    }
+
+    /**
+     * Get the value of the environment variable.
+     * 
+     * @param string $key
+     * @param mixed $default
+     * @return mixed
+     */
+    public static function get(string $key, $default = null)
+    {
+        return static::getRepository()->get($key, $default);
+    }
+
+    /**
+     * Set the value of the environment variable.
+     * 
+     * @param string $key
+     * @param mixed $value
+     * @return void
+     */
+    public static function set(string $key, $value) : void
+    {
+        static::getRepository()->set($key, $value);
     }
 }

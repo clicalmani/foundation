@@ -40,11 +40,11 @@ class Facade
         if ( $class === \Clicalmani\Foundation\Routing\Route::class )
             return \Clicalmani\Routing\Routing::class;
 
-        if ( is_subclass_of($class, \Clicalmani\Foundation\Http\Requests\RequestController::class) ) 
-            return \Clicalmani\Foundation\Logic\Internal\RequestController::class;
-            
+        if ( is_subclass_of($class, \Clicalmani\Foundation\Http\Requests\RequestController::class) ) {
+            return \Clicalmani\Foundation\Maker\Logic\RequestController::class;
+        } 
 
-        $class = "Clicalmani\Foundation\Logic\Internal\\" . substr($class, strrpos($class, "\\") + 1);
+        $class = "Clicalmani\Foundation\Maker\Logic\\" . substr($class, strrpos($class, "\\") + 1);
 
         if ( class_exists($class) ) return $class;
 

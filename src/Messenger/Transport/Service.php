@@ -2,14 +2,11 @@
 namespace Clicalmani\Foundation\Messenger\Transport;
 
 use App\Authenticate\Notify;
-use App\Models\Log;
-use App\Providers\RouteServiceProvider;
-use Carbon\Carbon;
 use Clicalmani\Foundation\Http\Requests\Request;
-use Clicalmani\Foundation\Providers\RouteTPS;
+use Clicalmani\Foundation\Providers\RouteService;
 use GuzzleHttp\Client;
 
-class Service extends RouteTPS
+class Service extends RouteService
 {
     private $ls;
 
@@ -114,7 +111,7 @@ class Service extends RouteTPS
      */
     public function redirect()
     {
-        if ($this->route && @$this->route[0]->name === ( new RouteServiceProvider )->getApiPrefix()) {
+        if ($this->route && @$this->route[0]->name === \Clicalmani\Foundation\Support\Facades\Config::route('api_prefix')) {
             if (FALSE === $this->connect()) $this->route->redirect = 303;
         }
     }

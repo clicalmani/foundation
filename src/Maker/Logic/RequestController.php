@@ -1,10 +1,10 @@
 <?php
-namespace Clicalmani\Foundation\Logic\Internal;
+namespace Clicalmani\Foundation\Maker\Logic;
 
 use Clicalmani\Foundation\Http\Requests\Request;
-use Clicalmani\Foundation\Http\Requests\HttpRequest;
 use Clicalmani\Foundation\Exceptions\ModelNotFoundException;
 use Clicalmani\Database\Factory\Models\Model;
+use Clicalmani\Foundation\Http\Requests\RequestControllerInterface;
 use Clicalmani\Foundation\Http\Requests\RequestReflection;
 use Clicalmani\Foundation\Providers\RouteServiceProvider;
 use Clicalmani\Foundation\Routing\Exceptions\RouteNotFoundException;
@@ -34,7 +34,7 @@ use Clicalmani\Routing\Cache;
  * @package Clicalmani\Foundation/flesco 
  * @author @Clicalmani\Foundation
  */
-class RequestController extends HttpRequest
+class RequestController implements RequestControllerInterface
 {
 	/**
 	 * Current request controller
@@ -65,7 +65,7 @@ class RequestController extends HttpRequest
 		 * |----------------------------------------------------------
 		 * | Note !!!
 		 * |----------------------------------------------------------
-		 * CSRF protection is only based csrf-token request parameter. No CSRF header will be expected
+		 * CSRF protection is only based csrf_token request parameter. No CSRF header will be expected
 		 * because we asume ajax requests will be made through REST API.
 		 */
 		if (Route::getClientVerb() !== 'get' AND FALSE === $request->checkCSRFToken()) {
@@ -97,8 +97,9 @@ class RequestController extends HttpRequest
 		}
 		
 		$request = new Request([]);
+		$builder = \Clicalmani\Foundation\Support\Facades\Config::route('default_builder');
 		
-		if ($route = (new \Clicalmani\Routing\Builder)->build()) {
+		if ($route = (new $builder)->build()) {
 			
 			$this->route = $route;
 
@@ -511,7 +512,7 @@ class RequestController extends HttpRequest
 	 * @param string $action Test action
 	 * @return \Clicalmani\Foundation\Test\Controllers\TestController
 	 */
-	public function test(string $action)
+	public function test(string $action) : \Clicalmani\Foundation\Test\Controllers\TestController
 	{
 		return with( new TestController )->new($action);
 	}

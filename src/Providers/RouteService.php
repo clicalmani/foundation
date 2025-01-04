@@ -1,7 +1,7 @@
 <?php 
 namespace Clicalmani\Foundation\Providers;
 
-abstract class RouteTPS 
+abstract class RouteService 
 {
     /**
      * Current route

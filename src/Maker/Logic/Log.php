@@ -1,5 +1,5 @@
 <?php 
-namespace Clicalmani\Foundation\Logic\Internal;
+namespace Clicalmani\Foundation\Maker\Logic;
 
 /**
  * Log Class

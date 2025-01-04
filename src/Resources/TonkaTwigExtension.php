@@ -21,7 +21,7 @@ class TonkaTwigExtension extends \Twig\Extension\AbstractExtension implements \T
 
     public function csrf_field() : string
     {
-        return '<input type="hidden" name="csrf-token" value="' . csrf_token() . '">';
+        return '<input type="hidden" name="csrf_token" value="' . csrf_token() . '">';
     }
 
     public function route(...$args) : string
