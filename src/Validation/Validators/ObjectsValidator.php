@@ -1,9 +1,9 @@
 <?php
 namespace Clicalmani\Foundation\Validation\Validators;
 
-use Clicalmani\Foundation\Validation\InputValidator;
+use Clicalmani\Foundation\Validation\Validator;
 
-class ObjectsValidator extends InputValidator
+class ObjectsValidator extends Validator
 {
     protected string $argument = 'object[]';
 

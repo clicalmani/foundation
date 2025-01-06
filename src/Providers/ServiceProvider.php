@@ -76,6 +76,32 @@ abstract class ServiceProvider
         static::$kernel      = $kernel;
         static::$http_kernel = $http_kernel;
 
+        /**
+         * |------------------------------------------------------------------------------
+         * | Register web middleware
+         * |------------------------------------------------------------------------------
+         * 
+         * Web middleware is registered here for global access and usage in the application
+         * for web routes. Web middleware is used to check CSRF token for non GET and OPTIONS
+         * requests.
+         * 
+         * @var \Clicalmani\Foundation\Http\Middlewares\Web
+         */
+        static::$http_kernel['web']['web'] = \Clicalmani\Foundation\Http\Middlewares\Web::class;
+
+        /**
+         * |------------------------------------------------------------------------------
+         * | Register api middleware
+         * |------------------------------------------------------------------------------
+         * 
+         * API middleware is registered here for global access and usage in the application
+         * for API routes. Each route will have a /api prfix will be handled by this middleware.
+         * However, /api prefix will be added to the route automatically.
+         * 
+         * @var \Clicalmani\Foundation\Http\Middlewares\Api
+         */
+        static::$http_kernel['api']['api'] = \Clicalmani\Foundation\Http\Middlewares\Api::class;
+        
         static::provideServices();
     }
 

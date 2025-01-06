@@ -1,10 +1,10 @@
 <?php
 namespace Clicalmani\Foundation\Validation;
 
-use Clicalmani\Foundation\Providers\InputValidationServiceProvider;
+use Clicalmani\Foundation\Providers\ValidationServiceProvider;
 use Clicalmani\Foundation\Support\Facades\Log;
 
-class InputValidator implements ValidatorInterface
+class Validator implements ValidatorInterface
 {
     use InputParser;
     use ParseValidator;
@@ -104,7 +104,7 @@ class InputValidator implements ValidatorInterface
                  */ 
                 $argument = $this->getArguments()->filter(fn(string $argument) => ! in_array($argument, $this->defaultArguments))->first();
                 
-                $service = new InputValidationServiceProvider;
+                $service = new ValidationServiceProvider;
                 
                 if (FALSE === $service->seemsValidator($argument)) $this->log("$argument is not a valid validator argument.");
 
@@ -120,7 +120,7 @@ class InputValidator implements ValidatorInterface
                  * 
                  * @var static
                  */
-                $validatorClass = ( new InputValidationServiceProvider )->getValidator($argument);
+                $validatorClass = ( new ValidationServiceProvider )->getValidator($argument);
                 
                 $validator = new $validatorClass;
 

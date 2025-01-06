@@ -11,7 +11,7 @@ use Clicalmani\Foundation\Routing\Exceptions\RouteNotFoundException;
 use Clicalmani\Foundation\Routing\Route;
 use Clicalmani\Foundation\Test\Controllers\TestController;
 use Clicalmani\Foundation\Validation\AsValidator;
-use Clicalmani\Routing\Cache;
+use Clicalmani\Routing\Memory;
 
 /**
  * |------------------------------------------------------------------
@@ -59,27 +59,25 @@ class RequestController implements RequestControllerInterface
 	{
 		$request = new Request;
 
-		/**
-		 * Check CSRF protection
-		 * 
-		 * |----------------------------------------------------------
-		 * | Note !!!
-		 * |----------------------------------------------------------
-		 * CSRF protection is only based csrf_token request parameter. No CSRF header will be expected
-		 * because we asume ajax requests will be made through REST API.
-		 */
-		if (Route::getClientVerb() !== 'get' AND FALSE === $request->checkCSRFToken()) {
-			response()->status(403, 'FORBIDEN', '403 Forbiden');
-
-			EXIT;
-		}
-
 		$response = $this->getResponse($request);
 		
-		// Run after navigation hook
+		/**
+		 * |-----------------------------------------------------------------------------------
+		 * |                                After Hook
+		 * |-----------------------------------------------------------------------------------
+		 * A hook to run after the request has been processed and before the response is sent.
+		 * A hook can be used to modify the response before it is sent.
+		 */
 		if ($hook = $this->route->afterHook()) $response = $hook($response);
 
-		// Fire TPS
+		/**
+		 * |-----------------------------------------------------------------------------------
+		 * |                                Response
+		 * |-----------------------------------------------------------------------------------
+		 * 
+		 * Fire route service providers before sending response. A service provider can be used to
+		 * redirect the route to a different location or set response headers.
+		 */
 		RouteServiceProvider::fireTPS($response, 1);
 		
 		die($response);
@@ -108,7 +106,7 @@ class RequestController implements RequestControllerInterface
 
 			$this->controller = $route->action;
 			
-			Cache::currentRoute($route);
+			Memory::currentRoute($route);
 			
 			if ( $response_code = $route->isAuthorized($request) AND 200 !== $response_code ) {
 				
@@ -125,7 +123,7 @@ class RequestController implements RequestControllerInterface
 			return $this->controller;
 		}
 		
-		throw new RouteNotFoundException( current_route() );
+		throw new RouteNotFoundException( client_uri() );
     }
 	
 	/**
@@ -166,7 +164,7 @@ class RequestController implements RequestControllerInterface
 			return $controller(...($this->getParameters($request)));
 		}
 
-		throw new RouteNotFoundException(current_route());
+		throw new RouteNotFoundException(client_uri());
 	}
 
 	/**

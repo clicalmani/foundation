@@ -1,9 +1,9 @@
 <?php
 namespace Clicalmani\Foundation\Validation\Validators;
 
-use Clicalmani\Foundation\Validation\InputValidator;
+use Clicalmani\Foundation\Validation\Validator;
 
-class FloatValidator extends InputValidator
+class FloatValidator extends Validator
 {
     protected string $argument = 'float';
 

@@ -19,7 +19,7 @@ class Request implements RequestInterface, \ArrayAccess, \JsonSerializable
     /**
      * Validator
      * 
-     * @var \Clicalmani\Foundation\Fundation\Validation\InputValidator
+     * @var \Clicalmani\Foundation\Fundation\Validation\Validator
      */
     private $validator;
 
@@ -78,7 +78,7 @@ class Request implements RequestInterface, \ArrayAccess, \JsonSerializable
      */
     public function __construct(private ?array $signatures = []) 
     {
-        $this->validator = new \Clicalmani\Foundation\Validation\InputValidator;
+        $this->validator = new \Clicalmani\Foundation\Validation\Validator;
 
         if (Route::isApi() AND in_array(self::getMethod(), ['patch', 'put'])) {
             

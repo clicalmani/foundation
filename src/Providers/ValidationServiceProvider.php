@@ -1,7 +1,7 @@
 <?php
 namespace Clicalmani\Foundation\Providers;
 
-class InputValidationServiceProvider extends ServiceProvider
+class ValidationServiceProvider extends ServiceProvider
 {
     /**
      * Input validators

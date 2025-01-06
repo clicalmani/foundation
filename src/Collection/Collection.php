@@ -9,7 +9,7 @@ namespace Clicalmani\Foundation\Collection;
  */
 class Collection extends SPLCollection
 {
-    public function __construct(?array $elements = [])
+    public function __construct($elements = [])
     {
         $this->add( ...$elements );
     }
@@ -79,7 +79,7 @@ class Collection extends SPLCollection
      */
     public function last() : mixed
     {
-        return $this[$this->count() - 1];
+        return $this->count() ? $this[$this->count() - 1]: null;
     }
 
     /**

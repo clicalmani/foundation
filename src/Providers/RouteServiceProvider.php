@@ -3,7 +3,7 @@ namespace Clicalmani\Foundation\Providers;
 
 use Clicalmani\Foundation\Http\Requests\Request;
 use Clicalmani\Foundation\Routing\Route;
-use Clicalmani\Routing\Cache;
+use Clicalmani\Routing\Memory;
 use Clicalmani\Routing\Record;
 
 /**
@@ -221,21 +221,21 @@ class RouteServiceProvider extends ServiceProvider
     /**
      * Get default builder
      * 
-     * @return string
+     * @return mixed
      */
-    public function getDefaultBuilder() : string
+    public function getDefaultBuilder() : mixed
     {
-        return static::$route_settings['default_builder'];
+        return @static::$route_settings['default_builder'];
     }
 
     /**
      * Get builders
      * 
-     * @return array
+     * @return mixed
      */
-    public function getBuilders() : array 
+    public function getBuilders() : mixed 
     {
-        return static::$route_settings['builders'];
+        return @static::$route_settings['builders'];
     }
 
     public function boot(): void
@@ -243,7 +243,7 @@ class RouteServiceProvider extends ServiceProvider
         static::$route_settings = require_once config_path('/routing.php');
         static::$cors_settings = require_once config_path('/cors.php');
         
-        Cache::setRoutes(
+        Memory::setRoutes(
             [
                 'get'     => [], 
                 'post'    => [],

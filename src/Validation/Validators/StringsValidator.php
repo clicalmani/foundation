@@ -1,9 +1,9 @@
 <?php
 namespace Clicalmani\Foundation\Validation\Validators;
 
-use Clicalmani\Foundation\Validation\InputValidator;
+use Clicalmani\Foundation\Validation\Validator;
 
-class StringsValidator extends InputValidator
+class StringsValidator extends Validator
 {
     protected string $argument = 'string[]';
 

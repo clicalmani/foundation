@@ -143,15 +143,15 @@ if ( ! function_exists( 'view' ) ) {
     }
 }
 
-if ( ! function_exists( 'current_route' ) ) {
+if ( ! function_exists( 'client_uri' ) ) {
 
     /**
      * Returns the current route
      * 
      * @return string
      */
-    function current_route() : string {
-        return Clicalmani\Foundation\Routing\Route::current();
+    function client_uri() : string {
+        return Clicalmani\Foundation\Routing\Route::uri();
     }
 }
 
@@ -327,7 +327,7 @@ if ( ! function_exists('collection') ) {
      * 
      * @return \Clicalmani\Foundation\Collection\Collection
      */
-    function collection(?array $items = []) {
+    function collection($items = []) {
         return new \Clicalmani\Foundation\Collection\Collection( $items );
     }
 }

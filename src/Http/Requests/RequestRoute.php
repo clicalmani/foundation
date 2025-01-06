@@ -18,7 +18,7 @@ class RequestRoute
      */
     public function current() : string
     {
-        return current_route();
+        return client_uri();
     }
 
     /**

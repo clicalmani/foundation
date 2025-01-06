@@ -1,9 +1,9 @@
 <?php
 namespace Clicalmani\Foundation\Validation\Validators;
 
-use Clicalmani\Foundation\Validation\InputValidator;
+use Clicalmani\Foundation\Validation\Validator;
 
-class IDValidator extends InputValidator
+class IDValidator extends Validator
 {
     protected string $argument = 'id';
 

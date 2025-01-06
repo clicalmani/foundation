@@ -1,9 +1,9 @@
 <?php
 namespace Clicalmani\Foundation\Validation\Validators;
 
-use Clicalmani\Foundation\Validation\InputValidator;
+use Clicalmani\Foundation\Validation\Validator;
 
-class RegExpValidator extends InputValidator
+class RegExpValidator extends Validator
 {
     protected string $argument = 'regexp';
 

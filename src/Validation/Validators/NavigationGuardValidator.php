@@ -1,8 +1,7 @@
 <?php
 namespace Clicalmani\Foundation\Validation\Validators;
 
-use Clicalmani\Foundation\Validation\InputValidator as Validator;
-use Clicalmani\Routing\Cache;
+use Clicalmani\Foundation\Validation\Validator as Validator;
 
 class NavigationGuardValidator extends Validator
 {
@@ -36,7 +35,7 @@ class NavigationGuardValidator extends Validator
      */
     public function validate(mixed &$value, ?array $options = [] ) : bool
     {
-        if ( $guard = Cache::getGuard($options['uid']) AND is_callable($guard['callback']) ) return $guard['callback']($value);
+        if ( $guard = \Clicalmani\Routing\Memory::getGuard($options['uid']) AND is_callable($guard['callback']) ) return $guard['callback']($value);
 
         return false;
     }

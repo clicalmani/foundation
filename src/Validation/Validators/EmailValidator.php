@@ -1,9 +1,9 @@
 <?php
 namespace Clicalmani\Foundation\Validation\Validators;
 
-use Clicalmani\Foundation\Validation\InputValidator;
+use Clicalmani\Foundation\Validation\Validator;
 
-class EmailValidator extends InputValidator
+class EmailValidator extends Validator
 {
     protected string $argument = 'email';
     

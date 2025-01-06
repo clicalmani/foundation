@@ -1,9 +1,9 @@
 <?php
 namespace Clicalmani\Foundation\Validation\Validators;
 
-use Clicalmani\Foundation\Validation\InputValidator;
+use Clicalmani\Foundation\Validation\Validator;
 
-class BooleanValidator extends InputValidator
+class BooleanValidator extends Validator
 {
     protected string $argument = 'boolean';
     

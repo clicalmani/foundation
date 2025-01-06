@@ -1,9 +1,9 @@
 <?php
 namespace Clicalmani\Foundation\Validation\Validators;
 
-use Clicalmani\Foundation\Validation\InputValidator;
+use Clicalmani\Foundation\Validation\Validator;
 
-class EnumValidator extends InputValidator
+class EnumValidator extends Validator
 {
     protected string $argument = 'enum';
 
