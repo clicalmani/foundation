@@ -201,7 +201,6 @@ class RouteServiceProvider extends ServiceProvider
      */
     public static function getProvidedTPS(int $service_level = 0) : array 
     {
-        static::$kernel['tps'][0][] = \Clicalmani\Foundation\Messenger\Transport\Service::class;
         return static::$kernel['tps'][$service_level];
     }
 
