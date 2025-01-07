@@ -94,7 +94,7 @@ class Collection extends SPLCollection
         foreach ($this as $key => $value) {
             $this[$key] = $closure($value, $key);
         }
-
+        
         return $this;
     }
 
@@ -107,10 +107,8 @@ class Collection extends SPLCollection
      */
     public function each(callable $closure) : static
     {
-        foreach ($this as $key => $value) {
-            $closure($value, $key);
-        }
-
+        $arr = $this->toArray();
+        array_walk($arr, $closure);
         return $this;
     }
 
@@ -123,16 +121,7 @@ class Collection extends SPLCollection
      */
     public function filter(callable $closure) : static
     {
-        $new = [];
-        foreach ($this as $key => $value)
-        {
-            if ($closure($value, $key)) {
-                $new[] = $value;
-            }
-        }
-
-        $this->exchange($new);
-
+        $this->exchange(array_values(array_filter($this->toArray(), $closure)));
         return $this;
     }
 

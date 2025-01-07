@@ -14,21 +14,6 @@ use Clicalmani\Foundation\Validation\AsValidator;
 use Clicalmani\Routing\Memory;
 
 /**
- * |------------------------------------------------------------------
- * | Init Service Providers
- * |------------------------------------------------------------------
- * 
- */
-
- $root_path = dirname( __DIR__, 6 );
-
- \Clicalmani\Foundation\Providers\ServiceProvider::init(
-	 require $root_path . '/config/app.php',
-	 require $root_path . '/bootstrap/kernel.php',
-	 require $root_path . '/app/Http/kernel.php'
- );
-
-/**
  * RequestController class
  * 
  * @package Clicalmani\Foundation/flesco 
