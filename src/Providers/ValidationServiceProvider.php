@@ -1,6 +1,8 @@
 <?php
 namespace Clicalmani\Foundation\Providers;
 
+use Clicalmani\Foundation\Support\Facades\Config;
+
 class ValidationServiceProvider extends ServiceProvider
 {
     /**
@@ -18,7 +20,7 @@ class ValidationServiceProvider extends ServiceProvider
     public function boot() : void
 	{
         $validators = ( new \Clicalmani\Foundation\Validation\Kernel )->validators();
-        $custom_validators = @ static::$http_kernel['validators'];
+        $custom_validators = \Clicalmani\Foundation\Support\Facades\Config::http('validators');
 
         /**
          * |-------------------------------------------------------

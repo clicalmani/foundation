@@ -28,7 +28,7 @@ class EncryptionServiceProvider
 		$method = @ $config['algo'];
 
 		$__func = fn($str) => hash($method, $str);
-		$__secret = env('APP_KEY', 'Tonka');
+		$__secret = env('APP_KEY');
     	
     	$_ipad = substr($__secret, strlen($__secret), 0) ^ str_repeat(chr(0x36), strlen($__secret));
     	$__opad = substr($__secret, 0, strlen($__secret)) ^ str_repeat(chr(0x5C), strlen($__secret));

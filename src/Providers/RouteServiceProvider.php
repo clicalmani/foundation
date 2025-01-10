@@ -3,6 +3,7 @@ namespace Clicalmani\Foundation\Providers;
 
 use Clicalmani\Foundation\Http\Requests\Request;
 use Clicalmani\Foundation\Routing\Route;
+use Clicalmani\Foundation\Support\Facades\Config;
 use Clicalmani\Routing\Memory;
 use Clicalmani\Routing\Record;
 
@@ -201,7 +202,7 @@ class RouteServiceProvider extends ServiceProvider
      */
     public static function getProvidedTPS(int $service_level = 0) : array 
     {
-        return static::$kernel['tps'][$service_level];
+        return Config::bootstrap('tps')[$service_level];
     }
 
     /**

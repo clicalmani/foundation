@@ -2,6 +2,7 @@
 namespace Clicalmani\Foundation\Providers;
 
 use Clicalmani\Foundation\Container\SPL_Loader;
+use Clicalmani\Foundation\Support\Facades\Config;
 
 /**
  * ServiceProvider class
@@ -17,39 +18,11 @@ abstract class ServiceProvider
      * @var \Clicalmani\Foundation\Container\SPL_Loader
      */
     protected $container;
-
-    /**
-     * Event listeners
-     * 
-     * @var array
-     */
-    protected $listen = [];
     
     public function __construct()
     {
         $this->container = new SPL_Loader;
     }
-
-    /**
-     * App config
-     * 
-     * @var array
-     */
-    protected static $app;
-
-    /**
-     * Service kernel
-     * 
-     * @var array
-     */
-    protected static $kernel;
-
-    /**
-     * Http middlewares
-     * 
-     * @var array
-     */
-    protected static $http_kernel;
 
     /**
      * (non-PHPDoc)
@@ -64,72 +37,6 @@ abstract class ServiceProvider
     public function register() : void { /** TODO: Override */}
 
     /**
-     * Bootstrap providers
-     * 
-     * @param array $kernel
-     * @param array $http_kernel
-     * @return void
-     */
-    public static function init(array $app, array $kernel, array $http_kernel) : void
-    {
-        static::$app         = $app;
-        static::$kernel      = $kernel;
-        static::$http_kernel = $http_kernel;
-
-        /**
-         * |------------------------------------------------------------------------------
-         * | Register web middleware
-         * |------------------------------------------------------------------------------
-         * 
-         * Web middleware is registered here for global access and usage in the application
-         * for web routes. Web middleware is used to check CSRF token for non GET and OPTIONS
-         * requests.
-         * 
-         * @var \Clicalmani\Foundation\Http\Middlewares\Web
-         */
-        static::$http_kernel['web']['web'] = \Clicalmani\Foundation\Http\Middlewares\Web::class;
-
-        /**
-         * |------------------------------------------------------------------------------
-         * | Register api middleware
-         * |------------------------------------------------------------------------------
-         * 
-         * API middleware is registered here for global access and usage in the application
-         * for API routes. Each route will have a /api prfix will be handled by this middleware.
-         * However, /api prefix will be added to the route automatically.
-         * 
-         * @var \Clicalmani\Foundation\Http\Middlewares\Api
-         */
-        static::$http_kernel['api']['api'] = \Clicalmani\Foundation\Http\Middlewares\Api::class;
-        
-        static::provideServices();
-    }
-
-    /**
-     * Make custom helper functions available
-     * 
-     * @return void
-     */
-    public static function helpers() : void
-    {
-        foreach (self::customHelpers() as $helper) {
-            with( new $helper )->boot();
-        }
-    }
-
-    /**
-     * Retrieve provided custom helpers
-     * 
-     * @return array
-     */
-    public static function customHelpers() : array
-    {
-        if ( $custom_helpers = static::$app['helpers'] ) return $custom_helpers;
-
-        return [];
-    }
-
-    /**
      * Get a provided middleware
      * 
      * @param string $gateway
@@ -138,44 +45,15 @@ abstract class ServiceProvider
      */
     public static function getProvidedMiddleware(string $gateway, $name) : mixed
     {
-        return @ static::$http_kernel[$gateway][$name];
+        return @ Config::http($gateway)[$name];
     }
 
-    /**
-     * Returns app config
-     * 
-     * @return array
-     */
-    public static function getAppConfig() : array
+    public static function provideServices(?array $providers = [])
     {
-        return static::$app;
+        foreach ($providers as $provider)
+            self::provideService($provider);
     }
-
-    /**
-     * Returns http config
-     * 
-     * @return array
-     */
-    public static function getHttpConfig() : array
-    {
-        return static::$http_kernel;
-    }
-
-    /**
-     * Returns http config
-     * 
-     * @return array
-     */
-    public static function getBootstrapConfig() : array
-    {
-        return static::$kernel;
-    }
-
-    private static function getServiceProviders()
-    {
-        return @ static::$app['providers'] ?? [];
-    }
-
+    
     private static function provideService(string $service_class)
     {
         if ( class_exists( $service_class ) ) {
@@ -184,11 +62,5 @@ abstract class ServiceProvider
             if ( method_exists($service, 'register') ) $service->register();
             if ( method_exists($service, 'boot') ) $service->boot();
         }
-    }
-
-    private static function provideServices()
-    {
-        foreach (self::getServiceProviders() as $service)
-            self::provideService($service);
     }
 }

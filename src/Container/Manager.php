@@ -114,11 +114,12 @@ abstract class Manager
      * Require a file
      * 
      * @param string $file_name
-     * @return void
+     * @return mixed
      */
-    protected function require(string $file_name) : void
+    protected function require(string $file_name) : mixed
     {
-        if ( @ file_exists($file_name) ) require_once $file_name;
+        if ( @ file_exists($file_name) ) return require_once $file_name;
+        return null;
     }
 
     /**

@@ -151,7 +151,7 @@ if ( ! function_exists( 'client_uri' ) ) {
      * @return string
      */
     function client_uri() : string {
-        return Clicalmani\Foundation\Routing\Route::uri();
+        return \Clicalmani\Foundation\Routing\Route::uri();
     }
 }
 

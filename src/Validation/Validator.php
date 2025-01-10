@@ -198,7 +198,7 @@ class Validator implements ValidatorInterface
     {
         if ($this->silent) return;
         
-        $is_debug_mode = ( 'true' === strtolower(env('APP_DEBUG')) );
+        $is_debug_mode = ( true === strtolower(env('APP_DEBUG')) );
         
         if ($is_debug_mode) throw new \Exception($message);
 

@@ -59,6 +59,18 @@ abstract class TestController implements TestInterface
     private $headers;
 
     /**
+     * Faker instance
+     * 
+     * @var \Clicalmani\Database\Faker\Faker
+     */
+    protected \Clicalmani\Database\Faker\Faker $faker;
+
+    public function __construct()
+    {
+        $this->faker = new \Clicalmani\Database\Faker\Faker;
+    }
+
+    /**
      * Merges parameters
      * 
      * @param ?array $parameters
