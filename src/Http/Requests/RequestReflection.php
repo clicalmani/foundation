@@ -25,7 +25,7 @@ class RequestReflection
     {
         $ret = [];
 
-        foreach ($this->reflect->getParameters() as $param) 
+        foreach ($this->getParameters() as $param) 
             $ret[$param->getName()] = $param->getType()?->getName();
         return $ret;
     }

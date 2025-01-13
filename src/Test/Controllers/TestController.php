@@ -213,7 +213,16 @@ abstract class TestController implements TestInterface
                 } else $request->test_user_id = $this->user;
             }
             
-            print_r( $this->controller::invokeControllerMethod($this->controller, $this->action) );
+            print_r( $this->controller::invokeMethod(
+                    new \Clicalmani\Foundation\Http\Controllers\MethodReflector(
+                        new \ReflectionMethod(
+                            \Clicalmani\Foundation\Http\Requests\RequestController::getInstance($this->controller), 
+                            $this->action
+                        )
+                    )
+                ) 
+            );
+            
             if ($num < $this->counter) echo "\n";
         }
     }

@@ -1,11 +1,9 @@
 <?php
-namespace Clicalmani\Foundation\Maker\Logic;
+namespace Clicalmani\Foundation\Http\Controllers;
 
 use Clicalmani\Foundation\Http\Requests\Request;
 use Clicalmani\Foundation\Exceptions\ModelNotFoundException;
 use Clicalmani\Database\Factory\Models\Model;
-use Clicalmani\Foundation\Http\Requests\RequestControllerInterface;
-use Clicalmani\Foundation\Http\Requests\RequestReflection;
 use Clicalmani\Foundation\Providers\RouteServiceProvider;
 use Clicalmani\Foundation\Routing\Exceptions\RouteNotFoundException;
 use Clicalmani\Foundation\Routing\Route;
@@ -19,21 +17,50 @@ use Clicalmani\Routing\Memory;
  * @package Clicalmani\Foundation/flesco 
  * @author @Clicalmani\Foundation
  */
-class RequestController implements RequestControllerInterface
+class RequestController
 {
-	/**
-	 * Current request controller
-	 * 
-	 * @var mixed
-	 */
-	private $controller;
-
 	/**
 	 * Current route
 	 * 
 	 * @var \Clicalmani\Routing\Route
 	 */
 	private $route;
+
+	/**
+	 * Controller action
+	 * 
+	 * @var mixed
+	 */
+	private $action;
+
+	/**
+	 * Unique class instance
+	 * 
+	 * @var object
+	 */
+	protected $instance;
+
+	/**
+	 * This method returns an instance of the given class.
+	 * 
+	 * @param string $class
+	 * @return object
+	 */
+    public function getInstance(string $class) : object
+    {
+		if ($this->instance instanceof $class) return $this->instance;
+
+        if ( method_exists($class, '__construct') ) {
+            $reflector = new MethodReflector( (new \ReflectionClass($class))->getConstructor() );
+			$args = collection($reflector->getParameters())
+						->map(fn(\ReflectionParameter $parameter) => instance($reflector->getParameterClassNames($parameter)[0]))
+						->toArray();
+
+			$this->instance = new $class(...$args);
+        } else $this->instance = new $class;
+
+		return $this->instance;
+    }
 
 	/**
 	 * Render request response
@@ -44,7 +71,7 @@ class RequestController implements RequestControllerInterface
 	{
 		$request = new Request;
 
-		$response = $this->getResponse($request);
+		$response = $this->getResponse();
 		
 		/**
 		 * |-----------------------------------------------------------------------------------
@@ -69,43 +96,36 @@ class RequestController implements RequestControllerInterface
 	}
 
 	/**
-	 * Resolve request controller
+	 * Get the action for the current request
 	 * 
 	 * @return mixed
 	 */
-    private function getController() : mixed
+    private function getAction() : mixed
 	{
-		if ( isset( $this->controller ) ) {
-			return $this->controller;
+		if ( isset( $this->action ) ) {
+			return $this->action;
 		}
 		
 		$request = new Request([]);
 		$builder = \Clicalmani\Foundation\Support\Facades\Config::route('default_builder');
 		
+		/** @var \Clicalmani\Routing\Route $route */
 		if ($route = (new $builder)->build()) {
 			
 			$this->route = $route;
 
-			// Redirect
+			// Do Redirect
 			if ($route->redirect) $this->redirect();
 
-			$this->controller = $route->action;
+			$this->action = $this->route->action;
 			
 			Memory::currentRoute($route);
 			
-			if ( $response_code = $route->isAuthorized($request) AND 200 !== $response_code ) {
-				
-				switch($response_code) {
-					case 401: $this->sendStatus($response_code, 'UNAUTHORIZED_REQUEST_ERROR', 'Request Unauthorized'); break;
-					case 403: $this->sendStatus($response_code, 'FORBIDEN', '403 Forbiden'); break;
-					case 404: $this->sendStatus($response_code, 'NOT FOUND', 'Not Found'); break;
-					default: $this->sendStatus($response_code, 'UNKNOW', 'Unknow'); break;
-				}
-				
-				exit;
+			if ( $response_code = $this->route->isAuthorized($request) ) {
+				$this->handleResponseCode($response_code);
 			}
 			
-			return $this->controller;
+			return $this->action;
 		}
 		
 		throw new RouteNotFoundException( client_uri() );
@@ -114,95 +134,99 @@ class RequestController implements RequestControllerInterface
 	/**
 	 * Get request response
 	 * 
-	 * @param \Clicalmani\Foundation\Http\Requests\Request
 	 * @return mixed
 	 */
-	private function getResponse(Request $request) : mixed
+	protected function getResponse()
 	{
-		$controller = $this->getController();
+		$action = $this->getAction();
 		
 		/**
-		 * Checks for controller
+		 * Checks for action
 		 */
-		if (is_array($controller) AND !empty($controller)) {
-			$class = $controller[0];
-			$obj   = new $class;                                             // An instance of the controller
-			
-			if ( @ isset($controller[1]) ) {
-
-				if ( ! method_exists($obj, $controller[1]) ) {
-					response()->status(500, 'INTERNAL_SERVER_ERROR', 'Method ' . $controller[1] . ' does not exist on class ' . $controller[0]);		// Forbiden
-					exit;
-				}
-				
-				return $this->invokeControllerMethod($class, $controller[1]);
-			}
-
-			return $this->invokeControllerMethod($class);
-
-		} elseif( is_string($controller) ) {
-
-			return $this->invokeControllerMethod($controller);			  // Controller with magic method invoke
-
-		} elseif ($controller instanceof \Closure) {                      // Otherwise fallback to closure function
-			                                                              // whith a default Request object
-			return $controller(...($this->getParameters($request)));
+		if (is_array($action) AND count($action) === 2) {
+			$reflector = new MethodReflector(new \ReflectionMethod($this->getInstance($action[0]), $action[1]));
+		} elseif( is_string($action) ) {
+			$reflector = new MethodReflector(new \ReflectionMethod($this->getInstance($action), '__invoke'));
+		} elseif (is_callable($action)) {
+			$reflector = new FunctionReflector(new \ReflectionFunction($action));
 		}
-
-		throw new RouteNotFoundException(client_uri());
+		
+		return $this->invokeMethod($reflector);
 	}
 
 	/**
-	 * Run route action
+	 * Invoke the method with the given reflector.
 	 * 
-	 * @param mixed $controllerClass
-	 * @param mixed $method
+	 * @param \Clicalmani\Foundation\Http\Controllers\ReflectorInterface $reflector
 	 * @return mixed
 	 */
-	public function invokeControllerMethod($controllerClass, $method = '__invoke') : mixed
+	public function invokeMethod(ReflectorInterface $reflector) : mixed
 	{
 		$request = new Request;							  // Fallback to default request
-		$reflect = new RequestReflection($controllerClass, $method);
+		/** @var int|null */
+		$request_pos = null;
 		
-		/**
-		 * Validate request
-		 */
-		if ( $requestClass = $reflect->getParamTypeAt(0) ) {
-			
-			// Model binding request
-			if ( $this->isResourceBound($requestClass) ) {
-				try {
-					return $this->bindResource($requestClass, $controllerClass, $method);
-				} catch(ModelNotFoundException $e) {
-					
-					if ( $callback = $this->route->missing() ) {
-						return $callback();
-					}
-
-					return response()->status(404, 'NOT_FOUND', $e->getMessage());		// Not Found
-				}
-			}
-			
+		if ($arr = $reflector->getRequest()) {
 			/** @var \Clicalmani\Foundation\Http\Requests\Request */
-			$request = new $requestClass;
-			$this->validateRequest(new $request);
+			$request = new $arr['name'];
+			$request_pos = $arr['pos'];
+			$this->validateRequest($request);
+		}
+
+		Request::currentRequest($request);
+
+		$request_parameters = $this->getRequestParameters();
+		/** @var \ReflectionParameter[] */
+		$parameters = $reflector->getParameters();
+		/** @var string */
+		$resource = null;
+		/** @var int */
+		$resource_pos = null;
+
+		if ($arr = $reflector->getResource()) {
+			try {
+				$resource = $this->bindResource($reflector);
+				$resource_pos = $arr['pos'];
+			} catch(ModelNotFoundException $e) {
+				
+				if ( $callback = $this->route->missing() ) {
+					return $callback();
+				}
+
+				return response()->status(404, 'NOT_FOUND', $e->getMessage());		// Not Found
+			}
+		}
+
+		if ($reflector instanceof MethodReflector) {
+			if ($attribute = (new \ReflectionMethod($reflector->getClass(), $reflector->getName()))->getAttributes(AsValidator::class)) {
+				$request->merge($attribute[0]->newInstance()->args);
+			}
+		}
+
+		$args = collection($parameters)->map(fn() => null)->toArray();
+		
+		if (NULL !== $request_pos) {
+			$args[$request_pos] = $request;
+		}
+
+		if (NULL !== $resource) {
+			$args[$resource_pos] = $resource;
 		}
 		
-		$params_types = $reflect->getParamsTypes();
-		$params_values = $this->getParameters($request);
-
-		array_shift($params_types);
+		foreach ($parameters as $i => $param) {
+			$param_reflector = new ParameterReflector($param);
+			$arg = @$args[$i] ?? null;
+			$param_reflector->setType($arg);
+			$args[$i] = $arg;
+		}
 		
-		$this->setRequestParameterTypes($params_types, $params_values, $method, $controllerClass);
-		Request::currentRequest($request); // Current request
-
-		if ($attribute = (new \ReflectionMethod($controllerClass, $method))->getAttributes(AsValidator::class)) {
-            $request->merge($attribute[0]->newInstance()->args);
-        }
+		$args = collection(array_merge($args, array_values($request_parameters)))
+					->filter(fn($arg) => $arg)
+					->toArray();
 		
-		if ($method !== '__invoke') return (new $controllerClass)->{$method}($request, ...$params_values);
+		if ($reflector instanceof MethodReflector) return $reflector($this->getInstance($reflector->getClass()), ...$args);
 
-        return (new $controllerClass)($request, ...$params_values);
+		return $reflector(...$args);
 	}
 
 	/**
@@ -232,51 +256,19 @@ class RequestController implements RequestControllerInterface
 	}
 
 	/**
-	 * Set parameters types
-	 * 
-	 * @param string[] $types
-	 * @param string[] $values
-	 * @param string $method Controller method
-	 * @param string $controller Controller class
-	 * @return void
-	 */
-	private function setRequestParameterTypes(array $types, array &$values, string $method, string $controller) : void
-	{
-		$tmp = [];
-		foreach ($types as $name => $type) {
-			if (in_array($type, ['boolean', 'bool', 'integer', 'int', 'float', 'double', 'string', 'array', 'object'])) {
-				$tmp[$name] = @ $values[$name];
-				settype($tmp[$name], $type);
-			} elseif ($type) {
-				$obj = new $type;
-
-				if (is_subclass_of($obj, \Clicalmani\Foundation\Http\Requests\Request::class)) {
-					$this->validateRequest($obj);
-					Request::currentRequest($obj); // Current request
-
-					if ($attribute = (new \ReflectionMethod($controller, $method))->getAttributes(AsValidator::class)) {
-						$obj->merge($attribute[0]->newInstance()->args);
-					}
-				}
-
-				$tmp[$name] = $obj;
-			} else $tmp[$name] = @ $values[$name];
-		}
-
-		$values = $tmp;
-	}
-
-	/**
 	 * Gather request parameters
 	 * 
 	 * @param \Clicalmani\Foundation\Http\Requests\Request
 	 * @return array
 	 */
-	private function getParameters(Request $request) : array
+	private function getRequestParameters() : array
     {
+		/** @var \Clicalmani\Foundation\Http\Requests\Request */
+		$request = Request::currentRequest();
+
 		if ( inConsoleMode() ) return $request->all();
 		
-        preg_match_all('/:[^\/]+/', (string) $this->route, $mathes);
+        preg_match_all('/' . config('route.parameter_prefix') . '[^\/]+/', (string) $this->route, $mathes);
 
         $parameters = [];
         
@@ -285,7 +277,7 @@ class RequestController implements RequestControllerInterface
             $mathes = $mathes[0];
             
             foreach ($mathes as $name) {
-                $name = substr($name, 1);    				      // Remove starting two dots (:)
+                $name = substr($name, 1);    				      // Remove prefix
                 
                 if (preg_match('/@/', $name)) {
                     $name = substr($name, 0, strpos($name, '@')); // Remove validation part
@@ -301,75 +293,49 @@ class RequestController implements RequestControllerInterface
     }
 
 	/**
-	 * Is resource bind
-	 * 
-	 * @param mixed $resource
-	 * @return bool
-	 */
-	private function isResourceBound(mixed $resource) : bool
-	{
-		return is_subclass_of($resource, \Clicalmani\Database\Factory\Models\Model::class);
-	}
-
-	/**
 	 * Bind a model resource
 	 * 
-	 * @param mixed $resource
-	 * @param mixed $controller
-	 * @param mixed $method
+	 * @param \Clicalmani\Foundation\Http\Controllers\ReflectorInterface $reflector
 	 * @return mixed
 	 */
-	private function bindResource(mixed $resource, mixed $controller, mixed $method) : mixed
+	private function bindResource(ReflectorInterface $reflector) : mixed
 	{
-		$request = new Request;
-		$reflect = new RequestReflection($controller, $method);
-		
-		$params_types = $reflect->getParamsTypes();
-		$params_values = $this->getParameters($request);
-		
-		array_shift($params_types);
+		$resource = $reflector->getResource()['name'];
+		$request = Request::currentRequest();
 
-		$this->setRequestParameterTypes($params_types, $params_values, $method, $controller);
-		Request::currentRequest($request); // Current request
-
-		if ($attribute = (new \ReflectionMethod($controller, $method))->getAttributes(AsValidator::class)) {
-            $request->merge($attribute[0]->newInstance()->args);
-        }
+		if ($reflector instanceof MethodReflector) {
+			if ($attribute = (new \ReflectionMethod($reflector->getClass(), $reflector->getName()))->getAttributes(AsValidator::class)) {
+				$request->merge($attribute[0]->newInstance()->args);
+				Request::currentRequest($request);
+			}
+		}
 		
-		if ( in_array($method, ['create', 'show', 'update', 'destroy']) ) {
+		if ( NULL !== $id = $request->id AND in_array($reflector->getName(), ['create', 'show', 'update', 'destroy']) ) {
 
 			// Request parameters
-			$parameters = explode(',', (string) $request->id);
+			$parameters = explode(',', (string) $id);
 			
 			if ( count($parameters) ) {
 				if ( count($parameters) === 1 ) $parameters = $parameters[0];	// Single primary key
 				
 				/** @var \Clicalmani\Database\Factory\Models\Model */
 				$model = new $resource($parameters);
-				
-				/**
-				 * Bind resources
-				 */
-				$this->bindRoutines($model);
-				
-				$collection = $model->get();
 
-				if ( $collection->isEmpty() ) throw new ModelNotFoundException($resource);
-				
-				return (new $controller)->{$method}($model, ...$params_values);
+				if ( $model->get()->isEmpty() ) throw new ModelNotFoundException($resource);
 
 			} else throw new ModelNotFoundException($resource);
+		} else {
+			
+			/** @var \Clicalmani\Database\Factory\Models\Model */
+			$model = new $resource;
 		}
-
-		/** @var \Clicalmani\Database\Factory\Models\Model */
-		$model = new $resource;
 
 		/**
 		 * Bind resources
 		 */
 		$this->bindRoutines($model);
 		
-		return (new $controller)->{$method}($model, ...$params_values);
+		return $model;
 	}
 
 	/**
@@ -517,6 +483,20 @@ class RequestController implements RequestControllerInterface
 		}
 		
 		exit;
+	}
+
+	private function handleResponseCode(int $response_code) : void
+	{
+		if (200 !== $response_code) {
+			switch($response_code) {
+				case 401: $this->sendStatus($response_code, 'UNAUTHORIZED_REQUEST_ERROR', 'Request Unauthorized'); break;
+				case 403: $this->sendStatus($response_code, 'FORBIDEN', '403 Forbiden'); break;
+				case 404: $this->sendStatus($response_code, 'NOT FOUND', 'Not Found'); break;
+				default: $this->sendStatus($response_code, 'UNKNOW', 'Unknow'); break;
+			}
+
+			EXIT;
+		}
 	}
 
 	private function sendStatus(int $code, string $status_code, string $message)

@@ -532,7 +532,7 @@ if ( ! function_exists('instance') ) {
     function instance(string $class, ?callable $callback = null, mixed ...$args)
     {
         $instance = new $class( ...$args );
-        $callback($instance);
+        if ($callback) $callback($instance);
         return $instance;
     }
 }

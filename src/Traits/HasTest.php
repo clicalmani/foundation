@@ -1,5 +1,5 @@
 <?php 
-namespace Clicalmani\Foundation\Test;
+namespace Clicalmani\Foundation\Traits;
 
 trait HasTest
 {

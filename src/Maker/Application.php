@@ -91,39 +91,6 @@ class Application
         };
     }
 
-    public function provideMiddlewares()
-    {
-        $http = $this->config['http'];
-
-        /**
-         * |------------------------------------------------------------------------------
-         * | Register web middleware
-         * |------------------------------------------------------------------------------
-         * 
-         * Web middleware is registered here for global access and usage in the application
-         * for web routes. Web middleware is used to check CSRF token for non GET and OPTIONS
-         * requests.
-         * 
-         * @var \Clicalmani\Foundation\Http\Middlewares\Web
-         */
-        $http['web']['web'] = \Clicalmani\Foundation\Http\Middlewares\Web::class;
-
-        /**
-         * |------------------------------------------------------------------------------
-         * | Register api middleware
-         * |------------------------------------------------------------------------------
-         * 
-         * API middleware is registered here for global access and usage in the application
-         * for API routes. Each route will have a /api prfix will be handled by this middleware.
-         * However, /api prefix will be added to the route automatically.
-         * 
-         * @var \Clicalmani\Foundation\Http\Middlewares\Api
-         */
-        $http['api']['api'] = \Clicalmani\Foundation\Http\Middlewares\Api::class;
-
-        $this->config['http'] = $http;
-    }
-
     public function addKernel(string $kernel)
     {
         $kernel = new $kernel($this);
@@ -136,11 +103,6 @@ class Application
         return $this->rootPath;
     }
 
-    public function provideServices()
-    {
-        \Clicalmani\Foundation\Providers\ServiceProvider::provideServices($this->config['app']['providers']);
-    }
-
     /**
      * Boot the application
      * 
@@ -148,8 +110,8 @@ class Application
      */
     public function boot() : void
     {
-        $this->provideMiddlewares();
-        $this->provideServices();
+        $this->addKernel(\App\Http\Kernel::class);
+        \Clicalmani\Foundation\Providers\ServiceProvider::provideServices($this->config['app']['providers']);
     }
 
     public function __get($name)

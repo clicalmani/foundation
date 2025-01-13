@@ -17,7 +17,7 @@ interface RequestControllerInterface
 	 * @param mixed $method
 	 * @return mixed
 	 */
-	public function invokeControllerMethod($controllerClass, $method = '__invoke') : mixed;
+	public function invokeMethod($controllerClass, $method = '__invoke') : mixed;
 
     /**
 	 * Controller test
