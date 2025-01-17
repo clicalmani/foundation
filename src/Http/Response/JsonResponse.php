@@ -69,15 +69,16 @@ Trait JsonResponse
      * @param ?string $message
      * @return void
      */
-    public function status(string $status_code, ?string $code = null, ?string $message = null) : void
+    public function status(string $status_code, ?string $status = null, ?string $message = null) : void
     {
         $this->sendStatus($status_code);
         
-        if (Route::isApi()) echo $this->json(['success' => false, 'status_code' => $status_code, 'error_code' => $code, 'error_message' => $message]);
+        if (Route::isApi()) echo $this->json(['success' => false, 'status_code' => $status_code, 'error_code' => $status, 'error_message' => $message]);
 
         else {
-            echo view($status_code, ['code' => $code, 'message' => $message]);
-            exit;
+            echo view($status_code, ['code' => $status, 'message' => $message]);
         }
+
+        EXIT;
     }
 }

@@ -8,6 +8,7 @@ class BootstrapKernel extends Kernel
     public function boot() : void
     {
         $this->bootstrap = $this->require( $this->app->config['paths']['root'] . '/bootstrap/kernel.php' );
+        $this->bootstrap['tps'][0][] = \Clicalmani\Foundation\Messenger\Transport\Service::class;
     }
 
     public function register(): void

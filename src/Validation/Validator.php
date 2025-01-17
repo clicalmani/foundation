@@ -28,14 +28,14 @@ class Validator implements ValidatorInterface
      * 
      * @var string[]
      */
-    private $defaultArguments = ['required', 'nullable'];
+    private $defaultArguments = ['required', 'nullable', 'sometimes'];
 
     /**
      * 
      */
     private $validated = [];
 
-    public function __construct(private ?bool $silent = false) {}
+    public function __construct(private ?bool $silent = false, protected ?string $parameter = null) {}
     
     public function validate(mixed &$value, ?array $options = [] ) : bool
     {
@@ -61,15 +61,36 @@ class Validator implements ValidatorInterface
         return $this->argument;
     }
 
+    /**
+     * Input value is required
+     * 
+     * @return bool
+     */
     public function isRequired() : bool
     {
         if ( -1 !== $this->getArguments()->index('required') ) return true;
         return false;
     }
 
+    /**
+     * Input value is nullable
+     * 
+     * @return bool
+     */
     public function isNullable() : bool
     {
         if ( -1 !== $this->getArguments()->index('nullable') ) return true;
+        return false;
+    }
+
+    /**
+     * Input value is sometimes required
+     * 
+     * @return bool
+     */
+    public function isSometimes() : bool
+    {
+        if (-1 !== $this->getArguments()->index('sometimes')) return true;
         return false;
     }
 
@@ -88,7 +109,15 @@ class Validator implements ValidatorInterface
             
             $this->signature = $sig;
             
-            if ( $this->isRequired() && ! array_key_exists($param, $inputs) ) $this->log("Parameter $param is required.");
+            if ( $this->isRequired() ) {
+                if ( ! array_key_exists($param, $inputs) ) {
+                    if ( FALSE === $this->isSometimes() ) $this->log("Parameter $param is required.");
+                    else {
+                        $inputs[$param] = null;
+                        continue;
+                    }
+                }
+            }
             
             if ( array_key_exists($param, $inputs) ) {
                 
@@ -122,7 +151,7 @@ class Validator implements ValidatorInterface
                  */
                 $validatorClass = ( new ValidationServiceProvider )->getValidator($argument);
                 
-                $validator = new $validatorClass;
+                $validator = new $validatorClass(parameter: $param);
 
                 /**
                  * Validator options

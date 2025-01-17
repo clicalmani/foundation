@@ -3,18 +3,22 @@
 use Carbon\Carbon;
 use Clicalmani\Foundation\Resources\View;
 
+if ( ! function_exists('app') ) {
+    function app() : \Clicalmani\Foundation\Maker\Application {
+        return \Clicalmani\Foundation\Maker\Application::getInstance();
+    }
+}
+
 if ( ! function_exists( 'root_path' ) ) {
 
     /**
      * Get root path
      * 
-     * @param ?string $subdirectory
+     * @param ?string $path
      * @return string
      */
-    function root_path(?string $subdirectory = '') : string {
-        $root_path = dirname( __DIR__, 4 );
-        if (!preg_match('/.*\/$/', $root_path)) $root_path = $root_path . '/';
-        return $root_path . trim($subdirectory, '/\\');
+    function root_path(?string $path = '') {
+        return app()->rootPath() . ($path ? DIRECTORY_SEPARATOR . trim($path, '/\\') : $path);
     }
 }
 
@@ -23,12 +27,11 @@ if ( ! function_exists( 'app_path' ) ) {
     /**
      * Get App path
      * 
-     * @param ?string $subdirectory
+     * @param ?string $path
      * @return string
      */
-    function app_path(?string $subdirectory = '') : string {
-        if ($subdirectory) return root_path( 'app/' . trim($subdirectory, '/\\') );
-        return root_path('app');
+    function app_path(?string $path = '') : string {
+        return app()->appPath( trim($path, '/\\') );
     }
 }
 
@@ -37,12 +40,11 @@ if ( ! function_exists( 'public_path' ) ) {
     /**
      * Get publi path
      * 
-     * @param ?string $subdirectory
+     * @param ?string $path
      * @return string
      */
-    function public_path(?string $subdirectory = '') : string {
-        if ($subdirectory !== '') return root_path( 'public/' . trim($subdirectory, '/\\') );
-        return root_path('public');
+    function public_path(?string $path = '') : string {
+        return app()->publicPath( trim($path, '/\\') );
     }
 }
 
@@ -51,12 +53,11 @@ if ( ! function_exists( 'bootstrap_path' ) ) {
     /**
      * Get bootstrap directory
      * 
-     * @param ?string $subdirectory
+     * @param ?string $path
      * @return string
      */
-    function bootstrap_path(?string $subdirectory = '') : string {
-        if ($subdirectory) return root_path( 'bootstrap/' . trim($subdirectory, '/\\') );
-        return root_path('bootstrap');
+    function bootstrap_path(?string $path = '') : string {
+        return app()->bootstrapPath( trim($path, '/\\') );
     }
 }
 
@@ -65,11 +66,10 @@ if ( ! function_exists( 'routes_path' ) ) {
     /**
      * Get routes path
      * 
-     * @param ?string $subdirectory
+     * @param ?string $path
      */
-    function routes_path(?string $subdirectory = '') : string {
-        if ($subdirectory) return root_path( 'routes/' . trim($subdirectory, '/\\') );
-        return root_path('routes');
+    function routes_path(?string $path = '') : string {
+        return app()->routesPath( trim($path, '/\\') );
     }
 }
 
@@ -78,12 +78,11 @@ if ( ! function_exists( 'resources_path' ) ) {
     /**
      * Get resources path
      * 
-     * @param ?string $subdirectory
+     * @param ?string $path
      * @return string
      */
-    function resources_path(?string $subdirectory = '') : string {
-        if ($subdirectory) return root_path( 'resources/' . trim($subdirectory, '/\\') );
-        return root_path('resources');
+    function resources_path(?string $path = '') : string {
+        return app()->resourcesPath( trim($path, '/\\') );
     }
 }
 
@@ -92,12 +91,11 @@ if ( ! function_exists( 'storage_path' ) ) {
     /**
      * Get storage path
      * 
-     * @param ?string $subdirectory
+     * @param ?string $path
      * @return string
      */
-    function storage_path(?string $subdirectory = '') : string {
-        if ($subdirectory) return root_path( 'storage/' . trim($subdirectory, '/\\') );
-        return root_path('storage');
+    function storage_path(?string $path = '') : string {
+        return app()->storagePath( trim($path, '/\\') );
     }
 }
 
@@ -106,12 +104,11 @@ if ( ! function_exists( 'config_path' ) ) {
     /**
      * Get config path
      * 
-     * @param ?string $subdirectory
+     * @param ?string $path
      * @return string
      */
-    function config_path(?string $subdirectory = '') : string {
-        if ($subdirectory) return root_path( 'config/' . trim($subdirectory, '/\\') );
-        return root_path('config');
+    function config_path(?string $path = '') : string {
+        return app()->configPath( trim($path, '/\\') );
     }
 }
 
@@ -120,12 +117,11 @@ if ( ! function_exists( 'database_path' ) ) {
     /**
      * Get database path
      * 
-     * @param ?string $subdirectory
+     * @param ?string $path
      * @return string
      */
-    function database_path(?string $subdirectory = '') : string {
-        if ($subdirectory) return root_path( 'database/' . trim($subdirectory, '/\\') );
-        return root_path('database');
+    function database_path(?string $path = '') : string {
+        return app()->databasePath( trim($path, '/\\') );
     }
 }
 
@@ -163,11 +159,7 @@ if ( ! function_exists( 'csrf_token' ) ) {
      * @return mixed
      */
     function csrf_token() : mixed {
-        if ( isset($_SESSION['csrf_token']) ) {
-            return $_SESSION['csrf_token'];
-        }
-
-        return null;
+        return isset($_SESSION['csrf_token']) ? $_SESSION['csrf_token'] : null;
     }
 }
 
@@ -194,12 +186,12 @@ if ( ! function_exists( 'assets' ) ) {
      * @return string
      */
     function assets(?string $path = '/') : string {
-        $app_url = env('APP_URL', '127.0.0.1:8000');
+        $app_url = app()->getUrl($path);
         $protocol = '';
         if (preg_match('/^http/', $app_url) == false) {
             $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || @$_SERVER['SERVER_PORT'] === 443) ? 'https://': 'http://';
         }
-        return $protocol . env('APP_URL', 'http://127.0.0.1:8000') . $path;
+        return $protocol.$app_url;
     }
 }
 
@@ -747,5 +739,12 @@ if ( ! function_exists('config') ) {
         $key_parts = explode('.', $key);
         $method = array_shift($key_parts);
         return $key ? $config->{$method}(join('.', $key_parts)) : $config;
+    }
+}
+
+if ( ! function_exists('abort') ) {
+    function abort(int $status_code, string $status, ?string $message = '') : never
+    {
+        response()->status($status_code, $status, $message);
     }
 }

@@ -143,17 +143,39 @@ class Reflector
     /**
      * Get the resource class name if the function has a resource parameter.
      * 
-     * @return array|null
+     * @return iterable|null
      */
-    public function getResource() : array|null
+    public function getResources() : iterable|null
     {
         foreach ($this->parameters as $index => $parameter) {
             foreach ($this->getParameterClassNames($parameter) as $class) {
-                if (is_subclass_of($class, \Clicalmani\Database\Factory\Models\Model::class)) return ['name' => $class, 'pos' => $index];
+                if (is_subclass_of($class, \Clicalmani\Database\Factory\Models\Model::class)) yield ['name' => $class, 'pos' => $index];
             }
         }
 
         return null;
+    }
+
+    /**
+     * Get the resource class name if the function has a resource parameter.
+     * 
+     * @return array|null
+     */
+    public function getResource() : array|null
+    {
+        return $this->getResources()->current();
+    }
+
+    /**
+     * Get the resource class name if the function has a resource parameter.
+     * 
+     * @return array|null
+     */
+    public function getNestedResource() : array|null
+    {
+        $iterator = $this->getResources();
+        $iterator->next();
+        return $iterator->current();
     }
 
     /**

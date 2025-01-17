@@ -18,18 +18,4 @@ interface ValidatorInterface
      * @return array
      */
     public function options() : array;
-
-    /**
-     * Input value is required
-     * 
-     * @return bool
-     */
-    public function isRequired() : bool;
-
-    /**
-     * Input value is nullable
-     * 
-     * @return bool
-     */
-    public function isNullable() : bool;
 }

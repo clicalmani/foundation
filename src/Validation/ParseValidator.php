@@ -6,7 +6,7 @@ trait ParseValidator
     public function getArguments()
     {
         return collection( explode('|', $this->signature) )
-                ->filter(fn(string $argument) => preg_match('/^[0-9a-z\[\]]+$/', $argument));
+                ->filter(fn(string $argument) => preg_match('/^[0-9a-z\[\]-_]+$/', $argument));
     }
 
     public function getOptions()

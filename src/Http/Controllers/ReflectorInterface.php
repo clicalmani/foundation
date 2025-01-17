@@ -18,6 +18,13 @@ interface ReflectorInterface
     public function getResource() : array|null;
 
     /**
+     * Get the nested resource class name if the function has a nested resource parameter.
+     * 
+     * @return array|null
+     */
+    public function getNestedResource() : array|null;
+
+    /**
      * Get the request class name if the function has a request parameter.
      * 
      * @return array|null

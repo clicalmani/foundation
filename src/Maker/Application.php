@@ -40,7 +40,7 @@ class Application
         $this->config['paths'] = $paths;
     }
 
-    public static function getInstance(?string $rootPath)
+    public static function getInstance(?string $rootPath = null)
     {
         if ( isset(static::$instance) ) return static::$instance;
 
@@ -98,9 +98,144 @@ class Application
         $kernel->register();
     }
 
-    public function rootPath()
+    /**
+     * Root path
+     * 
+     * @return string|null
+     */
+    public function rootPath() : string|null
     {
         return $this->rootPath;
+    }
+
+    /**
+     * App path
+     * 
+     * @param ?string $path
+     * @return string
+     */
+    public function appPath(string $path = ''): string
+    {
+        return $this->rootPath . DIRECTORY_SEPARATOR . 'app' . ($path ? DIRECTORY_SEPARATOR . $path : $path);
+    }
+
+    /**
+     * Public path
+     * 
+     * @param ?string $path
+     * @return string
+     */
+    public function publicPath(string $path = ''): string
+    {
+        return $this->rootPath . DIRECTORY_SEPARATOR . 'public' . ($path ? DIRECTORY_SEPARATOR . $path : $path);
+    }
+
+    /**
+     * Config path
+     * 
+     * @param ?string $path
+     * @return string
+     */
+    public function configPath(string $path = ''): string
+    {
+        return $this->rootPath . DIRECTORY_SEPARATOR . 'config' . ($path ? DIRECTORY_SEPARATOR . $path : $path);
+    }
+
+    /**
+     * Bootstrap path
+     * 
+     * @param ?string $path
+     * @return string
+     */
+    public function bootstrapPath(string $path = ''): string
+    {
+        return $this->rootPath . DIRECTORY_SEPARATOR . 'bootstrap' . ($path ? DIRECTORY_SEPARATOR . $path : $path);
+    }
+
+    /**
+     * Routes path
+     * 
+     * @param ?string $path
+     * @return string
+     */
+    public function routesPath(string $path = ''): string
+    {
+        return $this->rootPath . DIRECTORY_SEPARATOR . 'routes' . ($path ? DIRECTORY_SEPARATOR . $path : $path);
+    }
+
+    /**
+     * Storage path
+     * 
+     * @param ?string $path
+     * @return string
+     */
+    public function storagePath(string $path = ''): string
+    {
+        return $this->rootPath . DIRECTORY_SEPARATOR . 'storage' . ($path ? DIRECTORY_SEPARATOR . $path : $path);
+    }
+
+    /**
+     * Database path
+     * 
+     * @param ?string $path
+     * @return string
+     */
+    public function databasePath(string $path = ''): string
+    {
+        return $this->rootPath . DIRECTORY_SEPARATOR . 'database' . ($path ? DIRECTORY_SEPARATOR . $path : $path);
+    }
+
+    /**
+     * Resources path
+     * 
+     * @param ?string $path
+     * @return string
+     */
+    public function resourcesPath(string $path = ''): string
+    {
+        return $this->rootPath . DIRECTORY_SEPARATOR . 'resources' . ($path ? DIRECTORY_SEPARATOR . $path : $path);
+    }
+
+    /**
+     * Get the debug mode status
+     * 
+     * @return bool
+     */
+    public function getDebug(): bool
+    {
+        return $this->config['app']['debug'] ?? false;
+    }
+
+    /**
+     * Get the application URL
+     * 
+     * @param string $path
+     * @return string
+     */
+    public function getUrl(string $path = ''): string
+    {
+        $url = $this->config['app']['url'] ?? 'http://localhost';
+        return rtrim($url, '/') . '/' . ltrim($path, '/');
+    }
+
+    /**
+     * Get the application locale
+     * 
+     * @return string
+     */
+    public function getLocale(): string
+    {
+        return $this->config['app']['locale'] ?? 'en';
+    }
+
+    /**
+     * Get the application timezone
+     * 
+     * @return string
+     */
+    public function getTimezone(): string
+    {
+        return $this->config['app']['timezone'] ?? 'UTC';
     }
 
     /**

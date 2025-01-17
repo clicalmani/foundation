@@ -27,7 +27,7 @@ class RequestRoute
      * @param string $name
      * @return bool
      */
-    public function named(string $name) : bool
+    public function named(string $name) : bool 
     {
         return !!Route::findByName($name); 
     }

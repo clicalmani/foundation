@@ -2,13 +2,17 @@
 namespace Clicalmani\Foundation\Http\Requests;
 
 use Clicalmani\Foundation\Auth\EncryptionServiceProvider;
-use Clicalmani\Foundation\Http\Requests\UploadedFile;
-use Clicalmani\Foundation\Http\Requests\RequestRedirect;
 use Clicalmani\Foundation\Providers\AuthServiceProvider;
 use Clicalmani\Foundation\Routing\Route;
 
-class Request implements RequestInterface, \ArrayAccess, \JsonSerializable 
+class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \JsonSerializable 
 {
+    use HttpInputStream;
+    use HttpOutputStream;
+    use Session;
+    use Cookie;
+    use Redirect;
+
     /**
      * Current request object
      * 
@@ -116,32 +120,6 @@ class Request implements RequestInterface, \ArrayAccess, \JsonSerializable
     }
 
     /**
-     * Verify if file has been provided
-     * 
-     * @param string $name File name
-     * @return bool
-     */
-    public function hasFile(string $name) : bool
-    {
-        return !!@ $_FILES[$name];
-    }
-
-    /**
-     * Request file
-     * 
-     * @param string $name File name
-     * @return \Clicalmani\Foundation\Http\Requests\UploadedFile|null
-     */
-    public function file(string $name) : UploadedFile|null
-    {
-        if ( $this->hasFile($name) ) {
-            return new UploadedFile($name);
-        }
-
-        return null;
-    }
-
-    /**
 	 * (non-PHPdoc)
 	 * Override
 	 */
@@ -176,49 +154,6 @@ class Request implements RequestInterface, \ArrayAccess, \JsonSerializable
     }
 
     /**
-     * Provide a download attachment response header
-     * 
-     * @param string $filename Download file name
-     * @param string $filepath Download file path
-     * @return mixed
-     */
-    public function download($filename, $filepath)  : mixed
-    {
-        header("Content-Disposition: attachment; filename=$filename");
-
-        if ( file_exists($filepath) ) {
-            header('Content-Type: ' . mime_content_type($filepath));
-            return readfile($filepath);
-        }
-
-        return null;
-    }
-
-    /**
-     * File streaming
-     * 
-     * @param string $filename
-     * @param ?array $events
-     */
-    public function stream($filename, ?array $events = [])
-    {
-        header('Cache-Control: no-cache');
-        header('Content-Type: text/event-stream');
-
-        foreach ($events as $event) {
-            echo "event: $event\n\n";
-        }
-
-        if (file_exists($filename) && is_readable($filename)) {
-            readfile($filename);
-        }
-
-        ob_end_flush();
-        flush();
-        sleep(5);
-    }
-
-    /**
      * Merge request signatures
      * 
      * @param ?array $new_signatures New signatures to merge into
@@ -227,65 +162,6 @@ class Request implements RequestInterface, \ArrayAccess, \JsonSerializable
     public function merge(?array $new_signatures = []) : void
     {
         $this->signatures = array_merge((array) $this->signatures, $new_signatures);
-    }
-
-    /**
-     * Gather headers
-     * 
-     * @return array|false
-     */
-    public function getHeaders() : array|false
-    {
-        if ( inConsoleMode() ) return $this->all();
-        return apache_request_headers();
-    }
-
-    /**
-     * Get header value
-     * 
-     * @param string $header
-     * @return mixed
-     */
-    public function getHeader(string $header) : mixed
-    {
-        foreach ($this->getHeaders() as $name => $value) {
-            if (strtolower($name) == strtolower($header)) return $value;
-        }
-
-        return null;
-    }
-
-    /**
-     * Set response header
-     * 
-     * @param string $header
-     * @param string $value
-     * @return void
-     */
-    public function setHeader($header, $value) : void
-    {
-        header("$header: $value");
-    }
-
-    /**
-     * Current request method
-     * 
-     * @return string
-     */
-    public function getMethod() : string
-    { 
-        if ( inConsoleMode() ) return '@console';
-        return strtolower( (string) @ $_SERVER['REQUEST_METHOD'] );
-    }
-
-    /**
-     * Gather request parameters
-     * 
-     * @return array
-     */
-    public static function all() : array
-    {
-        return $_REQUEST;
     }
 
     /**
@@ -333,41 +209,13 @@ class Request implements RequestInterface, \ArrayAccess, \JsonSerializable
     }
 
     /**
-     * Get or set session
-     * 
-     * @return object
-     */
-    public function session() : object
-    {
-        return new \Clicalmani\Foundation\Http\Session\Session;
-    }
-
-    /**
-     * Get or set cookie
-     * 
-     * @param string $name Cookie name
-     * @param ?string $value Cookie value
-     * @param ?int $expiry Default one year
-     * @param ?string $path Default root path
-     * @return mixed
-     */
-    public function cookie(string $name, ?string $value = null, ?int $expiry = 604800, ?string $path = '/') : mixed
-    {
-        if ( ! is_null($value) ) {
-            return setcookie($name, $value, time() + $expiry, $path);
-        }
-
-        return $_COOKIE[$name];
-    }
-
-    /**
      * Return authorization bearer header value
      * 
      * @return string
      */
     public function getToken() : string
     {
-        $authorization = $this->getHeader('Authorization');
+        $authorization = $this->header('Authorization');
         
         if ($authorization) {
             return preg_replace('/^(Bearer )/i', '', $authorization);
@@ -434,16 +282,6 @@ class Request implements RequestInterface, \ArrayAccess, \JsonSerializable
     }
 
     /**
-     * Redirect route
-     * 
-     * @return \Clicalmani\Foundation\Http\Requests\RequestRedirect
-     */
-    public function redirect() : RequestRedirect
-    {
-        return new RequestRedirect;
-    }
-
-    /**
      * Request parameter value
      * 
      * @param ?string $param Parameter to request the value. If omitted all the parameters will be returned.
@@ -480,10 +318,96 @@ class Request implements RequestInterface, \ArrayAccess, \JsonSerializable
     /**
      * Route request
      * 
-     * @return \Clicalmani\Foundation\Http\Requests\RequestRoute
+     * @return \Clicalmani\Routing\Route|null
      */
-    public function route() : RequestRoute
+    public function route() : \Clicalmani\Routing\Route|null
     {
-        return new RequestRoute; 
+        return \Clicalmani\Foundation\Routing\Route::current();
+    }
+
+    /**
+     * Request URL
+     * 
+     * @return string
+     */
+    public function url() : string
+    {
+        return $this->route()?->uri;
+    }
+
+    /**
+     * Request full url
+     * 
+     * @return string
+     */
+    public function fullUrl() : string
+    {
+        return rtrim(app()->getUrl(), '/').$_SERVER['REQUEST_URI'];
+    }
+
+    /**
+     * Get the full URL with query parameters
+     * 
+     * @param ?array $query_parameters
+     * @return string
+     */
+    public function fullUrlWithQuery(?array $query_parameters = []) : string
+    {
+        $url = $this->fullUrl();
+        $parsed_url = parse_url($url);
+        $url = $parsed_url['scheme'] . '://' . $parsed_url['host'] . $parsed_url['path'];
+        parse_str($parsed_url['query'], $output);
+
+        if (!empty($query_parameters)) {
+            $output = array_merge($output, $query_parameters);
+        }
+
+        $query_string = http_build_query($output);
+        $url .= '?' . $query_string;
+
+        return $url;
+    }
+
+    /**
+     * Parse the full URL and remove specified query parameters.
+     * Otherwise all query parameters will be removed.
+     * 
+     * @param ?array $query_parameters
+     * @return string
+     */
+    public function fullUrlWithoutQuery(?array $query_parameters = []) : string
+    {
+        $url = $this->fullUrl();
+        $parsed_url = parse_url($url);
+        $url = $parsed_url['scheme'] . '://' . $parsed_url['host'] . $parsed_url['path'];
+        $query_string = '';
+
+        if (!empty($query_parameters)) {
+            parse_str($parsed_url['query'], $output);
+            $query_string = http_build_query(array_diff(array_keys($output), $query_parameters));
+        }
+
+        return $url.($query_string ? "?$query_string": $query_string);
+    }
+
+    /**
+     * Get the host name from the current request.
+     * 
+     * @return string
+     */
+    public function getHost() : string
+    {
+        return parse_url($this->fullUrl(), PHP_URL_HOST);
+    }
+
+    /**
+     * Check if the request method matches the given pattern.
+     * 
+     * @param string $pattern
+     * @return bool
+     */
+    public function isMethod(string $pattern) : bool
+    {
+        return preg_match($pattern, $this->getMethod()) === 1;
     }
 }

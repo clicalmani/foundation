@@ -35,19 +35,12 @@ class Facade
      */
     private static function getClass() : string
     {
-        $class = get_called_class();
-        
-        if ( $class === \Clicalmani\Foundation\Routing\Route::class )
-            return \Clicalmani\Routing\Routing::class;
-        
-        if ( is_subclass_of($class, \Clicalmani\Foundation\Http\Requests\RequestController::class) OR $class === \Clicalmani\Foundation\Http\Requests\RequestController::class ) {
-            return \Clicalmani\Foundation\Http\Controllers\RequestController::class;
-        } 
-
-        $class = "Clicalmani\Foundation\Maker\Logic\\" . substr($class, strrpos($class, "\\") + 1);
-
-        if ( class_exists($class) ) return $class;
-
-        throw new \Exception(sprintf("Facade class %s does not exists.", $class));
+        return match($class = get_called_class()) {
+            \Clicalmani\Foundation\Routing\Route::class => \Clicalmani\Routing\Routing::class,
+            \Clicalmani\Foundation\Database\Model::class => \Clicalmani\Database\Factory\Models\Model::class,
+            is_subclass_of($class, \Clicalmani\Foundation\Http\Requests\RequestController::class), 
+            \Clicalmani\Foundation\Http\Requests\RequestController::class => \Clicalmani\Foundation\Http\Controllers\RequestController::class,
+            default => "Clicalmani\Foundation\Maker\Logic\\" . substr($class, strrpos($class, "\\") + 1)
+        };
     }
 }

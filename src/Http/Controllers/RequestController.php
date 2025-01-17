@@ -182,18 +182,28 @@ class RequestController
 		$resource = null;
 		/** @var int */
 		$resource_pos = null;
+		/** @var string */
+		$nested_resource = null;
+		/** @var int */
+		$nested_resource_pos = null;
 
 		if ($arr = $reflector->getResource()) {
 			try {
-				$resource = $this->bindResource($reflector);
+				$resources = $this->bindResources($reflector);
+				$resource = $resources[0];
+				$nested_resource = @$resources[1] ?? null;
 				$resource_pos = $arr['pos'];
+
+				if ($arr = $reflector->getNestedResource()) {
+					$nested_resource_pos = $arr['pos'];
+				}
 			} catch(ModelNotFoundException $e) {
 				
 				if ( $callback = $this->route->missing() ) {
-					return $callback();
+					return $callback($e);
 				}
 
-				return response()->status(404, 'NOT_FOUND', $e->getMessage());		// Not Found
+				return response()->status($e->getCode(), $e->getStatus(), $e->getMessage());		// Not Found
 			}
 		}
 
@@ -211,6 +221,10 @@ class RequestController
 
 		if (NULL !== $resource) {
 			$args[$resource_pos] = $resource;
+		}
+
+		if (NULL !== $nested_resource) {
+			$args[$nested_resource_pos] = $nested_resource;
 		}
 		
 		foreach ($parameters as $i => $param) {
@@ -293,14 +307,15 @@ class RequestController
     }
 
 	/**
-	 * Bind a model resource
+	 * Bind models resources
 	 * 
 	 * @param \Clicalmani\Foundation\Http\Controllers\ReflectorInterface $reflector
-	 * @return mixed
+	 * @return array
 	 */
-	private function bindResource(ReflectorInterface $reflector) : mixed
+	private function bindResources(ReflectorInterface $reflector) : array
 	{
 		$resource = $reflector->getResource()['name'];
+		$nested_resource = @$reflector->getNestedResource()['name'];
 		$request = Request::currentRequest();
 
 		if ($reflector instanceof MethodReflector) {
@@ -310,32 +325,88 @@ class RequestController
 			}
 		}
 		
-		if ( NULL !== $id = $request->id AND in_array($reflector->getName(), ['create', 'show', 'update', 'destroy']) ) {
+		// Check if resource is present
+		if ( NULL !== $id = $request->id AND in_array($reflector->getName(), ['create', 'show', 'edit', 'update', 'destroy']) ) {
 
-			// Request parameters
-			$parameters = explode(',', (string) $id);
+			$nested_model = null;
+
+			/**
+			 * Model record key value
+			 * 
+			 * @var string[]
+			 */
+			$key_value = explode(',', (string)$id);
 			
-			if ( count($parameters) ) {
-				if ( count($parameters) === 1 ) $parameters = $parameters[0];	// Single primary key
+			if ( count($key_value) ) {
+				if ( count($key_value) === 1 ) $key_value = $key_value[0];	// Single primary key
 				
 				/** @var \Clicalmani\Database\Factory\Models\Model */
-				$model = new $resource($parameters);
+				$model = new $resource($key_value);
+				$this->resolveRouteBinding($model, $resource);
 
-				if ( $model->get()->isEmpty() ) throw new ModelNotFoundException($resource);
+				if ( $model->get()->isEmpty() ) throw new ModelNotFoundException("$resource not found");
 
-			} else throw new ModelNotFoundException($resource);
+			} else throw new ModelNotFoundException("$resource not found");
 		} else {
-			
 			/** @var \Clicalmani\Database\Factory\Models\Model */
 			$model = new $resource;
+		}
+
+		// Check if nested resource is present
+		if ( NULL !== $nid = $request->nid AND $nested_resource ) {
+			/** 
+			 * Nested model key value
+			 * 
+			 * @var string[] 
+			 */
+			$nested_key_value = explode(',', (string)$nid);
+
+			if ( count($nested_key_value) ) {
+				if ( count($nested_key_value) === 1 ) $nested_key_value = $nested_key_value[0];	// Single primary key
+				
+				/** @var \Clicalmani\Database\Factory\Models\Model */
+				$nested_model = new $nested_resource($nested_key_value);
+				$this->resolveRouteBinding($nested_model, $nested_resource);
+
+				if ( $nested_model->get()->isEmpty() ) throw new ModelNotFoundException("$nested_resource not found");
+
+			} else throw new ModelNotFoundException("$nested_resource not found");
+		} else {
+			/** @var \Clicalmani\Database\Factory\Models\Model|null */
+			$nested_model = $nested_resource ? new $nested_resource: null;
 		}
 
 		/**
 		 * Bind resources
 		 */
 		$this->bindRoutines($model);
+
+		if ( NULL !== $nested_model ) $this->bindRoutines($nested_model);
 		
-		return $model;
+		return [$model, $nested_model];
+	}
+
+	/**
+	 * Resolve route binding
+	 * 
+	 * @param \Clicalmani\Database\Factory\Models\Model $model
+	 * @param string $resource
+	 * @return void
+	 */
+	private function resolveRouteBinding(Model $model, string $resource) : void
+	{
+		if ($scope = $this->route->scoped()) {
+			$scope_name = collection(explode('_', $model))->map(fn(string $part) => ucfirst($part))->join('');
+			$keyName = $scope[$scope_name];
+		} else $keyName = $model->getKey();
+
+		// Resolve route binding inside the model
+		$reflector = new MethodReflector(new \ReflectionMethod($model, 'resolveRouteBinding'));
+		$reflector($model, $model->{$keyName}, $keyName);
+
+		// Global route binding
+		if (NULL !== $callback = \App\Providers\RouteServiceProvider::routeBindingCallback())
+			$callback($model->{$keyName}, $keyName, $resource);
 	}
 
 	/**

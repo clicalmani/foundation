@@ -35,7 +35,7 @@ class MethodReflector extends Reflector implements ReflectorInterface
 
     public function __invoke(object $object, mixed ...$args) : mixed
     {
-        if ($middleware = $object->getMiddleware()) {
+        if (method_exists($object, 'getMiddleware') && NULL !== $middleware = $object->getMiddleware()) {
             foreach ($middleware as $name => $pattern) {
                 if (preg_match("/$pattern/", $this->getName())) {
                     $object->handleResponseCode( $object->isAuthorized($name) );

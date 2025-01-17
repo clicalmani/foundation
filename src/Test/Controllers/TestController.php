@@ -6,6 +6,17 @@ use Clicalmani\Foundation\Auth\EncryptionServiceProvider;
 use Clicalmani\Foundation\Http\Requests\Request;
 use Clicalmani\Foundation\Test\TestInterface;
 
+/**
+ * TestController
+ * 
+ * This file is part of the Tonka Framework.
+ * 
+ * @package    clicalmani/tonka
+ * @subpackage Test\Controllers
+ * @author     clicalmani <clicalmani@gmail.com>
+ * @license    MIT License
+ * @link       https://github.com/clicalmani/foundation
+ */
 abstract class TestController implements TestInterface
 {
     /**
@@ -222,7 +233,7 @@ abstract class TestController implements TestInterface
                     )
                 ) 
             );
-            
+
             if ($num < $this->counter) echo "\n";
         }
     }

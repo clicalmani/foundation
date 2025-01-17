@@ -63,6 +63,13 @@ class RouteServiceProvider extends ServiceProvider
      * @var array
      */
     private static $route_settings;
+
+    /**
+     * Global route binging callback.
+     * 
+     * @var callable
+     */
+    private static $route_binding_callback;
     
     /**
      * Initialize route service
@@ -236,6 +243,17 @@ class RouteServiceProvider extends ServiceProvider
     public function getBuilders() : mixed 
     {
         return @static::$route_settings['builders'];
+    }
+
+    /**
+     * Get or set route binding callback.
+     * 
+     * @return mixed
+     */
+    public static function routeBindingCallback(?\Closure $callback = null) : mixed
+    {
+        if (NULL === $callback) return static::$route_binding_callback;
+        static::$route_binding_callback = $callback;
     }
 
     public function boot(): void
