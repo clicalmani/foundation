@@ -173,7 +173,7 @@ if ( ! function_exists( 'env' ) ) {
      * @return mixed
      */
     function env(string $key, ?string $default = '') : mixed {
-        return \Clicalmani\Foundation\Support\Facades\Env::get($key, $default);
+        return \Clicalmani\Foundation\Support\Facades\Env::get($key, $default) ?? $default;
     }
 }
 
