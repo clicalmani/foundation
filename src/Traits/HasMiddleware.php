@@ -1,7 +1,7 @@
 <?php
 namespace Clicalmani\Foundation\Traits;
 
-trait hasMiddleware
+trait HasMiddleware
 {
     public function middleware(string $name) : static
     {
