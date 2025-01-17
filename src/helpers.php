@@ -170,9 +170,9 @@ if ( ! function_exists( 'env' ) ) {
      * 
      * @param string $key Env key
      * @param ?string $default Default value if key does not exists.
-     * @return string
+     * @return mixed
      */
-    function env(string $key, ?string $default = '') : string {
+    function env(string $key, ?string $default = '') : mixed {
         return \Clicalmani\Foundation\Support\Facades\Env::get($key, $default);
     }
 }
