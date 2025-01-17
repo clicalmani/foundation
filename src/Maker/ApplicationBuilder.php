@@ -11,6 +11,7 @@ class ApplicationBuilder
 
     public function __construct(private Application $app)
     {
+        \Clicalmani\Foundation\Support\Helper::include();
         $this->app->console = new \Clicalmani\Console\Application($this->app);
     }
 
