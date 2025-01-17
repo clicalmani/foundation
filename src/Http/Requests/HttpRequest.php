@@ -10,7 +10,7 @@ namespace Clicalmani\Foundation\Http\Requests;
  *
  * @package Clicalmani\Foundation\Http\Requests
  */
-abstract class HttpRequest implements \Psr\Http\Message\RequestInterface
+abstract class HttpRequest
 {
     /**
      * The request target.
@@ -260,54 +260,10 @@ abstract class HttpRequest implements \Psr\Http\Message\RequestInterface
     {
         return $this->accepts(['application/json', 'text/json']);
     }
-    
-    public function getRequestTarget(): string
-    {
-        return $this->requestTarget;
-    }
-    
-    public function withRequestTarget(string $requestTarget): \Psr\Http\Message\RequestInterface
-    {
-        $new = clone $this;
-        $new->requestTarget = $requestTarget;
-        return $new;
-    }
-
-    public function withMethod(string $method): \Psr\Http\Message\RequestInterface
-    {
-        $new = clone $this;
-        $new->method = $method;
-        return $new;
-    }
-
-    public function getUri(): \Psr\Http\Message\UriInterface
-    {
-        $uri = new \GuzzleHttp\Psr7\Uri($this->getRequestTarget());
-        return $uri;
-    }
-
-    public function withUri(\Psr\Http\Message\UriInterface $uri, bool $preserveHost = false): \Psr\Http\Message\RequestInterface
-    {
-        $new = clone $this;
-        $new->requestTarget = (string) $uri;
-
-        if (!$preserveHost || !$this->getHost()) {
-            $new->headers['Host'] = [$uri->getHost()];
-        }
-
-        return $new;
-    }
 
     public function getProtocolVersion(): string
     {
         return $_SERVER['SERVER_PROTOCOL'] ?? 'HTTP/1.1';
-    }
-
-    public function withProtocolVersion(string $version): \Psr\Http\Message\MessageInterface
-    {
-        $new = clone $this;
-        $new->protocolVersion = $version;
-        return $new;
     }
 
     public function hasHeader(string $name): bool
@@ -328,48 +284,5 @@ abstract class HttpRequest implements \Psr\Http\Message\RequestInterface
     {
         $headers = $this->getHeader($name);
         return implode(', ', $headers);
-    }
-
-    public function withHeader(string $name, $value): \Psr\Http\Message\MessageInterface
-    {
-        $new = clone $this;
-        $new->headers[$name] = [$value];
-        return $new;
-    }
-
-    public function withAddedHeader(string $name, $value): \Psr\Http\Message\MessageInterface
-    {
-        $new = clone $this;
-        $new->headers[$name][] = $value;
-        return $new;
-    }
-
-    public function withoutHeader(string $name): \Psr\Http\Message\MessageInterface
-    {
-        $new = clone $this;
-        $name = strtolower($name);
-
-        foreach ($new->headers as $key => $value) {
-            if (strtolower($key) === $name) {
-                unset($new->headers[$key]);
-            }
-        }
-
-        return $new;
-    }
-
-    public function getBody(): \Psr\Http\Message\StreamInterface
-    {
-        $body = fopen('php://temp', 'r+');
-        fwrite($body, file_get_contents('php://input'));
-        rewind($body);
-        return new \GuzzleHttp\Psr7\Stream($body);
-    }
-
-    public function withBody(\Psr\Http\Message\StreamInterface $body): \Psr\Http\Message\MessageInterface
-    {
-        $new = clone $this;
-        $new->body = $body;
-        return $new;
     }
 }

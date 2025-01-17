@@ -5,7 +5,6 @@ use Clicalmani\Foundation\Auth\EncryptionServiceProvider;
 use Clicalmani\Foundation\Collection\Collection;
 use Clicalmani\Foundation\Providers\AuthServiceProvider;
 use Clicalmani\Foundation\Routing\Route;
-use stdClass;
 
 class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \JsonSerializable 
 {
