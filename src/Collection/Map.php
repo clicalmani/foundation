@@ -63,13 +63,6 @@ class Map extends Collection
      */
     public function put(mixed $key, mixed $value) : static
     {
-        foreach ($this as $element) {
-            if ($element->key === $key) {
-                $element->value = $value;
-                return $this;
-            }
-        }
-
         $this[] = (object) ['key' => $key, 'value' => $value];
         return $this;
     }

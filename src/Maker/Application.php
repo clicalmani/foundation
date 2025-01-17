@@ -239,6 +239,16 @@ class Application
     }
 
     /**
+     * Get the session instance
+     * 
+     * @return \Clicalmani\Foundation\Http\Session\SessionHandler
+     */
+    public function session(): \Clicalmani\Foundation\Http\Session\SessionHandler
+    {
+        return \App\Providers\SessionServiceProvider::getDriver()::getInstance();
+    }
+
+    /**
      * Boot the application
      * 
      * @return void

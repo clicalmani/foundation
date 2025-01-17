@@ -184,4 +184,14 @@ abstract class SessionStorageServiceProvider extends ServiceProvider
     {
         return static::$table;
     }
+
+    /**
+     * Returns session driver
+     * 
+     * @return string
+     */
+    public static function getDriver() : string
+    {
+        return static::$driver;
+    }
 }

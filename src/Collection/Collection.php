@@ -121,8 +121,16 @@ class Collection extends SPLCollection
      */
     public function filter(callable $closure) : static
     {
-        $this->exchange(array_values(array_filter($this->toArray(), $closure)));
-        return $this;
+        // return $this->exchange(array_values(array_filter($this->toArray(), $closure)));
+        $new = [];
+        foreach ($this as $key => $value)
+        {
+            if ($closure($value, $key)) {
+                $new[] = $value;
+            }
+        }
+
+        return $this->exchange($new);
     }
 
     /**
@@ -302,11 +310,17 @@ class Collection extends SPLCollection
         return new Map;
     }
 
-    public function plunk(string $key, string $value) : Map
+    /**
+     * Pluck a specific key from each element in the collection
+     * 
+     * @param string $key
+     * @return \Clicalmani\Foundation\Collection\Map
+     */
+    public function pluck(string $key) : Map
     {
         $map = new Map;
         foreach ($this as $element) {
-            $map->put($element[$key], $element[$value]);
+            $map->put($key, @$element[$key]);
         }
 
         return $map;
