@@ -82,7 +82,7 @@ abstract class SessionHandler implements \SessionHandlerInterface
      * @param mixed $data
      * @return void
      */
-    public function flush(?string $key = null, mixed $data) : void
+    public function flush(?string $key = null, mixed $data = null) : void
     {
         if ( !isset($key) ) $_SESSION = [];
         else {
