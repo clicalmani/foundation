@@ -1,7 +1,7 @@
 <?php
 namespace Clicalmani\Foundation\Http\Requests;
 
-interface RequestInterface 
+interface RequestInterface
 {
     
     /**

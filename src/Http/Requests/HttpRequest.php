@@ -1,6 +1,11 @@
 <?php
 namespace Clicalmani\Foundation\Http\Requests;
 
+use Psr\Http\Message\MessageInterface;
+use Psr\Http\Message\RequestInterface as PsrRequestInterface;
+use Psr\Http\Message\StreamInterface;
+use Psr\Http\Message\UriInterface;
+
 /**
  * Handles the HTTP request.
  *
@@ -10,7 +15,7 @@ namespace Clicalmani\Foundation\Http\Requests;
  *
  * @package Clicalmani\Foundation\Http\Requests
  */
-abstract class HttpRequest
+abstract class HttpRequest implements PsrRequestInterface
 {
     /**
      * The request target.
@@ -46,6 +51,11 @@ abstract class HttpRequest
      * @var \Psr\Http\Message\StreamInterface
      */
     protected $body;
+
+    /**
+     * @var $uri UriInterface
+     */
+    protected $uri;
 
     public function getHeaders() : array
     {
@@ -284,5 +294,114 @@ abstract class HttpRequest
     {
         $headers = $this->getHeader($name);
         return implode(', ', $headers);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function withProtocolVersion(string $version): MessageInterface
+    {
+        $clone = clone $this;
+        $clone->protocolVersion = $version;
+        return $clone;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function withHeader(string $name, $value): MessageInterface
+    {
+        $clone = clone $this;
+        $clone->headers[$name] = $value;
+        return $clone;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function withAddedHeader(string $name, $value): MessageInterface
+    {
+        $clone = clone $this;
+        if(isset($clone->headers[$name])) {
+            $clone->headers[$name] = array_merge($clone->headers[$name], $value);
+        }
+        return $clone;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function withoutHeader(string $name): MessageInterface
+    {
+        $clone = clone $this;
+        unset($clone->headers[$name]);
+        return $clone;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getBody(): StreamInterface
+    {
+       return $this->body;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function withBody(StreamInterface $body): MessageInterface
+    {
+        $clone = clone $this;
+        $clone->body = $body;
+        return $clone;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getRequestTarget(): string
+    {
+        return $this->requestTarget ?? "";
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function withRequestTarget(string $requestTarget): PsrRequestInterface
+    {
+        if (preg_match('/\s/', $requestTarget)) {
+            throw new \InvalidArgumentException('Invalid request target provided.');
+        }
+        $clone = clone $this;
+        $clone->requestTarget = $requestTarget;
+        return $clone;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function withMethod(string $method): PsrRequestInterface
+    {
+        $clone = clone $this;
+        $clone->method = $method;
+        return $clone;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getUri(): UriInterface
+    {
+        // TODO: Implement withUri() method.
+        return $this->uri;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function withUri(UriInterface $uri, bool $preserveHost = false): PsrRequestInterface
+    {
+        // TODO: Implement withUri() method.
+        return $this;
     }
 }
