@@ -13,6 +13,7 @@ class ApplicationBuilder
     {
         \Clicalmani\Foundation\Support\Helper::include();
         $this->app->console = new \Clicalmani\Console\Application($this->app);
+        $this->app->database = require_once config_path( '/database.php' );
     }
 
     public function run()

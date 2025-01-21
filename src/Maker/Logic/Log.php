@@ -119,6 +119,19 @@ class Log
         if (FALSE == is_string($debug_message)) $debug_message = json_encode($debug_message);
         $this->notice($debug_message, $file, $line);
     }
+
+    /**
+     * Log info message
+     * 
+     * @param string $info_message
+     * @param ?string $file Error file name
+     * @param ?int $line Error line
+     * @return void
+     */
+    public function info(string $info_message, ?string $file = 'Unknow', ?int $line = null)
+    {
+        $this->notice($info_message, $file, $line);
+    }
     
     /**
      * May create error log file

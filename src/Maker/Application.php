@@ -19,6 +19,13 @@ class Application
     protected static $instance;
 
     /**
+     * Database configuration
+     * 
+     * @var array
+     */
+    protected $db_config;
+
+    /**
      * Application configuration
      * 
      * @var \Clicalmani\Foundation\Maker\Logic\Config
@@ -264,6 +271,7 @@ class Application
         return match ($name) {
             'config' => $this->config,
             'console' => $this->console,
+            'database' => $this->db_config,
             default => null
         };
     }
@@ -272,7 +280,8 @@ class Application
     {
         return match ($name) {
             'config' => $this->config = $value,
-            'console' => $this->console = $value
+            'console' => $this->console = $value,
+            'database' => $this->db_config = $value,
         };
     }
 }

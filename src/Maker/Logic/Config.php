@@ -60,8 +60,8 @@ class Config implements \ArrayAccess, JsonSerializable
 
     public function database(?string $key = null)
     {
-        $database_config = require_once config_path( '/database.php' );
-        return $key ? $database_config[$this->parseKey($key)] : $database_config;
+        if ( ! isset($key) ) return $database_config = app()->database;
+        return app()->database[$this->parseKey($key)];
     }
 
     public function env(?string $key = null)
