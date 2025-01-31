@@ -3,7 +3,7 @@ namespace Clicalmani\Foundation\Http\Middlewares;
 
 use Clicalmani\Foundation\Container\SPL_Loader;
 use Clicalmani\Foundation\Http\Requests\Request;
-use Clicalmani\Foundation\Http\Response\Response;
+use Clicalmani\Foundation\Http\Response;
 use Clicalmani\Routing\Group;
 
 /**
@@ -18,7 +18,7 @@ abstract class Middleware
      * Handler
      * 
      * @param \Clicalmani\Foundation\Http\Requests\Request $request Request object
-     * @param \Clicalmani\Foundation\Http\Response\Response $response Response object
+     * @param \Clicalmani\Foundation\Http\Response $response Response object
      * @param callable $next Next middleware function
      * @return int|false
      */

@@ -147,7 +147,7 @@ class RouteServiceProvider extends ServiceProvider
          * |                ***** Preflight Routes *****
          * |-------------------------------------------------------------------
          * 
-         * API Request is composed of preflight request and request
+         * API Request is composed of preflight request and request.
          * Prefilght request is meant to check wether the CORS protocol is understood
          */
         if (@ $_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
@@ -159,7 +159,7 @@ class RouteServiceProvider extends ServiceProvider
                 header("Access-Control-Allow-Headers: " . static::$cors_settings['allowed_headers']);
                 
                 // Preflight
-                response()->status(204, 'PREFLIGHT', '');
+                response()->sendStatus(204);
                 exit;
         }
     }

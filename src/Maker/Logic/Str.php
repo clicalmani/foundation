@@ -33,7 +33,7 @@ class Str
     public function slug(mixed $value, ?string $fallback_value = '' ) : string 
     {
         if (!$value) return $fallback_value;
-        return strtolower(strtr($this->removeAccents( $value ), ' /\\', '---') );
+        return strtolower(strtr($this->removeAccents( $value ), [" " => '-', "\\" => '-', "/" => '', "`" => '']) );
     }
 
     /**

@@ -73,6 +73,16 @@ class Collection extends SPLCollection
     }
 
     /**
+     * Get all elements
+     * 
+     * @return array
+     */
+    public function all() : array
+    {
+        return $this->toArray();
+    }
+
+    /**
      * Get the last element
      * 
      * @return mixed

@@ -2,6 +2,8 @@
 
 use Carbon\Carbon;
 use Clicalmani\Foundation\Resources\View;
+use Clicalmani\Psr7\NonBufferedBody;
+use Clicalmani\Psr7\StatusCodeInterface;
 
 if ( ! function_exists('app') ) {
     function app() : \Clicalmani\Foundation\Maker\Application {
@@ -290,12 +292,12 @@ if ( ! function_exists('redirect') ) {
 if ( ! function_exists('response') ) {
 
     /**
-     * Return an Http response
+     * Returns the response instance
      * 
-     * @return \Clicalmani\Foundation\Http\Response\HttpResponseHelper
+     * @return \Clicalmani\Foundation\Http\Response
      */
     function response() {
-        return new \Clicalmani\Foundation\Http\Response\HttpResponseHelper;
+        return app()->response;
     }
 }
 
@@ -351,7 +353,7 @@ if ( ! function_exists('now') ) {
     }
 }
 
-if ( ! function_exists('slug') ) {
+if ( ! function_exists('slugify') ) {
 
     /**
      * Slugify a string
@@ -359,7 +361,7 @@ if ( ! function_exists('slug') ) {
      * @param string $str
      * @return string
      */
-    function slug(string $str) : string {
+    function slugify(string $str) : string {
         return \Clicalmani\Foundation\Support\Facades\Str::slug($str);
     }
 }
@@ -738,13 +740,54 @@ if ( ! function_exists('config') ) {
         $config = new \Clicalmani\Foundation\Maker\Logic\Config;
         $key_parts = explode('.', $key);
         $method = array_shift($key_parts);
-        return $key ? $config->{$method}(join('.', $key_parts)) : $config;
+        
+        $value = $config->{$method}($key_parts[0]);
+        array_shift($key_parts);
+
+        if ( is_array($value) && count($key_parts) > 1 ) {
+            foreach ($key_parts as $part) {
+                $value = $value[$part];
+            }
+        }
+
+        return $key ? $value : $config;
     }
 }
 
 if ( ! function_exists('abort') ) {
-    function abort(int $status_code, string $status, ?string $message = '') : never
+    function abort(int $status_code) : never
     {
-        response()->status($status_code, $status, $message);
+        response()->sendStatus($status_code);
     }
 }
+
+// if (!function_exists('dd')) {
+//     function dd(mixed ...$vars): never
+//     {
+//         if ( ! class_exists(\Symfony\Component\VarDumper::class) ) {
+//             throw new \RuntimeException(
+//                 sprintf("To enable support for dumping, please install the symfony/var-dumper package.")
+//             );
+//         }
+
+//         if (!\in_array(\PHP_SAPI, ['cli', 'phpdbg', 'embed'], true) && !headers_sent()) {
+//             header('HTTP/1.1 500 Internal Server Error');
+//         }
+
+//         if (!$vars) {
+//             VarDumper::dump(new ScalarStub('🐛'));
+
+//             exit(1);
+//         }
+
+//         if (array_key_exists(0, $vars) && 1 === count($vars)) {
+//             VarDumper::dump($vars[0]);
+//         } else {
+//             foreach ($vars as $k => $v) {
+//                 VarDumper::dump($v, is_int($k) ? 1 + $k : $k);
+//             }
+//         }
+
+//         exit(1);
+//     }
+// }

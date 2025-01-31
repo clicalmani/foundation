@@ -1,7 +1,11 @@
 <?php
 namespace Clicalmani\Foundation\Resources;
 
-class View
+use Clicalmani\Foundation\Exceptions\ResourceNotFoundException;
+use Clicalmani\Psr7\NonBufferedBody;
+use Clicalmani\Psr7\Response;
+
+class View extends Response
 {
     /**
      * Twig environment
@@ -16,28 +20,26 @@ class View
      * @param string $template
      * @param ?array $vars
      */
-    public function __construct(private string $template, private ?array $vars = [])
+    public function __construct(private string $template, private ?array $context = [])
     {
+        $this->body = new NonBufferedBody;
         $this->twig = new \Twig\Environment(new \Clicalmani\Foundation\Resources\TemplateLoader, []);
         $this->twig->addExtension(new \Clicalmani\Foundation\Resources\TonkaTwigExtension);
     }
 
     /**
-     * Render a view
+     * Render the view
      * 
-     * @param string $filename
-     * @param ?array $vars Variables
      * @return string
-     * @throws LoaderError — When the template cannot be found
-     * @throws SyntaxError — When an error occurred during compilation
      */
-    public function render() : string
+    public function render(): string
     {
-        return $this->twig->render($this->template, $this->vars);
+        return $this->twig->render($this->template, $this->context);
     }
 
     public function __toString()
     {
-        return $this->render();
+        $this->body->write($this->render());
+        EXIT;
     }
 }

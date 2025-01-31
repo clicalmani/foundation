@@ -1,6 +1,8 @@
 <?php
 namespace Clicalmani\Foundation\Http\Requests;
 
+use Clicalmani\Routing\Memory;
+
 /**
  * Handles the HTTP request.
  *
@@ -12,6 +14,8 @@ namespace Clicalmani\Foundation\Http\Requests;
  */
 abstract class HttpRequest
 {
+    const HEADER_X_FORWARDED_ALL = 'X-Forwarded-*';
+
     /**
      * The request target.
      *
@@ -46,6 +50,20 @@ abstract class HttpRequest
      * @var \Psr\Http\Message\StreamInterface
      */
     protected $body;
+
+    /**
+     * Trusted hosts.
+     *
+     * @var string[]
+     */
+    protected static $trustedHosts = [];
+
+    /**
+     * Trusted proxies.
+     *
+     * @var array
+     */
+    protected static $trustedProxies = [];
 
     public function getHeaders() : array
     {
@@ -284,5 +302,41 @@ abstract class HttpRequest
     {
         $headers = $this->getHeader($name);
         return implode(', ', $headers);
+    }
+
+    public static function setTrustedHosts(array $trustedHosts): void
+    {
+        static::$trustedHosts = $trustedHosts;
+    }
+
+    public static function setTrustedProxies(array $trustedProxies): void
+    {
+        static::$trustedProxies = $trustedProxies;
+    }
+
+    public static function setTrustedHeaderNames(array $headers_names)
+    {
+        $ips = [];
+
+        if ( isset(static::$trustedProxies[0]) ) {
+            $ips = array_shift(static::$trustedProxies[0]) ?? [];
+        }
+
+        static::$trustedProxies = [
+            $ips, ...$headers_names
+        ];
+    }
+    
+    public function getRequestTarget(): string
+    {
+        if ($this->requestTarget) {
+            return $this->requestTarget;
+        }
+
+        if ($route = Memory::currentRoute()) {
+            return $this->requestTarget = $route->uri;
+        }
+
+        return $this->requestTarget = $_SERVER['REQUEST_URI'] ?? '/';
     }
 }

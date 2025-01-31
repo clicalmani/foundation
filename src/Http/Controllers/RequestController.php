@@ -4,11 +4,14 @@ namespace Clicalmani\Foundation\Http\Controllers;
 use Clicalmani\Foundation\Http\Requests\Request;
 use Clicalmani\Foundation\Exceptions\ModelNotFoundException;
 use Clicalmani\Database\Factory\Models\Model;
+use Clicalmani\Foundation\Http\Response;
 use Clicalmani\Foundation\Providers\RouteServiceProvider;
+use Clicalmani\Foundation\Resources\View;
 use Clicalmani\Foundation\Routing\Exceptions\RouteNotFoundException;
 use Clicalmani\Foundation\Routing\Route;
 use Clicalmani\Foundation\Test\Controllers\TestController;
 use Clicalmani\Foundation\Validation\AsValidator;
+use Clicalmani\Psr7\NonBufferedBody;
 use Clicalmani\Routing\Memory;
 
 /**
@@ -69,8 +72,6 @@ class RequestController
 	 */
 	public function render() : never
 	{
-		$request = new Request;
-
 		$response = $this->getResponse();
 		
 		/**
@@ -134,9 +135,9 @@ class RequestController
 	/**
 	 * Get request response
 	 * 
-	 * @return mixed
+	 * @return \Psr\Http\Message\ResponseInterface
 	 */
-	protected function getResponse()
+	protected function getResponse() : \Psr\Http\Message\ResponseInterface
 	{
 		$action = $this->getAction();
 		
@@ -158,9 +159,9 @@ class RequestController
 	 * Invoke the method with the given reflector.
 	 * 
 	 * @param \Clicalmani\Foundation\Http\Controllers\ReflectorInterface $reflector
-	 * @return mixed
+	 * @return \Psr\Http\Message\ResponseInterface
 	 */
-	public function invokeMethod(ReflectorInterface $reflector) : mixed
+	public function invokeMethod(ReflectorInterface $reflector) : \Psr\Http\Message\ResponseInterface
 	{
 		$request = new Request;							  // Fallback to default request
 		/** @var int|null */
@@ -203,7 +204,11 @@ class RequestController
 					return $callback($e);
 				}
 
-				return response()->status($e->getCode(), $e->getStatus(), $e->getMessage());		// Not Found
+				return new Response(
+					$e->getCode(),
+					null,
+					new NonBufferedBody
+				);
 			}
 		}
 
@@ -253,7 +258,7 @@ class RequestController
 	{
 		if (method_exists($request, 'authorize')) {
 			if (false == $request->authorize()) {
-				response()->status(403, 'FORBIDEN', '403 Forbiden');		// Forbiden
+				response()->sendStatus(403);		// Forbiden
 				die();
 			}
 		}
@@ -539,41 +544,21 @@ class RequestController
 
 	private function redirect()
 	{
-		/** @var int */
-		$redirect_code = $this->route->redirect;
-
-		switch($redirect_code) {
-			case 302: $this->sendStatus($redirect_code, 'FOUND', 'Temporary Unavailable'); break;
-			case 301: $this->sendStatus($redirect_code, 'PAGE_MOVED_PERMANENTLY', 'Page Moved Permenently'); break;
-			case 308: $this->sendStatus($redirect_code, 'PERMANENT_REDIRECT', 'Permanent Redirect'); break;
-			case 303: $this->sendStatus($redirect_code, 'SEE_OTHER', 'Redirect'); break;
-			case 307: $this->sendStatus($redirect_code, 'PERMANENTLY_REDIRECT', 'Temporary Unavailable'); break;
-			case 300: $this->sendStatus($redirect_code, 'MULTIPLE_CHOICES', 'Multiple Choices'); break;
-			case 304: $this->sendStatus($redirect_code, 'NOT_MODIFIED', 'Not Modified'); break;
-			default: $this->sendStatus($redirect_code, 'UNKNOW', 'Unknow'); break;
-		}
-		
-		exit;
+		$this->sendStatus($this->route->redirect);
 	}
 
 	private function handleResponseCode(int $response_code) : void
 	{
 		if (200 !== $response_code) {
-			switch($response_code) {
-				case 401: $this->sendStatus($response_code, 'UNAUTHORIZED_REQUEST_ERROR', 'Request Unauthorized'); break;
-				case 403: $this->sendStatus($response_code, 'FORBIDEN', '403 Forbiden'); break;
-				case 404: $this->sendStatus($response_code, 'NOT FOUND', 'Not Found'); break;
-				default: $this->sendStatus($response_code, 'UNKNOW', 'Unknow'); break;
-			}
-
+			$this->sendStatus($response_code);
 			EXIT;
 		}
 	}
 
-	private function sendStatus(int $code, string $status_code, string $message)
+	private function sendStatus(int $code)
 	{
-		if (Route::isApi()) response()->status($code, $status_code, $message);
-		else response()->send($code);
+		if (Route::isApi()) response()->sendStatus($code);
+		else view($code);
 
 		exit;
 	}

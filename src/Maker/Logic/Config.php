@@ -60,8 +60,8 @@ class Config implements \ArrayAccess, JsonSerializable
 
     public function database(?string $key = null)
     {
-        if ( ! isset($key) ) return $database_config = app()->database;
-        return app()->database[$this->parseKey($key)];
+        if ( ! isset($key) ) return app()->database;
+        return @app()->database[$this->parseKey($key)];
     }
 
     public function env(?string $key = null)
@@ -116,5 +116,12 @@ class Config implements \ArrayAccess, JsonSerializable
             'bootstrap' => static::$kernel,
             'http' => static::$http_kernel
         ];
+    }
+
+    public function set(string $key, mixed $value): void
+    {
+        switch ($key) {
+            case 'database': app()->database = array_merge(app()->database, $value); break;
+        }
     }
 }

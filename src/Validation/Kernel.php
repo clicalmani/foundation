@@ -33,6 +33,9 @@ class Kernel {
             \Clicalmani\Foundation\Validation\Validators\UriValidator::class,
             \Clicalmani\Foundation\Validation\Validators\NavigationGuardValidator::class,
             \Clicalmani\Foundation\Validation\Validators\PasswordValidator::class,
+            \Clicalmani\Foundation\Validation\Validators\FileValidator::class,
+            \Clicalmani\Foundation\Validation\Validators\ImageValidator::class,
+            \Clicalmani\Foundation\Validation\Validators\PDFValidator::class,
         ];
     }
 };

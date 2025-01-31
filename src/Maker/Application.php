@@ -1,6 +1,9 @@
 <?php
 namespace Clicalmani\Foundation\Maker;
 
+use Clicalmani\Foundation\Http\Response;
+use Clicalmani\Psr7\NonBufferedBody;
+use Clicalmani\Psr7\StatusCodeInterface;
 use Composer\Autoload\ClassLoader;
 
 /**
@@ -39,12 +42,35 @@ class Application
      */
     protected $console;
 
+    /**
+     * File system
+     * 
+     * @var \Clicalmani\Foundation\FileSystem\FileSystem
+     */
+    protected $filesystem;
+
+    /**
+     * Response holder
+     * 
+     * @var \Psr\Http\Message\ResponseInterface
+     */
+    protected $response;
+
     public function __construct(private ?string $rootPath = null)
     {
         $this->config = new \Clicalmani\Foundation\Maker\Logic\Config;
         $paths = $this->config['paths'];
         $paths['root'] = $this->rootPath;
         $this->config['paths'] = $paths;
+
+        // File system
+        $this->filesystem = new \Clicalmani\Foundation\FileSystem\FilesystemManager($this);
+
+        $this->response = new Response(
+            StatusCodeInterface::STATUS_OK,
+            null,
+            new NonBufferedBody
+        );
     }
 
     public static function getInstance(?string $rootPath = null)
@@ -272,6 +298,8 @@ class Application
             'config' => $this->config,
             'console' => $this->console,
             'database' => $this->db_config,
+            'filesystem' => $this->filesystem,
+            'response' => $this->response,
             default => null
         };
     }

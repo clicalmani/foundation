@@ -1,7 +1,7 @@
 <?php
 namespace Clicalmani\Foundation\Resources;
 
-use Clicalmani\Foundation\Exceptions\ResourceViewException;
+use Clicalmani\Foundation\Exceptions\ResourceNotFoundException;
 use Twig\Loader\LoaderInterface;
 use Twig\Source;
 
@@ -86,7 +86,7 @@ class TemplateLoader implements LoaderInterface
 
         if (!$throw) return null;
 
-        throw new ResourceViewException($this->errorCache[$name]);
+        throw new ResourceNotFoundException($this->errorCache[$name]);
     }
 
     private function normalizeName(string $name): string

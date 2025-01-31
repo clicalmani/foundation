@@ -5,6 +5,7 @@ use Clicalmani\Foundation\Auth\EncryptionServiceProvider;
 use Clicalmani\Foundation\Collection\Collection;
 use Clicalmani\Foundation\Providers\AuthServiceProvider;
 use Clicalmani\Foundation\Routing\Route;
+use Clicalmani\Foundation\Support\Arr;
 
 class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \JsonSerializable 
 {
@@ -409,7 +410,7 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
      */
     public function isMethod(string $pattern) : bool
     {
-        return preg_match($pattern, $this->getMethod()) === 1;
+        return preg_match("/^$pattern$/", $this->getMethod()) === 1;
     }
 
     /**
@@ -421,20 +422,7 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
      */
     public function input(?string $name = null, ?string $default = null) : mixed
     {
-        if (NULL === $name) return $this->all();
-
-        $arr = preg_split('/\./', $name, -1, PREG_SPLIT_NO_EMPTY);
-        
-        return match (count($arr)) {
-            1 => $this->{$name} ?? $default,
-            2 => is_numeric($arr[1]) ? $this->collect($arr[0])->get($arr[1]) ?? $default: $this->collect($arr[0])->map(fn(array $v) => @$v[$arr[1]]),
-            3 => $this->collect($arr[0])
-                    ->filter(fn($v, $k) => ($arr[1] === '*' ? $v: ($k === (int)$arr[1])))
-                    ->pluck($arr[2])
-                    ->map(fn(\stdClass $obj) => $obj->value ?? $default)
-                    ->toArray(),
-            default => null
-        };
+        return Arr::get($this->all(), $name, $default);
     }
 
     /**
@@ -747,5 +735,38 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
     {
         $this->session()->flash('_old_input', $_REQUEST);
         $this->redirect($url);
+    }
+
+    /**
+     * Check if the request is trustworthy.
+     * 
+     * @return bool
+     */
+    public function isTrustworthy() : bool
+    {
+        if ($trustedIps = array_shift(static::$trustedProxies) AND is_array($trustedIps)) {
+
+            $headers = @static::$trustedProxies[0] ?? [];
+
+            if (array_intersect($this->ips(), $trustedIps)) {
+
+                if ( isset(static::$trustedProxies[0]) && static::HEADER_X_FORWARDED_ALL === static::$trustedProxies[0]) {
+                    $headers = [
+                        'X-Forwarded-For',
+                        'X-Forwarded-Client-IP',
+                        'X-Forwarded-Host',
+                        'X-Forwarded-Proto',
+                        'X-Forwarded-Port',
+                    ];
+                }
+
+                foreach ($headers as $header) {
+                    if (FALSE === $this->hasHeader($header)) return false;
+                }
+
+            } else return false;
+        }
+
+        return in_array($this->getHost(), static::$trustedHosts);
     }
 }
