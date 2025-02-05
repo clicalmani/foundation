@@ -219,7 +219,7 @@ if ( ! function_exists( 'create_parameters_hash' ) ) {
      * @return string
      */
     function create_parameters_hash(array $parameters) : string {
-        return (new \Clicalmani\Foundation\Http\Requests\Request)->createParametersHash($parameters);
+        return (new \Clicalmani\Foundation\Http\Request)->createParametersHash($parameters);
     }
 }
 
@@ -262,11 +262,11 @@ if ( ! function_exists('request') ) {
      */
     function request(?string $param = '', ?string $value = null) : mixed {
 
+        $request = \Clicalmani\Foundation\Http\Request::currentRequest();
+
         if ('' === $param) {
-            return \Clicalmani\Foundation\Http\Requests\Request::all(); 
+            return $request->getAttributes();
         }
-        
-        $request = \Clicalmani\Foundation\Http\Requests\Request::currentRequest() ?? (object) \Clicalmani\Foundation\Http\Requests\Request::all();
 
         if ( $request ) {
             if ($value) @$request->{$param} = $value;
@@ -282,10 +282,10 @@ if ( ! function_exists('redirect') ) {
     /**
      * Do a redirect
      * 
-     * @return \Clicalmani\Foundation\Http\Requests\RequestRedirect
+     * @return \Clicalmani\Foundation\Http\RequestRedirect
      */
     function redirect() {
-        return with ( new \Clicalmani\Foundation\Http\Requests\Request )->redirect();
+        return with ( new \Clicalmani\Foundation\Http\Request )->redirect();
     }
 }
 
@@ -296,8 +296,19 @@ if ( ! function_exists('response') ) {
      * 
      * @return \Clicalmani\Foundation\Http\Response
      */
-    function response() {
-        return app()->response;
+    function response(?string $message = '', int $status = 200) : \Clicalmani\Foundation\Http\Response 
+    {
+        $response = app()->response;
+
+        if ('' !== $message) {
+            $response->setMessage($message);
+        }
+
+        if (200 !== $status) {
+            $response->setStatus($status);
+        }
+
+        return $response;
     }
 }
 
@@ -656,7 +667,7 @@ if ( ! function_exists('bearerToken') ) {
      * @return mixed
      */
     function bearerToken() : mixed {
-        return with ( new \Clicalmani\Foundation\Http\Requests\Request )->bearerToken();
+        return with ( new \Clicalmani\Foundation\Http\Request )->bearerToken();
     }
 }
 

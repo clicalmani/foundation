@@ -3,7 +3,7 @@ namespace Clicalmani\Foundation\Test\Controllers;
 
 use Clicalmani\Database\Factory\Sequence;
 use Clicalmani\Foundation\Auth\EncryptionServiceProvider;
-use Clicalmani\Foundation\Http\Requests\Request;
+use Clicalmani\Foundation\Http\Request;
 use Clicalmani\Foundation\Test\TestInterface;
 
 /**
@@ -22,7 +22,7 @@ abstract class TestController implements TestInterface
     /**
      * Request controller
      * 
-     * @var \Clicalmani\Foundation\Http\Requests\RequestController
+     * @var \Clicalmani\Foundation\Http\RequestController
      */
     protected $controller;
 
@@ -227,7 +227,7 @@ abstract class TestController implements TestInterface
             print_r( $this->controller::invokeMethod(
                     new \Clicalmani\Foundation\Http\Controllers\MethodReflector(
                         new \ReflectionMethod(
-                            \Clicalmani\Foundation\Http\Requests\RequestController::getInstance($this->controller), 
+                            \Clicalmani\Foundation\Http\RequestController::getInstance($this->controller), 
                             $this->action
                         )
                     )

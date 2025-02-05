@@ -1,7 +1,7 @@
 <?php
 namespace Clicalmani\Foundation\Http\Controllers;
 
-use Clicalmani\Foundation\Http\Requests\Request;
+use Clicalmani\Foundation\Http\Request;
 use Clicalmani\Foundation\Exceptions\ModelNotFoundException;
 use Clicalmani\Database\Factory\Models\Model;
 use Clicalmani\Foundation\Http\Response;
@@ -168,7 +168,7 @@ class RequestController
 		$request_pos = null;
 		
 		if ($arr = $reflector->getRequest()) {
-			/** @var \Clicalmani\Foundation\Http\Requests\Request */
+			/** @var \Clicalmani\Foundation\Http\Request */
 			$request = new $arr['name'];
 			$request_pos = $arr['pos'];
 			$this->validateRequest($request);
@@ -251,7 +251,7 @@ class RequestController
 	/**
 	 * Validate request
 	 * 
-	 * @param \Clicalmani\Foundation\Http\Requests\Request
+	 * @param \Clicalmani\Foundation\Http\Request
 	 * @return mixed
 	 */
 	private function validateRequest(Request $request) : mixed
@@ -277,12 +277,12 @@ class RequestController
 	/**
 	 * Gather request parameters
 	 * 
-	 * @param \Clicalmani\Foundation\Http\Requests\Request
+	 * @param \Clicalmani\Foundation\Http\Request
 	 * @return array
 	 */
 	private function getRequestParameters() : array
     {
-		/** @var \Clicalmani\Foundation\Http\Requests\Request */
+		/** @var \Clicalmani\Foundation\Http\Request */
 		$request = Request::currentRequest();
 
 		if ( inConsoleMode() ) return $request->all();

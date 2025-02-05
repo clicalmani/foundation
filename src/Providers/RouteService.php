@@ -13,13 +13,13 @@ abstract class RouteService
     /**
      * Request object
      * 
-     * @var \Clicalmani\Foundation\Http\Requests\Request
+     * @var \Clicalmani\Foundation\Http\Request
      */
     protected $request;
 
     public function __construct()
     {
-        $this->request = new \Clicalmani\Foundation\Http\Requests\Request;
+        $this->request = new \Clicalmani\Foundation\Http\Request;
     }
 
     /**

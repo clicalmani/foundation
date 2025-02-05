@@ -1,7 +1,7 @@
 <?php
 namespace Clicalmani\Foundation\Http\Middlewares;
 
-use Clicalmani\Foundation\Http\Requests\Request;
+use Clicalmani\Foundation\Http\Request;
 use Clicalmani\Foundation\Http\Response;
 use Clicalmani\Foundation\Container\SPL_Loader;
 use Clicalmani\Foundation\Auth\AuthServiceProvider;
@@ -30,7 +30,7 @@ abstract class JWTAuth extends AuthServiceProvider
     /**
      * Handler
      * 
-     * @param \Clicalmani\Foundation\Http\Requests\Request $request Request object
+     * @param \Clicalmani\Foundation\Http\Request $request Request object
      * @param \Clicalmani\Foundation\Http\Response $response Response object
      * @param callable $next Next middleware function
      * @return int|false

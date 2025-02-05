@@ -19,8 +19,8 @@ class FileValidator extends Validator
 
     public function validate(mixed &$value, ?array $options = [] ) : bool
     {
-        /** @var \Clicalmani\Foundation\Http\Requests\Request */
-        $request = \Clicalmani\Foundation\Http\Requests\Request::currentRequest();
+        /** @var \Clicalmani\Foundation\Http\Request */
+        $request = \Clicalmani\Foundation\Http\Request::currentRequest();
 
         if ($request->file($this->parameter)?->isValid()) return true;
 

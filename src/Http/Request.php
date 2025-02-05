@@ -1,15 +1,23 @@
 <?php
-namespace Clicalmani\Foundation\Http\Requests;
+namespace Clicalmani\Foundation\Http;
 
 use Clicalmani\Foundation\Auth\EncryptionServiceProvider;
 use Clicalmani\Foundation\Collection\Collection;
+use Clicalmani\Foundation\Http\Requests\Cookie;
+use Clicalmani\Foundation\Http\Requests\HttpInputStream;
+use Clicalmani\Foundation\Http\Requests\HttpOutputStream;
+use Clicalmani\Foundation\Http\Requests\HttpRequest;
+use Clicalmani\Foundation\Http\Requests\Redirect;
+use Clicalmani\Foundation\Http\Requests\RequestInterface;
+use Clicalmani\Foundation\Http\Requests\Session;
 use Clicalmani\Foundation\Providers\AuthServiceProvider;
-use Clicalmani\Foundation\Routing\Route;
-use Clicalmani\Foundation\Support\Arr;
+use Clicalmani\Foundation\Support\Facades\Arr;
+use Clicalmani\Psr7\Headers;
+use Clicalmani\Psr7\Stream;
+use Clicalmani\Psr7\Uri;
 
 class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \JsonSerializable 
 {
-    use HttpInputStream;
     use HttpOutputStream;
     use Session;
     use Cookie;
@@ -85,20 +93,15 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
     public function __construct(private ?array $signatures = []) 
     {
         $this->validator = new \Clicalmani\Foundation\Validation\Validator;
-
-        if (Route::isApi() AND in_array(self::getMethod(), ['patch', 'put'])) {
-            
-            // Parse input stream
-            $params = [];
-            new \Clicalmani\Foundation\Http\Requests\ParseInputStream($params);
-            
-            /**
-             * Header application/json
-             */
-            if ( array_key_exists('parameters', $params) ) $params = $params['parameters'];
-
-            $_REQUEST = array_merge($_REQUEST, $params);
-        }
+        
+        parent::__construct(
+            $this->getMethod(),
+            new Uri((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http', $this->getHost()),
+            Headers::fromArray(apache_request_headers()),
+            $_COOKIE,
+            $_SERVER,
+            Stream::createFromResource(fopen('php://input', 'r'))
+        );
     }
 
     /**
@@ -107,9 +110,8 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
      */
     public function __get($property)
     {
-        $this->validator->sanitize($_REQUEST, $this->signatures ?? []);
-        
-        return @ $_REQUEST[$property];
+        $this->validator->sanitize($this->attributes, $this->signatures ?? []);
+        return @ $this->attributes[$property];
     }
 
     /**
@@ -118,7 +120,7 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
      */
     public function __set($property, $value)
     {
-        $_REQUEST[$property] = $value;
+        $this->attributes[$property] = $value;
     }
 
     /**
@@ -151,7 +153,7 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
 	 */
     public function offsetUnset(mixed $property) : void {
         if ($this->$property) {
-            unset($_REQUEST[$property]);
+            unset($this->attributes[$property]);
         }
     }
 
@@ -186,7 +188,7 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
     {
         return tap(
             EncryptionServiceProvider::createParametersHash($params), 
-            fn(string $hash) => $_REQUEST[\Clicalmani\Foundation\Auth\EncryptionServiceProvider::hashParameter()] = $hash
+            fn(string $hash) => $this->attributes[\Clicalmani\Foundation\Auth\EncryptionServiceProvider::hashParameter()] = $hash
         );
     }
 
@@ -269,7 +271,7 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
      */
     public function jsonSerialize() : mixed
     {
-        return $_REQUEST;
+        return $this->attributes;
     }
 
     /**
@@ -280,7 +282,7 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
      */
     public function make(array $params = []) : void
     {
-        $_REQUEST = $params;
+        $this->attributes = $params;
     }
 
     /**
@@ -422,7 +424,7 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
      */
     public function input(?string $name = null, ?string $default = null) : mixed
     {
-        return Arr::get($this->all(), $name, $default);
+        return Arr::get($this->attributes, $name, $default);
     }
 
     /**
@@ -520,7 +522,7 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
     public function only(array $keys) : array
     {
         return array_filter(
-            $_REQUEST,
+            $this->attributes,
             fn($key) => in_array($key, $keys),
             ARRAY_FILTER_USE_KEY
         );
@@ -535,7 +537,7 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
     public function except(array $keys) : array
     {
         return array_filter(
-            $_REQUEST,
+            $this->attributes,
             fn($key) => !in_array($key, $keys),
             ARRAY_FILTER_USE_KEY
         );
@@ -653,7 +655,7 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
      */
     public function extend(array $data) : void
     {
-        $_REQUEST = array_merge($_REQUEST, $data);
+        $this->attributes = array_merge($this->attributes, $data);
     }
 
     /**
@@ -666,7 +668,7 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
     {
         foreach ($data as $key => $value) {
             if ($this->missing($key)) {
-                $_REQUEST[$key] = $value;
+                $this->attributes[$key] = $value;
             }
         }
     }
@@ -678,7 +680,7 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
      */
     public function flush() : void
     {
-        foreach ($_REQUEST as $key => $value) $this->session($key, $value);
+        foreach ($this->attributes as $key => $value) $this->session($key, $value);
     }
 
     /**
@@ -690,8 +692,8 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
     public function flushOnly(array $keys) : void
     {
         foreach ($keys as $key) {
-            if (isset($_REQUEST[$key])) {
-                $this->session($key, $_REQUEST[$key]);
+            if (isset($this->attributes[$key])) {
+                $this->session($key, $this->attributes[$key]);
             }
         }
     }
@@ -704,7 +706,7 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
      */
     public function flushExcept(array $keys) : void
     {
-        foreach ($_REQUEST as $key => $value) {
+        foreach ($this->attributes as $key => $value) {
             if (!in_array($key, $keys)) {
                 $this->session($key, $value);
             }
@@ -733,7 +735,7 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
      */
     public function redirectWithInput(string $url) : void
     {
-        $this->session()->flash('_old_input', $_REQUEST);
+        $this->session()->flash('_old_input', $this->attributes);
         $this->redirect($url);
     }
 

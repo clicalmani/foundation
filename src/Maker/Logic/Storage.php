@@ -8,15 +8,17 @@ use Clicalmani\Foundation\Support\Facades\Tonka;
 class Storage extends Facade
 {
     private $manager;
+    private $disk;
 
-    public function __construct(FilesystemManager $manager)
+    public function __construct()
     {
-        $this->manager = $manager;
+        $this->manager = app()->filesystem;
+        $this->disk = $this->manager->getDefaultDriver();
     }
 
     public function move(string $source, string $destination, ?string $disk = null)
     {
-        $disk = $disk ?: $this->manager->getDefaultDriver();
+        $disk = $disk ?: $this->disk;
         $config = $this->manager->getConfig($disk);
         $destination = $config['root'] . DIRECTORY_SEPARATOR . $destination;
         $this->manager->drive($disk)->move($source, $destination, $config);
@@ -24,19 +26,16 @@ class Storage extends Facade
         return $destination;
     }
 
-    public function store(string $filename, ?string $driver = null)
+    public function store(string $source, string $filename, ?string $disk = null)
     {
-        $driver = $driver ?: $this->manager->getDefaultDriver();
-        $config = $this->manager->getConfig($driver);
-        $destination = $config['root'] . DIRECTORY_SEPARATOR . basename($filename);
+        $disk = $disk ?: $this->disk;
+        $config = $this->manager->getConfig($disk);
+        $destination = $config['root'] . DIRECTORY_SEPARATOR . $filename;
 
-        $this->manager->disk($driver)->move(
-            $filename, 
-            $destination,
-            $config
+        $this->manager->disk($disk)->move(
+            $source, 
+            $destination
         );
-
-        return $destination;
     }
 
     /**

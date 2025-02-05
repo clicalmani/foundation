@@ -8,8 +8,8 @@ trait Session
      * 
      * @return object
      */
-    public function session() : object
-    {
-        return new \Clicalmani\Foundation\Http\Session\Session;
-    }
+    // public function session() : object
+    // {
+    //     return new \Clicalmani\Foundation\Http\Session\Session;
+    // }
 }

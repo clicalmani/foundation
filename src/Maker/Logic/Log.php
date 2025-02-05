@@ -109,12 +109,12 @@ class Log
     /**
      * Log debug message
      * 
-     * @param string $notice_message
+     * @param mixed $debug_message
      * @param ?string $file Error file name
      * @param ?int $line Error line
      * @return void
      */
-    public function debug(string|array|object|null $debug_message, ?string $file = 'Unknow', ?int $line = null)
+    public function debug(mixed $debug_message, ?string $file = 'Unknow', ?int $line = null)
     {
         if (FALSE == is_string($debug_message)) $debug_message = json_encode($debug_message);
         $this->notice($debug_message, $file, $line);

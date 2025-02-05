@@ -6,7 +6,7 @@ trait Redirect
     /**
      * Redirect route
      * 
-     * @return \Clicalmani\Foundation\Http\Requests\RequestRedirect
+     * @return \Clicalmani\Foundation\Http\RequestRedirect
      */
     public function redirect() : RequestRedirect
     {

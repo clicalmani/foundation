@@ -10,8 +10,8 @@ class ImageValidator extends FileValidator
         $is_file = parent::validate($value, $options);
 
         if (TRUE === $is_file) {
-            /** @var \Clicalmani\Foundation\Http\Requests\Request */
-            $request = \Clicalmani\Foundation\Http\Requests\Request::currentRequest();
+            /** @var \Clicalmani\Foundation\Http\Request */
+            $request = \Clicalmani\Foundation\Http\Request::currentRequest();
             $file = $request->file($this->parameter);
 
             return in_array(

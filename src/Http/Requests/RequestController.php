@@ -2,7 +2,8 @@
 namespace Clicalmani\Foundation\Http\Requests;
 
 use Clicalmani\Foundation\Exceptions\MiddlewareException;
-use Clicalmani\Foundation\Http\Response\Response;
+use Clicalmani\Foundation\Http\Request;
+use Clicalmani\Foundation\Http\Response;
 use Clicalmani\Foundation\Providers\ServiceProvider;
 use Clicalmani\Foundation\Support\Facades\Facade;
 
@@ -71,7 +72,7 @@ class RequestController extends Facade
         if ( NULL !== $middleware )
             with( new $middleware )->handle(
                 Request::currentRequest(),
-                new Response,
+                new Response(),
                 fn() => http_response_code()
             );
 

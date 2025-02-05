@@ -2,11 +2,14 @@
 namespace Clicalmani\Foundation\FileSystem;
 
 use League\Flysystem\Config;
+use League\Flysystem\UrlGeneration\PublicUrlGenerator as UrlGenerator;
 
-class PublicUrlGenerator
+class PublicUrlGenerator implements UrlGenerator
 {
-    public function publicUrl(string $path, Config $config)
+    public function publicUrl(string $path, Config $config) : string
     {
+        if ($url = $config->get('url')) return $url.'/'.$path;
+
         $app_url = app()->getUrl($path);
         $protocol = '';
 

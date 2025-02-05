@@ -1,20 +1,112 @@
 <?php
 namespace Clicalmani\Foundation\Http\Requests;
 
+use Clicalmani\Psr7\Stream;
+use Psr\Http\Message\StreamInterface;
+
 /**
  * Class UploadedFile
  * 
  * @package Clicalmani\Foundation
  * @author @Clicalmani\Foundation
  */
-class UploadedFile 
+class UploadedFile implements \Psr\Http\Message\UploadedFileInterface
 {
+    /**
+     * Uploaded file path
+     * 
+     * @var string
+     */
+    protected string $file;
+
+    /**
+     * File name
+     * 
+     * @var string
+     */
+    protected string $name;
+
+    /**
+     * File type
+     * 
+     * @var string
+     */
+    protected string $type;
+
+    /**
+     * File size
+     * 
+     * @var int
+     */
+    protected int $size;
+
+    /**
+     * File error
+     * 
+     * @var int
+     */
+    protected int $error;
+
+    /**
+     * File SAPI
+     * 
+     * @var bool
+     */
+    protected bool $sapi = false;
+
+    /**
+     * File stream
+     * 
+     * @var \Psr\Http\Message\StreamInterface
+     */
+    protected $stream;
+
+    /**
+     * File moved
+     * 
+     * @var bool
+     */
+    protected $moved = false;
+
+    /**
+     * File storage
+     * 
+     * @var \Clicalmani\Foundation\Maker\Logic\Storage
+     */
+    protected $storage;
+
     /**
      * Controller
      * 
      * @param string $name File key
      */
-    public function __construct(private string $name) {}
+    public function __construct(
+        string $name,
+        // ?string $name = null,
+        ?string $type = null,
+        ?int $size = null,
+        int $error = UPLOAD_ERR_OK,
+        bool $sapi = false
+    ) {
+        $this->name = $name;
+        $this->type = mime_content_type($this->getFile()->tmp_name);
+        $this->size = $this->getFile()->size;
+        $this->error = $this->getFile()->error;
+        $this->sapi = is_uploaded_file($this->getFile()->tmp_name);
+    }
+
+    public function getStream(): StreamInterface
+    {
+        if ($this->moved) {
+            throw new \RuntimeException('Cannot retrieve stream after it has already been moved');
+        }
+
+        if ($this->stream === null) {
+            $this->stream = Stream::createFromFile($this->getFile()->tmp_name);
+        }
+
+        return $this->stream;
+    }
 
     /**
      * Get the uploaded file
@@ -48,7 +140,17 @@ class UploadedFile
      */
     public function getSize() : ?int
     {
-        return $this->getFile()->size;
+        return $this->size;
+    }
+
+    /**
+     * Get file type
+     * 
+     * @return string
+     */
+    public function getType() : string
+    {
+        return $this->type;
     }
 
     /**
@@ -114,6 +216,29 @@ class UploadedFile
         if ( $this->isMultiple() ) return count( $this->getName() );
 
         return 1;
+    }
+
+    public function moveTo(string $targetPath): void
+    {
+        if ($this->moved) {
+            throw new \RuntimeException('Cannot move file; already moved!');
+        }
+
+        if ($this->error !== UPLOAD_ERR_OK) {
+            throw new \RuntimeException('Cannot retrieve stream due to upload error');
+        }
+
+        if ($this->sapi) {
+            if (FALSE === move_uploaded_file($this->getFile()->tmp_name, $targetPath)) {
+                throw new \RuntimeException('Error moving uploaded file');
+            }
+        } else {
+            if (FALSE === rename($this->getFile()->tmp_name, $targetPath)) {
+                throw new \RuntimeException('Error moving uploaded file');
+            }
+        }
+
+        $this->moved = true;
     }
 
     /**

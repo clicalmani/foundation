@@ -62,13 +62,10 @@ class Application
         $paths = $this->config['paths'];
         $paths['root'] = $this->rootPath;
         $this->config['paths'] = $paths;
-
-        // File system
-        $this->filesystem = new \Clicalmani\Foundation\FileSystem\FilesystemManager($this);
-
+        
         $this->response = new Response(
             StatusCodeInterface::STATUS_OK,
-            null,
+            200,
             new NonBufferedBody
         );
     }
@@ -290,6 +287,8 @@ class Application
     {
         $this->addKernel(\App\Http\Kernel::class);
         \Clicalmani\Foundation\Providers\ServiceProvider::provideServices($this->config['app']['providers']);
+        // File system
+        $this->filesystem = new \Clicalmani\Foundation\FileSystem\FilesystemManager($this);
     }
 
     public function __get($name)

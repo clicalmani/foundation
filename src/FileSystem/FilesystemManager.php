@@ -2,18 +2,14 @@
 namespace Clicalmani\Foundation\FileSystem;
 
 use Clicalmani\Foundation\Maker\Application;
-use Clicalmani\Foundation\Support\Arr;
+use Clicalmani\Foundation\Support\Facades\Arr;
 use League\Flysystem\UnixVisibility\PortableVisibilityConverter;
 use League\Flysystem\Visibility;
 use League\Flysystem\Filesystem as Flysystem;
-use League\Flysystem\FilesystemAdapter as FlysystemAdapter;
+use League\Flysystem\Local\LocalFilesystemAdapter as LocalAdapter;
+use League\Flysystem\FilesystemAdapter;
 use League\Flysystem\Ftp\FtpAdapter;
 use League\Flysystem\Ftp\FtpConnectionOptions;
-use League\Flysystem\Local\LocalFilesystemAdapter as LocalAdapter;
-use League\Flysystem\ReadOnly\ReadOnlyFilesystemAdapter;
-use League\Flysystem\PathPrefixing\PathPrefixedAdapter;
-use League\Flysystem\PhpseclibV3\SftpAdapter;
-use League\Flysystem\PhpseclibV3\SftpConnectionProvider;
 
 class FilesystemManager
 {
@@ -33,9 +29,12 @@ class FilesystemManager
      */
     public $customCreators = [];
 
+    private $config;
+
     public function __construct(Application $app)
     {
         $this->app = $app;
+        $this->config = require $this->app->rootPath().'/config/filesystem.php';
     }
 
     /**
@@ -68,7 +67,7 @@ class FilesystemManager
      */
     public function getDefaultDriver()
     {
-        return $this->app->filesystem['default'];
+        return $this->config['default'];
     }
 
     /**
@@ -92,7 +91,7 @@ class FilesystemManager
      */
     public function resolve(string $name, ?array $config = null)
     {
-        $config ??= $this->getConfig($name);
+        $config ??= $this->getConfig("disks.{$name}");
 
         if (empty($config['driver'])) {
             throw new \InvalidArgumentException("Disk [{$name}] does not have a configured driver.");
@@ -119,9 +118,9 @@ class FilesystemManager
      * @param  string  $name
      * @return array
      */
-    public function getConfig($name)
+    public function getConfig(string $name)
     {
-        return $this->app->filesystem['disks'][$name] ?: [];
+        return Arr::get($this->config, $name, []);
     }
 
     /**
@@ -172,6 +171,8 @@ class FilesystemManager
             $config['root'] = '';
         }
 
+        $config['port'] = (int)$config['port'] ?? 21;
+
         $adapter = new FtpAdapter(FtpConnectionOptions::fromArray($config));
 
         return $this->createFlysystem($adapter, $config);
@@ -183,20 +184,20 @@ class FilesystemManager
      * @param  array  $config
      * @return \League\Flysystem\FilesystemOperator
      */
-    public function createSftpDriver(array $config)
-    {
-        $provider = SftpConnectionProvider::fromArray($config);
+    // public function createSftpDriver(array $config)
+    // {
+    //     $provider = SftpConnectionProvider::fromArray($config);
 
-        $root = $config['root'] ?? '';
+    //     $root = $config['root'] ?? '';
 
-        $visibility = PortableVisibilityConverter::fromArray(
-            $config['permissions'] ?? []
-        );
+    //     $visibility = PortableVisibilityConverter::fromArray(
+    //         $config['permissions'] ?? []
+    //     );
 
-        $adapter = new SftpAdapter($provider, $root, $visibility);
+    //     $adapter = new SftpAdapter($provider, $root, $visibility);
 
-        return $this->createFlysystem($adapter, $config);
-    }
+    //     return $this->createFlysystem($adapter, $config);
+    // }
 
     /**
      * Create an instance of the Amazon S3 driver.
@@ -204,26 +205,26 @@ class FilesystemManager
      * @param  array  $config
      * @return \Illuminate\Contracts\Filesystem\Cloud
      */
-    public function createS3Driver(array $config)
-    {
-        $s3Config = $this->formatS3Config($config);
+    // public function createS3Driver(array $config)
+    // {
+    //     $s3Config = $this->formatS3Config($config);
 
-        $root = (string) ($s3Config['root'] ?? '');
+    //     $root = (string) ($s3Config['root'] ?? '');
 
-        $visibility = new AwsS3PortableVisibilityConverter(
-            $config['visibility'] ?? Visibility::PUBLIC
-        );
+    //     $visibility = new AwsS3PortableVisibilityConverter(
+    //         $config['visibility'] ?? Visibility::PUBLIC
+    //     );
 
-        $streamReads = $s3Config['stream_reads'] ?? false;
+    //     $streamReads = $s3Config['stream_reads'] ?? false;
 
-        $client = new S3Client($s3Config);
+    //     $client = new S3Client($s3Config);
 
-        $adapter = new S3Adapter($client, $s3Config['bucket'], $root, $visibility, null, $config['options'] ?? [], $streamReads);
+    //     $adapter = new S3Adapter($client, $s3Config['bucket'], $root, $visibility, null, $config['options'] ?? [], $streamReads);
 
-        return new AwsS3V3Adapter(
-            $this->createFlysystem($adapter, $config), $adapter, $s3Config, $client
-        );
-    }
+    //     return new AwsS3V3Adapter(
+    //         $this->createFlysystem($adapter, $config), $adapter, $s3Config, $client
+    //     );
+    // }
 
     /**
      * Create a Flysystem instance with the given adapter.
@@ -232,24 +233,29 @@ class FilesystemManager
      * @param  array  $config
      * @return \League\Flysystem\FilesystemOperator
      */
-    public function createFlysystem(FlysystemAdapter $adapter, array $config)
+    public function createFlysystem(FilesystemAdapter $adapter, array $config)
     {
-        if ($config['read-only'] ?? false === true) {
-            $adapter = new \League\Flysystem\ReadOnly\ReadOnlyFilesystemAdapter($adapter);
-        }
+        // if ($config['read-only'] ?? false === true) {
+        //     $adapter = new \League\Flysystem\ReadOnly\ReadOnlyFilesystemAdapter($adapter);
+        // }
 
-        if (! empty($config['prefix'])) {
-            $adapter = new \League\Flysystem\PathPrefixing\PathPrefixedAdapter($adapter, $config['prefix']);
-        }
+        // if (! empty($config['prefix'])) {
+        //     $adapter = new \League\Flysystem\PathPrefixing\PathPrefixedAdapter($adapter, $config['prefix']);
+        // }
 
-        return new Flysystem($adapter, Arr::only($config, [
-            'directory_visibility',
-            'disable_asserts',
-            'retain_visibility',
-            'temporary_url',
-            'url',
-            'visibility',
-        ]));
+        return new Flysystem(
+            $adapter, 
+            Arr::only($config, [
+                'directory_visibility',
+                'disable_asserts',
+                'retain_visibility',
+                'temporary_url',
+                'url',
+                'visibility',
+            ]),
+            null,
+            new PublicUrlGenerator
+        );
     }
 
     /**

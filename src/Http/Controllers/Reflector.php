@@ -187,8 +187,8 @@ class Reflector
     {
         foreach ($this->parameters as $index => $parameter) {
             foreach ($this->getParameterClassNames($parameter) as $class) {
-                if (is_subclass_of($class, \Clicalmani\Foundation\Http\Requests\Request::class) ||
-                    $class === \Clicalmani\Foundation\Http\Requests\Request::class) return ['name' => $class, 'pos' => $index];
+                if (is_subclass_of($class, \Clicalmani\Foundation\Http\Request::class) ||
+                    $class === \Clicalmani\Foundation\Http\Request::class) return ['name' => $class, 'pos' => $index];
             }
         }
 

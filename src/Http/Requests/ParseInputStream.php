@@ -62,10 +62,7 @@ class ParseInputStream
     private function getStreamBoundary() : mixed
     {
         preg_match('/boundary=(.*)$/', @ $_SERVER['CONTENT_TYPE'] ?? '', $matches);
-
-        if ($boundry = @$matches[1]) return $boundry;
-
-        return null;
+        return @$matches[1] ?? null;
     }
 
     /**

@@ -13,7 +13,7 @@ trait StatusErrors
     public function notFound() : int
     {
         $this->status = 404;
-        if (FALSE === Route::isApi()) $this->body->write(view('404'));
+        $this->sendStatus();
         return http_response_code();
     }
 

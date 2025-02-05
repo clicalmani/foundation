@@ -7,7 +7,7 @@ trait HttpInputStream
      * Request file
      * 
      * @param string $name File name
-     * @return \Clicalmani\Foundation\Http\Requests\UploadedFile|null
+     * @return \Clicalmani\Foundation\Http\UploadedFile|null
      */
     public function file(string $name) : UploadedFile|null
     {
