@@ -80,7 +80,7 @@ abstract class Manager
      */
     public function getClassName() : string
     {
-        if (false !== ($lastNsPos = $this->lastNameSpacePos())) return substr($this->current_class, 0, $lastNsPos + 1);
+        if (false !== ($lastNsPos = $this->lastNameSpacePos())) return substr($this->current_class, $lastNsPos + 1);
 
         return '';
     }

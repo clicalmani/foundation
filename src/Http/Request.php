@@ -97,7 +97,7 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
         parent::__construct(
             $this->getMethod(),
             new Uri((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http', $this->getHost()),
-            Headers::fromArray(apache_request_headers()),
+            Headers::fromArray( inConsoleMode() ? []: apache_request_headers()),
             $_COOKIE,
             $_SERVER,
             Stream::createFromResource(fopen('php://input', 'r'))
@@ -346,7 +346,7 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
      */
     public function fullUrl() : string
     {
-        return rtrim(app()->getUrl(), '/').$_SERVER['REQUEST_URI'];
+        return rtrim(app()->getUrl(), '/').$this->route()?->uri;
     }
 
     /**

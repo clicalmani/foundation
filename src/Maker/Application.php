@@ -97,6 +97,7 @@ class Application
 
     public function handleRequest()
     {
+        $this->db_config = require config_path( '/database.php' );
         $this->boot();
         return \Clicalmani\Foundation\Http\Requests\RequestController::render();
     }
@@ -106,6 +107,11 @@ class Application
         $this->console->make();
         $this->boot();
         $this->console->run();
+    }
+
+    public function getContainer()
+    {
+        return $this->classLoader;
     }
 
     /**

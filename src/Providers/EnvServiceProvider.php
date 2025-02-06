@@ -22,5 +22,9 @@ class EnvServiceProvider extends ServiceProvider
             Env::getRepository(), 
             dirname( __DIR__, 5)
         )->safeLoad();
+
+        if ( inConsoleMode() ) {
+            app()->database = require_once config_path('/database.php');
+        }
     }
 }
