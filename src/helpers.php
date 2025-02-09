@@ -277,16 +277,22 @@ if ( ! function_exists('request') ) {
     }
 }
 
-if ( ! function_exists('redirect') ) {
+/**
+ * Do a redirect
+ * 
+ * @return \Clicalmani\Foundation\Http\RedirectInterface
+ */
+function redirect(string $uri = '/', int $status = 302) {
+    return new \Clicalmani\Foundation\Http\Redirect($uri, $status);
+}
 
-    /**
-     * Do a redirect
-     * 
-     * @return \Clicalmani\Foundation\Http\RequestRedirect
-     */
-    function redirect() {
-        return with ( new \Clicalmani\Foundation\Http\Request )->redirect();
-    }
+/**
+ * Do a redirect back
+ * 
+ * @return \Clicalmani\Foundation\Http\RedirectInterface
+ */
+function back() {
+    return redirect()->back();
 }
 
 if ( ! function_exists('response') ) {
@@ -770,6 +776,10 @@ if ( ! function_exists('abort') ) {
     {
         response()->sendStatus($status_code);
     }
+}
+
+function session(?string $name = null, ?string $value = null) {
+    return new \Clicalmani\Foundation\Http\Session($name, $value);
 }
 
 // if (!function_exists('dd')) {

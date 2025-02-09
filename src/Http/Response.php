@@ -6,6 +6,7 @@ use Clicalmani\Foundation\Routing\Route;
 use Clicalmani\Psr7\Header;
 use Clicalmani\Psr7\NonBufferedBody;
 use Clicalmani\Psr7\Stream;
+use Clicalmani\Routing\Memory;
 use Psr\Http\Message\StreamInterface;
 
 /**
@@ -272,23 +273,11 @@ class Response extends \Clicalmani\Psr7\Response
      * 
      * @param string $url
      * @param int $status
-     * @return never
+     * @return \Clicalmani\Foundation\Http\RedirectInterface
      */
-    public function redirect(string $url, int $status = 302, array $data = []) : never
+    public function redirect(string $uri = '/', int $status = 302) : RedirectInterface
     {
-        $this->status($status)
-            ->header('Location', $url)
-            ->send();
-    }
-
-    /**
-     * Redirect back
-     * 
-     * @return never
-     */
-    public function redirectBack() : never
-    {
-        $this->redirect($_SERVER['HTTP_REFERER']);
+        return new Redirect($uri, $status);
     }
 
     /**
@@ -343,25 +332,35 @@ class Response extends \Clicalmani\Psr7\Response
     public function cookie(
         string $name, 
         string $value, 
-        int $expire = 0, 
+        int $expires = 0, 
         string $path = '', 
         string $domain = '', 
         bool $secure = false, 
         bool $httponly = false
     ) : static {
-        setcookie($name, $value, $expire, $path, $domain, $secure, $httponly);
+        (new \Clicalmani\Cookie\Cookie(
+            $name,
+            $value,
+            $expires,
+            $path,
+            $domain,
+            $secure,
+            $httponly
+        ))->set();
         return $this;
     }
 
     /**
-     * Remove a cookie
+     * Delete a cookie
      * 
      * @param string $name
+     * @param string $path
+     * @param string $domain
      * @return static
      */
-    public function removeCookie(string $name) : static
+    public function deleteCookie(string $name, string $path = '', string $domain = '') : static
     {
-        setcookie($name, '', time() - 3600);
+        setcookie($name, '', time() - 3600, $path, $domain);
         return $this;
     }
 

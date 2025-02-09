@@ -9,6 +9,7 @@ class TonkaTwigExtension extends \Twig\Extension\AbstractExtension implements \T
             new \Twig\TwigFunction('csrf_field', [$this, 'csrf_field']),
             new \Twig\TwigFunction('route', [$this, 'route']),
             new \Twig\TwigFunction('assets', [$this, 'assets']),
+            new \Twig\TwigFunction('session', [$this, 'session']),
         ];
     }
 
@@ -17,6 +18,11 @@ class TonkaTwigExtension extends \Twig\Extension\AbstractExtension implements \T
         return [
             new \Twig\TwigFilter('json', [$this, 'json']),
         ];
+    }
+
+    public function getTokenParsers()
+    {
+        return [];
     }
 
     public function csrf_field() : string
@@ -37,6 +43,11 @@ class TonkaTwigExtension extends \Twig\Extension\AbstractExtension implements \T
     public function assets(?string $path = '/') : string
     {
         return assets($path);
+    }
+
+    public function session(string $name)
+    {
+        return $_SESSION[$name] ?? null;
     }
 
     public function getGlobals() : array

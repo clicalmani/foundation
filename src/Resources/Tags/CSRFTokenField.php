@@ -1,5 +1,7 @@
 <?php
-namespace Clicalmani\Foundation\Resources;
+namespace Clicalmani\Foundation\Resources\Tags;
+
+use Clicalmani\Foundation\Resources\TemplateTag;
 
 class CSRFTokenField extends TemplateTag
 {

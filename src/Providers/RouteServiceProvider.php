@@ -260,6 +260,8 @@ class RouteServiceProvider extends ServiceProvider
     {
         static::$route_settings = require_once config_path('/routing.php');
         static::$cors_settings = require_once config_path('/cors.php');
+
+        require_once dirname(__DIR__, 3) . '/routing/src/functions.php';
         
         Memory::setRoutes(
             [

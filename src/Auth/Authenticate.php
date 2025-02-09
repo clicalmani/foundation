@@ -46,7 +46,7 @@ abstract class Authenticate extends ServiceProvider implements \JsonSerializable
 	 */
 	public function createUser(mixed $user_id = NULL) : static
 	{
-		$this->user_id = $this->user_id ?? $user_id;
+		$this->user_id = $user_id ?: $this->user_id;
 		$this->user = instance($this->userModel, fn(Model $instance) => $instance, $this->user_id);
 		return $this;
 	}

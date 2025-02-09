@@ -135,9 +135,9 @@ class RequestController
 	/**
 	 * Get request response
 	 * 
-	 * @return \Psr\Http\Message\ResponseInterface
+	 * @return \Psr\Http\Message\ResponseInterface|\Clicalmani\Foundation\Http\RedirectInterface
 	 */
-	protected function getResponse() : \Psr\Http\Message\ResponseInterface
+	protected function getResponse() : \Psr\Http\Message\ResponseInterface|\Clicalmani\Foundation\Http\RedirectInterface
 	{
 		$action = $this->getAction();
 		
@@ -159,9 +159,9 @@ class RequestController
 	 * Invoke the method with the given reflector.
 	 * 
 	 * @param \Clicalmani\Foundation\Http\Controllers\ReflectorInterface $reflector
-	 * @return \Psr\Http\Message\ResponseInterface
+	 * @return \Psr\Http\Message\ResponseInterface|\Clicalmani\Foundation\Http\RedirectInterface
 	 */
-	public function invokeMethod(ReflectorInterface $reflector) : \Psr\Http\Message\ResponseInterface
+	public function invokeMethod(ReflectorInterface $reflector) : \Psr\Http\Message\ResponseInterface|\Clicalmani\Foundation\Http\RedirectInterface
 	{
 		$request = new Request;							  // Fallback to default request
 		/** @var int|null */
@@ -204,11 +204,7 @@ class RequestController
 					return $callback($e);
 				}
 
-				return new Response(
-					$e->getCode(),
-					null,
-					new NonBufferedBody
-				);
+				return new Response;
 			}
 		}
 
@@ -285,7 +281,7 @@ class RequestController
 		/** @var \Clicalmani\Foundation\Http\Request */
 		$request = Request::currentRequest();
 
-		if ( inConsoleMode() ) return $request->all();
+		if ( inConsoleMode() ) return $request->getAttributes();
 		
         preg_match_all('/' . config('route.parameter_prefix') . '[^\/]+/', (string) $this->route, $mathes);
 

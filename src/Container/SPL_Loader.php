@@ -40,7 +40,7 @@ class SPL_Loader extends Manager
      */
     public function inject(string|callable $class_or_file) : void
     {
-        if (is_callable($class_or_file)) include_once $class_or_file();
-        else $this->lazyLoad($class_or_file);
+        if (is_callable($class_or_file) AND $file = $class_or_file() AND file_exists($file)) include_once $file;
+        elseif ( is_string($class_or_file) ) $this->lazyLoad($class_or_file);
     }
 }

@@ -19,6 +19,6 @@ abstract class TemplateTag
 
     public function bind(string $content) : string
     {
-        return str_replace($this->tag, $this->render(), $content);
+        return preg_replace("/$this->tag/", $this->render(), $content);
     }
 }

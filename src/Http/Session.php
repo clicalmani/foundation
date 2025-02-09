@@ -8,28 +8,13 @@ class Session
      * 
      * @param string $name
      * @param string $value
-     * @param int $expires
-     * @param string $path
-     * @param string $domain
-     * @param bool $secure
-     * @param bool $httpOnly
      */
     public function __construct(
-        protected string $name,
-        protected string $value,
-        protected int $expires,
-        protected string $path,
-        protected string $domain,
-        protected bool $secure,
-        protected bool $httpOnly
+        protected ?string $name = null,
+        protected ?string $value = null
     ) {
         $this->name = $name;
         $this->value = $value;
-        $this->expires = $expires;
-        $this->path = $path;
-        $this->domain = $domain;
-        $this->secure = $secure;
-        $this->httpOnly = $httpOnly;
     }
 
     /**
@@ -49,19 +34,19 @@ class Session
      * 
      * @return void
      */
-    public function set(): void
+    public function set(?string $name = null, ?string $value = null): void
     {
-        $_SESSION[$this->name] = $this->value;
+        $_SESSION[$this->name ?: $name] = $this->value ?: $value;
     }
 
     /**
      * Get session
      * 
-     * @return string
+     * @return ?string
      */
-    public function get(): string
+    public function get(?string $name = null): ?string
     {
-        return $_SESSION[$this->name];
+        return @$_SESSION[$name ?: $this->name];
     }
 
     /**
@@ -69,19 +54,20 @@ class Session
      * 
      * @return bool
      */
-    public function exists(): bool
+    public function exists(?string $name = null): bool
     {
-        return isset($_SESSION[$this->name]);
+        return isset($_SESSION[$name ?: $this->name]);
     }
 
     /**
      * Remove session
      * 
+     * @param ?string $name
      * @return void
      */
-    public function remove(): void
+    public function remove(?string $name = null): void
     {
-        unset($_SESSION[$this->name]);
+        unset($_SESSION[$name ?: $this->name]);
     }
 
     /**
@@ -92,5 +78,49 @@ class Session
     public function destroy(): void
     {
         session_destroy();
+    }
+
+    /**
+     * Get all session data
+     * 
+     * @return array
+     */
+    public function all(): array
+    {
+        return $_SESSION;
+    }
+
+    /**
+     * Get all session keys
+     * 
+     * @return array
+     */
+    public function allKeys(): array
+    {
+        return array_keys($_SESSION);
+    }
+
+    /**
+     * Get all session values
+     * 
+     * @return array
+     */
+    public function allValues(): array
+    {
+        return array_values($_SESSION);
+    }
+
+    public function __get($name)
+    {
+        return match ($name) {
+            $this->name => $this->value
+        };
+    }
+
+    public function __set($name, $value)
+    {
+        match ($name) {
+            $this->name => $this->value = $value
+        };
     }
 }

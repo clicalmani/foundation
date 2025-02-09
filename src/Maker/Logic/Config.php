@@ -1,6 +1,7 @@
 <?php
 namespace Clicalmani\Foundation\Maker\Logic;
 
+use Clicalmani\Foundation\Support\Facades\Arr;
 use Clicalmani\Foundation\Support\Facades\Env;
 use JsonSerializable;
 
@@ -61,7 +62,7 @@ class Config implements \ArrayAccess, JsonSerializable
     public function database(?string $key = null)
     {
         if ( ! isset($key) ) return app()->database;
-        return @app()->database[$this->parseKey($key)];
+        return Arr::get(@app()->database, $key);
     }
 
     public function env(?string $key = null)

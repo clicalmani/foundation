@@ -4,12 +4,11 @@ namespace Clicalmani\Foundation\Http;
 use Clicalmani\Foundation\Auth\EncryptionServiceProvider;
 use Clicalmani\Foundation\Collection\Collection;
 use Clicalmani\Foundation\Http\Requests\Cookie;
-use Clicalmani\Foundation\Http\Requests\HttpInputStream;
 use Clicalmani\Foundation\Http\Requests\HttpOutputStream;
 use Clicalmani\Foundation\Http\Requests\HttpRequest;
 use Clicalmani\Foundation\Http\Requests\Redirect;
 use Clicalmani\Foundation\Http\Requests\RequestInterface;
-use Clicalmani\Foundation\Http\Requests\Session;
+use Clicalmani\Foundation\Http\Session;
 use Clicalmani\Foundation\Providers\AuthServiceProvider;
 use Clicalmani\Foundation\Support\Facades\Arr;
 use Clicalmani\Psr7\Headers;
@@ -19,7 +18,6 @@ use Clicalmani\Psr7\Uri;
 class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \JsonSerializable 
 {
     use HttpOutputStream;
-    use Session;
     use Cookie;
     use Redirect;
 
@@ -716,27 +714,15 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
     /**
      * Manage the session instance.
      * 
-     * @return mixed
+     * @return \Clicalmani\Foundation\Http\Session
      */
-    public function session(?string $key = null, ?string $value = null) : mixed
+    public function session(?string $key = null, ?string $value = null) : Session
     {
-        $session_instance = app()->session();
+        $session_instance = new Session($key, $value);
 
-        if ( isset($key) ) return $session_instance->{$key};
-        if ( isset($value) && isset($key) ) return $session_instance->{$key} = $value;
+        if ( isset($key) ) $session_instance->{$key};
+        if ( isset($value) && isset($key) ) $session_instance->{$key} = $value;
         return $session_instance;
-    }
-
-    /**
-     * Redirect back with input data.
-     * 
-     * @param string $url The URL to redirect to.
-     * @return void
-     */
-    public function redirectWithInput(string $url) : void
-    {
-        $this->session()->flash('_old_input', $this->attributes);
-        $this->redirect($url);
     }
 
     /**
