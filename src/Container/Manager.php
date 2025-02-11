@@ -144,4 +144,79 @@ abstract class Manager
 
         return false;
     }
+
+    /**
+     * Inject method dependencies
+     * 
+     * @param object $object
+     * @param string $method
+     * @param array $parameters
+     * @return mixed
+     */
+    public function injectMethodDependencies(object|string $object_or_class, string $method, array $parameters = [])
+    {
+        $reflectionMethod = new \ReflectionMethod($object_or_class, $method);
+        $dependencies = [];
+
+        foreach ($reflectionMethod->getParameters() as $parameter) {
+            $dependency = $parameter->getType();
+            if ($dependency) {
+                $dependencies[] = $this->resolve($dependency->getName());
+            } else {
+                if (array_key_exists($parameter->name, $parameters)) {
+                    $dependencies[] = $parameters[$parameter->name];
+                } else {
+                    $dependencies[] = $parameter->getDefaultValue();
+                }
+            }
+        }
+
+        return $reflectionMethod->invokeArgs($object_or_class, $dependencies);
+    }
+
+    /**
+     * Inject constructor dependencies
+     * 
+     * @param string $class
+     * @return object
+     */
+    public function injectConstructorDependencies(string $class) : object
+    {
+        $reflectionClass = new \ReflectionClass($class);
+        $constructor = $reflectionClass->getConstructor();
+
+        if (is_null($constructor)) {
+            return new $class();
+        }
+
+        $dependencies = [];
+        foreach ($constructor->getParameters() as $parameter) {
+            $dependency = $parameter->getType();
+            if ($dependency) {
+                $dependencies[] = $this->resolve($dependency->getName());
+            } else {
+                $dependencies[] = $parameter->isDefaultValueAvailable() ? $parameter->getDefaultValue() : null;
+            }
+        }
+
+        return $reflectionClass->newInstanceArgs($dependencies);
+    }
+
+    /**
+     * Resolve a class instance
+     * 
+     * @param string $class
+     * @return mixed
+     */
+    protected function resolve(string $class)
+    {
+        if ($this->isCached()) {
+            return new $class();
+        }
+
+        $filename = $this->find();
+        $this->require($filename);
+
+        return new $class();
+    }
 }

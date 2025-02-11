@@ -91,7 +91,7 @@ class TemplateLoader implements LoaderInterface
 
     private function normalizeName(string $name): string
     {
-        return preg_replace('#/{2,}#', '/', str_replace('\\', '/', $name));
+        return preg_replace('#\.|/{2,}#', '/', str_replace('\\', '/', $name));
     }
 
     private function getContent(string $template_path): string

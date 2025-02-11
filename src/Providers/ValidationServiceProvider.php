@@ -19,7 +19,7 @@ class ValidationServiceProvider extends ServiceProvider
 	 */
     public function boot() : void
 	{
-        $validators = ( new \Clicalmani\Foundation\Validation\Kernel )->validators();
+        $validators = ( new \Clicalmani\Validation\Kernel )->validators();
         $custom_validators = \Clicalmani\Foundation\Support\Facades\Config::http('validators');
 
         /**

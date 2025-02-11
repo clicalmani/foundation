@@ -90,7 +90,7 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
      */
     public function __construct(private ?array $signatures = []) 
     {
-        $this->validator = new \Clicalmani\Foundation\Validation\Validator;
+        $this->validator = new \Clicalmani\Validation\Validator;
         
         parent::__construct(
             $this->getMethod(),
@@ -390,6 +390,16 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
         }
 
         return $url.($query_string ? "?$query_string": $query_string);
+    }
+
+    /**
+     * Alias of getAttributes
+     * 
+     * @return array
+     */
+    public function all(): array
+    {
+        return $this->getAttributes();
     }
 
     /**

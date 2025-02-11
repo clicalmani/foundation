@@ -10,7 +10,7 @@ use Clicalmani\Foundation\Resources\View;
 use Clicalmani\Foundation\Routing\Exceptions\RouteNotFoundException;
 use Clicalmani\Foundation\Routing\Route;
 use Clicalmani\Foundation\Test\Controllers\TestController;
-use Clicalmani\Foundation\Validation\AsValidator;
+use Clicalmani\Validation\AsValidator;
 use Clicalmani\Psr7\NonBufferedBody;
 use Clicalmani\Routing\Memory;
 

@@ -52,7 +52,7 @@ class TonkaTwigExtension extends \Twig\Extension\AbstractExtension implements \T
 
     public function getGlobals() : array
     {
-        return [
+        return array_merge(Kernel::$sharedData, [
             'app' => [
                 'name' => env('APP_NAME'),
                 'url' => env('APP_URL'),
@@ -60,7 +60,7 @@ class TonkaTwigExtension extends \Twig\Extension\AbstractExtension implements \T
                 'debug' => env('APP_DEBUG'),
                 'timezone' => env('APP_TIMEZONE'),
             ],
-        ];
+        ]);
     }
 
     public function getName() : string
