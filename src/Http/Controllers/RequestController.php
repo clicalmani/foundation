@@ -107,14 +107,14 @@ class RequestController
 			return $this->action;
 		}
 		
-		$request = new Request([]);
+		$request = new Request;
 		$builder = \Clicalmani\Foundation\Support\Facades\Config::route('default_builder');
 		
 		/** @var \Clicalmani\Routing\Route $route */
 		if ($route = (new $builder)->build()) {
 			
 			$this->route = $route;
-
+			
 			// Do Redirect
 			if ($route->redirect) $this->redirect();
 
@@ -554,7 +554,10 @@ class RequestController
 	private function sendStatus(int $code)
 	{
 		if (Route::isApi()) response()->sendStatus($code);
-		else view($code);
+		else {
+			http_response_code($code);
+			view($code);
+		}
 
 		exit;
 	}

@@ -53,7 +53,7 @@ abstract class HttpRequest extends \Clicalmani\Psr7\Request
         $this->attributes = $_REQUEST;
         $this->body = $body;
         $this->uploadedFiles = $_FILES;
-
+        
         if (isset($serverParams['SERVER_PROTOCOL'])) {
             $this->protocolVersion = str_replace('HTTP/', '', $serverParams['SERVER_PROTOCOL']);
         }
@@ -62,29 +62,38 @@ abstract class HttpRequest extends \Clicalmani\Psr7\Request
             $this->headers[] = new Header('HTTP_HOST', (array)$this->uri->getHost());
         }
 
-        if (in_array($this->method, ['put', 'patch'])) {
-
-            parse_str(urldecode($this->body->getContents()), $stream);
+        if ( isset($_SERVER['CONTENT_TYPE']) && strpos($_SERVER['CONTENT_TYPE'], 'application/json') !== FALSE ) {
+            $this->attributes = json_decode($this->body->getContents(), true) ?? [];
+        }
         
+        if (in_array($this->method, ['put', 'patch'])) {
+            
+            $input = $this->body->getContents();
+            parse_str(urldecode($input), $stream);
+            
             if ($stream_boundary = $this->getStreamBoundary()) {
 
                 $records = tap(
-                    preg_split("/-+$stream_boundary/", $this->body->getContents(), -1, PREG_SPLIT_NO_EMPTY), 
+                    preg_split("/-+$stream_boundary/", $input, -1, PREG_SPLIT_NO_EMPTY), 
                     fn(array &$parts) => array_pop($parts)
                 );
-
+                
                 foreach($records as $record) {
                     $this->retrieveAttributes($record);
                     $this->retrieveFiles($record);
                 }
-            } else $this->attributes = $stream;
+            } else {
+                if ( isset($_SERVER['CONTENT_TYPE']) && strpos($_SERVER['CONTENT_TYPE'], 'application/json') !== FALSE ) {
+                    $this->attributes = json_decode($input, true) ?? [];
+                } else $this->attributes = $stream;
+            }
         }
     }
 
     public function getHeaders() : array
     {
         if ( inConsoleMode() ) return $this->attributes;
-        return apache_request_headers();
+        return $this->headers->all();
     }
     
     public function getHeader(string $name) : array
@@ -313,22 +322,12 @@ abstract class HttpRequest extends \Clicalmani\Psr7\Request
 
     public function hasHeader(string $name): bool
     {
-        $headers = $this->getHeaders();
-        $name = strtolower($name);
-
-        /** @var \Clicalmani\Psr7\Header */
-        foreach ($headers as $header) {
-            if (strtolower($header->name) === $name) {
-                return true;
-            }
-        }
-
-        return false;
+        return !!$this->getHeaderLine($name);
     }
 
     public function getHeaderLine(string $name): string
     {
-        return $this->__getHeader($name)->line();
+        return $this->__getHeader($name)?->line() ?? '';
     }
 
     public static function setTrustedHosts(array $trustedHosts): void
@@ -387,10 +386,10 @@ abstract class HttpRequest extends \Clicalmani\Psr7\Request
         }
 
         foreach ($data as $key => $value) {
-            $this->parseParameter($attributes, $key, $value);
+            $this->parseParameter($data, $key, $value);
         }
 
-        $this->attributes = array_merge($this->attributes, $attributes);
+        $this->attributes = array_merge($this->attributes, $data);
     }
 
     /**

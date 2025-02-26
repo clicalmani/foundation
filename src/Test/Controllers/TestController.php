@@ -227,7 +227,7 @@ abstract class TestController implements TestInterface
             print_r( $this->controller::invokeMethod(
                     new \Clicalmani\Foundation\Http\Controllers\MethodReflector(
                         new \ReflectionMethod(
-                            \Clicalmani\Foundation\Http\RequestController::getInstance($this->controller), 
+                            \Clicalmani\Foundation\Http\Requests\RequestController::getInstance($this->controller), 
                             $this->action
                         )
                     )

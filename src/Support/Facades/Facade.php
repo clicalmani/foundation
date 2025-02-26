@@ -44,6 +44,10 @@ class Facade
             return \Clicalmani\Foundation\Http\Controllers\RequestController::class;
         } 
 
+        if ( $class === \Inertia\Inertia::class ) {
+            return \Inertia\Response::class;
+        }
+
         $class = "Clicalmani\Foundation\Maker\Logic\\" . substr($class, strrpos($class, "\\") + 1);
 
         if ( class_exists($class) ) return $class;

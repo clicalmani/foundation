@@ -3,14 +3,21 @@ namespace Clicalmani\Foundation\Resources;
 
 class TonkaTwigExtension extends \Twig\Extension\AbstractExtension implements \Twig\Extension\GlobalsInterface
 {
+    use Paths;
+
+    public function addFunction(string $name, callable $callback, array $options = [])
+    {
+        Kernel::$functions[] = new \Twig\TwigFunction($name, $callback, $options);
+    }
+
+    public function addFilter(string $name, callable $callback, array $options = [])
+    {
+        Kernel::$filters[] = new \Twig\TwigFilter($name, $callback, $options);
+    }
+
     public function getFunctions() : array
     {
-        return [
-            new \Twig\TwigFunction('csrf_field', [$this, 'csrf_field']),
-            new \Twig\TwigFunction('route', [$this, 'route']),
-            new \Twig\TwigFunction('assets', [$this, 'assets']),
-            new \Twig\TwigFunction('session', [$this, 'session']),
-        ];
+        return Kernel::$functions;
     }
 
     public function getFilters() : array
@@ -25,40 +32,15 @@ class TonkaTwigExtension extends \Twig\Extension\AbstractExtension implements \T
         return [];
     }
 
-    public function csrf_field() : string
-    {
-        return '<input type="hidden" name="csrf_token" value="' . csrf_token() . '">';
-    }
-
-    public function route(...$args) : string
-    {
-        return route(...$args);
-    }
-
-    public function json(string $json) : \stdClass
-    {
-        return json_decode($json);
-    }
-
-    public function assets(?string $path = '/') : string
-    {
-        return assets($path);
-    }
-
-    public function session(string $name)
-    {
-        return $_SESSION[$name] ?? null;
-    }
-
     public function getGlobals() : array
     {
-        return array_merge(Kernel::$sharedData, [
+        return array_merge(app()->viewSharedData(), [
             'app' => [
-                'name' => env('APP_NAME'),
-                'url' => env('APP_URL'),
-                'env' => $_ENV,
-                'debug' => env('APP_DEBUG'),
-                'timezone' => env('APP_TIMEZONE'),
+                'name' => app()->config('app.name'),
+                'url' => app()->config('app.url'),
+                'env' => app()->config('app.env'),
+                'debug' => app()->config('app.debug'),
+                'timezone' => app()->config('app.timezone'),
             ],
         ]);
     }

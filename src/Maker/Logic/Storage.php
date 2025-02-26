@@ -1,7 +1,6 @@
 <?php 
 namespace Clicalmani\Foundation\Maker\Logic;
 
-use Clicalmani\Foundation\FileSystem\FilesystemManager;
 use Clicalmani\Foundation\Support\Facades\Facade;
 use Clicalmani\Foundation\Support\Facades\Tonka;
 

@@ -5,6 +5,7 @@ use Clicalmani\Foundation\Http\Request;
 use Clicalmani\Foundation\Http\Response;
 use Clicalmani\Foundation\Container\SPL_Loader;
 use Clicalmani\Foundation\Auth\AuthServiceProvider;
+use Clicalmani\Foundation\Http\RedirectInterface;
 
 /**
  * Class JWTAuth
@@ -30,12 +31,12 @@ abstract class JWTAuth extends AuthServiceProvider
     /**
      * Handler
      * 
-     * @param \Clicalmani\Foundation\Http\Request $request Request object
-     * @param \Clicalmani\Foundation\Http\Response $response Response object
-     * @param callable $next Next middleware function
-     * @return int|false
+     * @param \Clicalmani\Foundation\Http\Request $request Current request object
+     * @param \Clicalmani\Foundation\Http\Response $response Http response
+     * @param \Closure $next 
+     * @return \Clicalmani\Foundation\Http\Response|\Clicalmani\Foundation\Http\RedirectInterface
      */
-    protected abstract function handle(Request $request, Response $response, callable $next) : int|false;
+    public abstract function handle(Request $request, Response $response, \Closure $next) : Response|RedirectInterface;
 
     /**
      * Bootstrap

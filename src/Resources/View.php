@@ -23,6 +23,9 @@ class View extends Response
     public function __construct(private string $template, private ?array $context = [])
     {
         $this->runCreators();
+        $sharedData = app()->viewSharedData();
+        $sharedData = array_merge($sharedData, $context);
+        $this->context = $sharedData;
         $this->body = new NonBufferedBody;
         $this->twig = new \Twig\Environment(new \Clicalmani\Foundation\Resources\TemplateLoader, []);
         $this->twig->addExtension(new \Clicalmani\Foundation\Resources\TonkaTwigExtension);
@@ -60,7 +63,9 @@ class View extends Response
      */
     public static function share(string $key, mixed $value): void
     {
-        Kernel::$sharedData[$key] = $value;
+        $sharedData = app()->viewSharedData();
+        $sharedData[$key] = $value;
+        app()->viewSharedData($sharedData);
     }
 
     /**

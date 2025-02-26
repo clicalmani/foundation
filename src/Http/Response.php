@@ -1,12 +1,11 @@
 <?php
 namespace Clicalmani\Foundation\Http;
 
-use Clicalmani\Foundation\FileSystem\MemoryConfiguration;
+use Clicalmani\Foundation\Exceptions\ResourceNotFoundException;
 use Clicalmani\Foundation\Routing\Route;
 use Clicalmani\Psr7\Header;
 use Clicalmani\Psr7\NonBufferedBody;
 use Clicalmani\Psr7\Stream;
-use Clicalmani\Routing\Memory;
 use Psr\Http\Message\StreamInterface;
 
 /**
@@ -59,11 +58,11 @@ class Response extends \Clicalmani\Psr7\Response
      * @param ?int $code Status code
      * @return never
      */
-    public function sendStatus(?int $code = null) : never
+    public function sendStatus(?int $code = null)
     {
         $this->status = $code ?: $this->status;
         http_response_code($this->status);
-
+        
         if (Route::isApi()) 
             $this->sendBody(
                 json_encode(
@@ -75,7 +74,11 @@ class Response extends \Clicalmani\Psr7\Response
             );
 
         else {
-            $this->sendBody(view($this->status, ['code' => $this->getReasonPhrase()]));
+            try {
+                $this->sendBody(view($this->status, ['code' => $this->getReasonPhrase()]));
+            } catch (ResourceNotFoundException $e) {
+                ;
+            }
         }
     }
 

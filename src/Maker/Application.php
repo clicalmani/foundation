@@ -1,7 +1,9 @@
 <?php
 namespace Clicalmani\Foundation\Maker;
 
+use Clicalmani\Foundation\Http\Request;
 use Clicalmani\Foundation\Http\Response;
+use Clicalmani\Foundation\Support\Facades\Arr;
 use Clicalmani\Psr7\NonBufferedBody;
 use Clicalmani\Psr7\StatusCodeInterface;
 use Composer\Autoload\ClassLoader;
@@ -45,7 +47,7 @@ class Application
     /**
      * File system
      * 
-     * @var \Clicalmani\Foundation\FileSystem\FileSystem
+     * @var \Clicalmani\Foundation\Filesystem\FileSystem
      */
     protected $filesystem;
 
@@ -55,6 +57,13 @@ class Application
      * @var \Psr\Http\Message\ResponseInterface
      */
     protected $response;
+
+    /**
+     * View shared data
+     * 
+     * @var array|callable
+     */
+    protected $viewSharedData;
 
     public function __construct(private ?string $rootPath = null)
     {
@@ -233,13 +242,23 @@ class Application
     }
 
     /**
+     * Get app mode
+     * 
+     * @return string
+     */
+    public function env(): string
+    {
+        return $this->config('app.env', 'production');
+    }
+
+    /**
      * Get the debug mode status
      * 
      * @return bool
      */
     public function getDebug(): bool
     {
-        return $this->config['app']['debug'] ?? false;
+        return $this->config('app.debug', 'false');
     }
 
     /**
@@ -250,7 +269,7 @@ class Application
      */
     public function getUrl(string $path = ''): string
     {
-        $url = $this->config['app']['url'] ?? 'http://localhost';
+        $url = $this->config('app.url', 'http://localhost');
         return rtrim($url, '/') . '/' . ltrim($path, '/');
     }
 
@@ -261,7 +280,7 @@ class Application
      */
     public function getLocale(): string
     {
-        return $this->config['app']['locale'] ?? 'en';
+        return $this->config('app.locale', 'en');
     }
 
     /**
@@ -271,7 +290,7 @@ class Application
      */
     public function getTimezone(): string
     {
-        return $this->config['app']['timezone'] ?? 'UTC';
+        return $this->config('app.timezone', 'UTC');
     }
 
     /**
@@ -294,7 +313,33 @@ class Application
         $this->addKernel(\App\Http\Kernel::class);
         \Clicalmani\Foundation\Providers\ServiceProvider::provideServices($this->config['app']['providers']);
         // File system
-        $this->filesystem = new \Clicalmani\Foundation\FileSystem\FilesystemManager($this);
+        $this->filesystem = new \Clicalmani\Foundation\Filesystem\FilesystemManager($this);
+    }
+
+    /**
+     * Get config
+     * 
+     * @param string $key
+     * @param mixed $default
+     * @return mixed
+     */
+    public function config(string $key, mixed $default = '') : mixed
+    {
+        return Arr::get($this->config, $key, $default);
+    }
+
+    /**
+     * Set view shared data
+     * 
+     * @param array $data
+     */
+    public function viewSharedData(array|callable|null $data = null)
+    {
+        if (isset($data)) $this->viewSharedData = $data;
+        else {
+            if ( is_array($this->viewSharedData)) return $this->viewSharedData;
+            elseif ( is_callable($this->viewSharedData) ) return call($this->viewSharedData, Request::getCurrentRequest());
+        }
     }
 
     public function __get($name)
@@ -315,6 +360,7 @@ class Application
             'config' => $this->config = $value,
             'console' => $this->console = $value,
             'database' => $this->db_config = $value,
+            'response' => $this->response = $value
         };
     }
 }

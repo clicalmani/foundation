@@ -1,55 +1,49 @@
 <?php
 namespace Clicalmani\Foundation\Http;
 
-use Clicalmani\Foundation\Routing\Route;
-
 trait StatusErrors
 {
     /**
      * 404 Not found redirect
      * 
-     * @return int
+     * @return static
      */
-    public function notFound() : int
+    public function notFound() : static
     {
         $this->status = 404;
-        $this->sendStatus();
-        return http_response_code();
+        return $this;
     }
 
     /**
      * 401 Unauthorized redirect
      * 
-     * @return int
+     * @return static
      */
-    public function unauthorized() : int
+    public function unauthorized() : static
     {
         $this->status = 401;
-        $this->sendStatus();
-        return http_response_code();
+        return $this;
     }
 
     /**
      * 403 Forbiden redirect
      * 
-     * @return int
+     * @return static
      */
-    public function forbiden() : int
+    public function forbiden() : static
     {
         $this->status = 403;
-        $this->sendStatus();
-        return http_response_code();
+        return $this;
     }
 
     /**
      * 500 Internal server error
      * 
-     * @return int
+     * @return static
      */
-    public function internalServerError() : int
+    public function internalServerError() : static
     {
         $this->status = 500;
-        $this->sendStatus();
-        return http_response_code();
+        return $this;
     }
 }

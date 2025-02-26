@@ -1,7 +1,7 @@
 <?php
 namespace Clicalmani\Foundation\Http\Requests;
 
-use Clicalmani\Foundation\FileSystem\FilesystemManager;
+use Clicalmani\Foundation\Filesystem\FilesystemManager;
 use Clicalmani\Foundation\Support\Facades\Storage;
 use Clicalmani\Psr7\Stream;
 use Psr\Http\Message\StreamInterface;

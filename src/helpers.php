@@ -778,7 +778,7 @@ if ( ! function_exists('abort') ) {
     }
 }
 
-function session(?string $name = null, ?string $value = null) {
+function session(?string $name = null, mixed $value = null) {
     return new \Clicalmani\Foundation\Http\Session($name, $value);
 }
 

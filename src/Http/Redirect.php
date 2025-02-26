@@ -5,6 +5,7 @@ use Clicalmani\Foundation\Http\Controllers\MethodReflector;
 use Clicalmani\Foundation\Http\Requests\RequestController;
 use Clicalmani\Psr7\NonBufferedBody;
 use Clicalmani\Routing\Memory;
+use Inertia\Inertia;
 
 class Redirect implements RedirectInterface
 {
@@ -20,6 +21,10 @@ class Redirect implements RedirectInterface
     {
         $this->uri = $uri;
         $this->status = $status;
+
+        if (Request::currentRequest()?->hasHeader('X-Inertia') && in_array((new Request)->getMethod(), ['put', 'patch', 'delete'])) {
+            $this->status = 303;
+        }
     }
 
     public function with(string $status, string $value): RedirectInterface
@@ -32,6 +37,11 @@ class Redirect implements RedirectInterface
     {
         $this->status = $code;
         return $this;
+    }
+
+    public function getStatusCode(): int
+    {
+        return $this->status;
     }
 
     public function back(): RedirectInterface
@@ -75,7 +85,11 @@ class Redirect implements RedirectInterface
     public function __toString()
     {
         if ($this->message_name) $this->uri .= (strpos($this->uri, '?') === false ? '?' : '&') . $this->message_name . '=' . $this->message;
-
+        
+        if (Request::currentRequest()?->hasHeader('X-Inertia')) {
+            return Inertia::location($this->uri);
+        }
+        
         (new Response)->withBody(new NonBufferedBody)
             ->status($this->status)
             ->header('Location', $this->uri)

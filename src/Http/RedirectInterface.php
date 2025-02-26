@@ -28,6 +28,13 @@ interface RedirectInterface
     public function status(int $code) : \Clicalmani\Foundation\Http\RedirectInterface;
 
     /**
+     * Returns the status code.
+     * 
+     * @return int Status code
+     */
+    public function getStatusCode() : int;
+
+    /**
      * Redirect to a specific route.
      * 
      * @param mixed ...$args

@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Foundation\FileSystem;
+namespace Clicalmani\Foundation\Filesystem;
 
 use League\Flysystem\Config;
 use League\Flysystem\UrlGeneration\PublicUrlGenerator as UrlGenerator;

@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Foundation\FileSystem;
+namespace Clicalmani\Foundation\Filesystem;
 
 use Clicalmani\Foundation\Support\Facades\Tonka;
 

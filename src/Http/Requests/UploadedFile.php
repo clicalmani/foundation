@@ -324,7 +324,7 @@ class UploadedFile implements \Psr\Http\Message\UploadedFileInterface
     {
         return match ($name) {
             'storage' => new \Clicalmani\Foundation\Maker\Logic\Storage(
-                new \Clicalmani\Foundation\FileSystem\FilesystemManager( app() )
+                new \Clicalmani\Foundation\Filesystem\FilesystemManager( app() )
             )
         };
     }

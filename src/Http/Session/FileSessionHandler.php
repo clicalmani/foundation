@@ -10,7 +10,13 @@ class FileSessionHandler extends SessionHandler
 
     public function open(string $path, string $name): bool
     {
-        return $this->savePath = $path;
+        $this->savePath = $path;
+        
+        if (!is_dir($this->savePath)) {
+            mkdir($this->savePath, 0777, true);
+        }
+
+        return true;
     }
 
     public function close(): bool

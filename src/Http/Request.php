@@ -14,6 +14,7 @@ use Clicalmani\Foundation\Support\Facades\Arr;
 use Clicalmani\Psr7\Headers;
 use Clicalmani\Psr7\Stream;
 use Clicalmani\Psr7\Uri;
+use Inertia\Inertia;
 
 class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \JsonSerializable 
 {
@@ -39,9 +40,9 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
      * Get or set the current request
      * 
      * @param ?self $request
-     * @return mixed
+     * @return ?static
      */
-    public static function currentRequest(?self $request = null) : mixed
+    public static function currentRequest(?self $request = null) : ?static
     {
         if ($request) return static::$current_request = $request;
         return static::$current_request;
@@ -173,7 +174,15 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
      */
     public function checkCSRFToken() : bool
     {
-        return @ $this->{'csrf_token'} === csrf_token();
+        $token = null;
+        
+        if ($this->hasHeader('X-Inertia')) return true;
+        
+        if ($this->hasHeader('X-CSRF-Token')) {
+            $token = $this->header('X-CSRF-Token');
+        } else $token = $this->{'csrf_token'};
+        
+        return @ $token === csrf_token();
     }
 
     /**
@@ -334,7 +343,8 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
      */
     public function url() : string
     {
-        return $this->route()?->uri;
+        if ( inConsoleMode() ) return '@';
+        return $_SERVER['REQUEST_URI'];
     }
 
     /**
@@ -344,7 +354,7 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
      */
     public function fullUrl() : string
     {
-        return rtrim(app()->getUrl(), '/').$this->route()?->uri;
+        return rtrim(app()->getUrl(), '/').$this->url();
     }
 
     /**
@@ -410,6 +420,16 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
     public function getHost() : string
     {
         return parse_url($this->fullUrl(), PHP_URL_HOST);
+    }
+
+    /**
+     * Get the port from the current request.
+     * 
+     * @return string
+     */
+    public function getPort() : string
+    {
+        return parse_url($this->fullUrl(), PHP_URL_PORT) ?? '80';
     }
 
     /**

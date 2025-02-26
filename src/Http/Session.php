@@ -7,11 +7,11 @@ class Session
      * Session constructor
      * 
      * @param string $name
-     * @param string $value
+     * @param mixed $value
      */
     public function __construct(
         protected ?string $name = null,
-        protected ?string $value = null
+        protected mixed $value = null
     ) {
         $this->name = $name;
         $this->value = $value;
@@ -34,7 +34,7 @@ class Session
      * 
      * @return void
      */
-    public function set(?string $name = null, ?string $value = null): void
+    public function set(?string $name = null, mixed $value = null): void
     {
         $_SESSION[$this->name ?: $name] = $this->value ?: $value;
     }

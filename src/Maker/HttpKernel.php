@@ -1,6 +1,10 @@
 <?php
 namespace Clicalmani\Foundation\Maker;
 
+use Clicalmani\Foundation\Http\Middlewares\Api;
+use Clicalmani\Foundation\Http\Middlewares\Middleware;
+use Clicalmani\Foundation\Http\Middlewares\Web;
+
 class HttpKernel extends Kernel
 {
     /**
@@ -60,7 +64,7 @@ class HttpKernel extends Kernel
              */
             'web' => array_merge([
                 'web' => \Clicalmani\Foundation\Http\Middlewares\Web::class], 
-                $this->middleware['web']
+                array_merge($this->middleware['web'], Web::getGlobals())
             ), 
 
             /**
@@ -76,7 +80,7 @@ class HttpKernel extends Kernel
              */
             'api' => array_merge([
                 'api' => \Clicalmani\Foundation\Http\Middlewares\Api::class], 
-                $this->middleware['api']
+                array_merge($this->middleware['api'], Api::getGlobals())
             )
         ];
     }

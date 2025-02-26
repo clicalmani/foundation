@@ -77,7 +77,7 @@ abstract class Authenticate extends ServiceProvider implements \JsonSerializable
 	{
 		if (static::$serializer) return call(static::$serializer);
 
-		return null;
+		return json_encode($this->user);
 	}
 	
 	/**

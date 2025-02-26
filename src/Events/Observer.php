@@ -3,5 +3,10 @@ namespace Clicalmani\Foundation\Events;
 
 interface Observer
 {
-    public function trigger() : void;
+    /**
+     * Notify the observer
+     * 
+     * @return void
+     */
+    public function notify($event) : void;
 }
