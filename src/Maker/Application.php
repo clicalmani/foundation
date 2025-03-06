@@ -65,6 +65,13 @@ class Application
      */
     protected $viewSharedData;
 
+    /**
+     * Console commands
+     * 
+     * @var array
+     */
+    private $commands = [];
+
     public function __construct(private ?string $rootPath = null)
     {
         $this->config = new \Clicalmani\Foundation\Maker\Logic\Config;
@@ -77,6 +84,8 @@ class Application
             200,
             new NonBufferedBody
         );
+
+        $this->commands = \Clicalmani\Console\Kernel::$kernel;
     }
 
     public static function getInstance(?string $rootPath = null)
@@ -340,6 +349,17 @@ class Application
             if ( is_array($this->viewSharedData)) return $this->viewSharedData;
             elseif ( is_callable($this->viewSharedData) ) return call($this->viewSharedData, Request::getCurrentRequest());
         }
+    }
+
+    /**
+     * Get or add console commands
+     * 
+     * @param array $new_commands
+     */
+    public function commands(array $new_commands = [])
+    {
+        if ( !empty($new_commands) ) $this->commands += $new_commands;
+        return $this->commands;
     }
 
     public function __get($name)

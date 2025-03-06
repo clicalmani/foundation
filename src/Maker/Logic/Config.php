@@ -30,9 +30,16 @@ class Config implements \ArrayAccess, JsonSerializable
 
     protected static $paths = [];
 
+    protected static $mail_config;
+
     public function app(?string $key = null)
     {
         return $key ? static::$app_config[$this->parseKey($key)] : static::$app_config;
+    }
+
+    public function mail(?string $key = null)
+    {
+        return $key ? static::$mail_config[$this->parseKey($key)] : static::$mail_config;
     }
 
     public function http(?string $key = null)
@@ -77,7 +84,7 @@ class Config implements \ArrayAccess, JsonSerializable
 
     public function offsetExists(mixed $offset): bool
     {
-        return !!in_array($offset, ['app', 'bootstrap', 'http']);
+        return !!in_array($offset, ['app', 'mail', 'bootstrap', 'http']);
     }
 
     public function offsetGet(mixed $offset): mixed
@@ -86,7 +93,8 @@ class Config implements \ArrayAccess, JsonSerializable
             'app' => static::$app_config,
             'bootstrap' => static::$kernel,
             'http' => static::$http_kernel,
-            'paths' => static::$paths
+            'paths' => static::$paths,
+            'mail' => static::$mail_config
         };
     }
 
@@ -96,7 +104,8 @@ class Config implements \ArrayAccess, JsonSerializable
             'app' => static::$app_config = $value,
             'bootstrap' => static::$kernel = $value,
             'http' => static::$http_kernel = $value,
-            'paths' => static::$paths = $value
+            'paths' => static::$paths = $value,
+            'mail' => static::$mail_config = $value
         };
     }
 
