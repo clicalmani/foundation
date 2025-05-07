@@ -14,7 +14,6 @@ use Clicalmani\Foundation\Support\Facades\Arr;
 use Clicalmani\Psr7\Headers;
 use Clicalmani\Psr7\Stream;
 use Clicalmani\Psr7\Uri;
-use Inertia\Inertia;
 
 class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \JsonSerializable 
 {
@@ -44,8 +43,8 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
      */
     public static function currentRequest(?self $request = null) : ?static
     {
-        if ($request) return static::$current_request = $request;
-        return static::$current_request;
+        if ($request) return self::$current_request = $request;
+        return self::$current_request;
     }
 
     /**
@@ -96,7 +95,7 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
         parent::__construct(
             $this->getMethod(),
             new Uri((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http', $this->getHost()),
-            Headers::fromArray( inConsoleMode() ? []: apache_request_headers()),
+            Headers::fromArray( isConsoleMode() ? []: apache_request_headers()),
             $_COOKIE,
             $_SERVER,
             Stream::createFromResource(fopen('php://input', 'r'))
@@ -264,7 +263,7 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
              * | To interact with the app as a normal user when testing, a user ID
              * | may be specified.
              */
-            if ( inConsoleMode() ) $user_id = $this->test_user_id;
+            if ( isConsoleMode() ) $user_id = $this->test_user_id;
             
             return $authenticator->createUser($user_id);
         }
@@ -343,7 +342,7 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
      */
     public function url() : string
     {
-        if ( inConsoleMode() ) return '@';
+        if ( isConsoleMode() ) return '@';
         return $_SERVER['REQUEST_URI'];
     }
 
@@ -419,7 +418,7 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
      */
     public function getHost() : string
     {
-        return parse_url($this->fullUrl(), PHP_URL_HOST);
+        return parse_url($this->fullUrl(), PHP_URL_HOST) ?? '';
     }
 
     /**

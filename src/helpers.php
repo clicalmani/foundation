@@ -343,6 +343,18 @@ if ( ! function_exists('collection') ) {
     }
 }
 
+if ( ! function_exists('collect') ) {
+
+    /**
+     * Alias of collection
+     * 
+     * @return \Clicalmani\Foundation\Collection\Collection
+     */
+    function collect($items = []) {
+        return collection($items);
+    }
+}
+
 if ( ! function_exists('sanitize_attribute') ) {
 
     /**
@@ -438,7 +450,7 @@ if ( ! function_exists('mail_smtp') ) {
      */
     function mail_smtp(array $to, array $from, string $subject, string|View $body, ?array $options = [])
     {
-        $mail = new \Clicalmani\Foundation\Messenger\MailSMTP;
+        $mail = new \Clicalmani\Foundation\MailSMTP;
 
         if (@ $options['attachments'])
             foreach ($options['attachments'] as $attachment) {
@@ -548,14 +560,14 @@ if ( ! function_exists('instance') ) {
     }
 }
 
-if ( ! function_exists('inConsoleMode') ) {
+if ( ! function_exists('isConsoleMode') ) {
 
     /**
      * Verify if console mode is active
      * 
      * @return bool
      */
-    function inConsoleMode() : bool {
+    function isConsoleMode() : bool {
         return defined('CONSOLE_MODE_ACTIVE') && CONSOLE_MODE_ACTIVE;
     }
 }

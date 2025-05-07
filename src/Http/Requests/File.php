@@ -33,6 +33,11 @@ class File implements FileInterface
         $this->sapi = $sapi;
     }
 
+    /**
+     * Get the file stream
+     *
+     * @return string
+     */
     public function getStream(): StreamInterface
     {
         if ($this->sapi) {
@@ -42,6 +47,11 @@ class File implements FileInterface
         return new Stream(fopen($this->file, 'r'));
     }
 
+    /**
+     * Move file to a new location
+     *
+     * @return void
+     */
     public function moveTo(string $targetPath): void
     {
         if ($this->moved) {
@@ -51,13 +61,11 @@ class File implements FileInterface
         if ($this->error !== UPLOAD_ERR_OK) {
             throw new \RuntimeException('Cannot move file, upload error');
         }
-
+        
         if (!is_uploaded_file($this->file)) {
             if (!rename($this->file, $targetPath))
                 throw new \RuntimeException('Cannot rename file');
-        }
-
-        if (!move_uploaded_file($this->file, $targetPath)) {
+        } elseif (!move_uploaded_file($this->file, $targetPath)) {
             throw new \RuntimeException('Cannot move file');
         }
 
@@ -65,31 +73,61 @@ class File implements FileInterface
         $this->moved = true;
     }
 
+    /**
+     * Get the file size
+     *
+     * @return ?int
+     */
     public function getSize(): ?int
     {
         return $this->size;
     }
 
+    /**
+     * Get the error code
+     *
+     * @return string
+     */
     public function getError(): int
     {
         return $this->error;
     }
 
+    /**
+     * Get the file name
+     *
+     * @return string
+     */
     public function getClientFilename(): string
     {
         return $this->name;
     }
 
+    /**
+     * Get the file media type
+     *
+     * @return string
+     */
     public function getClientMediaType(): string
     {
         return $this->type;
     }
 
+    /**
+     * Get the file extension
+     *
+     * @return string|null
+     */
     public function getClientExtension(): ?string
     {
         return pathinfo($this->name, PATHINFO_EXTENSION);
     }
 
+    /**
+     * Check if the file is valid
+     *
+     * @return bool
+     */
     public function isValid() : bool
     {
         return $this->error === UPLOAD_ERR_OK;

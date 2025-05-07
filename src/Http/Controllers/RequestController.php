@@ -6,12 +6,10 @@ use Clicalmani\Foundation\Exceptions\ModelNotFoundException;
 use Clicalmani\Database\Factory\Models\Model;
 use Clicalmani\Foundation\Http\Response;
 use Clicalmani\Foundation\Providers\RouteServiceProvider;
-use Clicalmani\Foundation\Resources\View;
 use Clicalmani\Foundation\Routing\Exceptions\RouteNotFoundException;
 use Clicalmani\Foundation\Routing\Route;
 use Clicalmani\Foundation\Test\Controllers\TestController;
 use Clicalmani\Validation\AsValidator;
-use Clicalmani\Psr7\NonBufferedBody;
 use Clicalmani\Routing\Memory;
 
 /**
@@ -163,19 +161,21 @@ class RequestController
 	 */
 	public function invokeMethod(ReflectorInterface $reflector) : \Psr\Http\Message\ResponseInterface|\Clicalmani\Foundation\Http\RedirectInterface
 	{
-		$request = new Request;							  // Fallback to default request
+		$request = isConsoleMode() ? Request::currentRequest() : new Request; // Fallback to default request
 		/** @var int|null */
 		$request_pos = null;
 		
 		if ($arr = $reflector->getRequest()) {
+			$data = $request->all();
 			/** @var \Clicalmani\Foundation\Http\Request */
 			$request = new $arr['name'];
 			$request_pos = $arr['pos'];
+			if ($data) $request->extend($data);
 			$this->validateRequest($request);
 		}
-
+		
 		Request::currentRequest($request);
-
+		
 		$request_parameters = $this->getRequestParameters();
 		/** @var \ReflectionParameter[] */
 		$parameters = $reflector->getParameters();
@@ -233,14 +233,18 @@ class RequestController
 			$arg = @$args[$i] ?? null;
 			$param_reflector->setType($arg);
 			$args[$i] = $arg;
+
+			if (array_key_exists($param->name, $request_parameters)) {
+				$args[$i] = $request_parameters[$param->name];
+			}
 		}
-		
-		$args = collection(array_merge($args, array_values($request_parameters)))
-					->filter(fn($arg) => $arg)
-					->toArray();
 		
 		if ($reflector instanceof MethodReflector) return $reflector($this->getInstance($reflector->getClass()), ...$args);
 
+		// $args = collection(array_merge($args, array_values($request_parameters)))
+		// 			->filter(fn($arg) => $arg)
+		// 			->toArray();
+		
 		return $reflector(...$args);
 	}
 
@@ -281,7 +285,7 @@ class RequestController
 		/** @var \Clicalmani\Foundation\Http\Request */
 		$request = Request::currentRequest();
 
-		if ( inConsoleMode() ) return $request->getAttributes();
+		if ( isConsoleMode() ) return $request->getAttributes();
 		
         preg_match_all('/' . config('route.parameter_prefix') . '[^\/]+/', (string) $this->route, $mathes);
 
@@ -318,7 +322,7 @@ class RequestController
 		$resource = $reflector->getResource()['name'];
 		$nested_resource = @$reflector->getNestedResource()['name'];
 		$request = Request::currentRequest();
-
+		
 		if ($reflector instanceof MethodReflector) {
 			if ($attribute = (new \ReflectionMethod($reflector->getClass(), $reflector->getName()))->getAttributes(AsValidator::class)) {
 				$request->merge($attribute[0]->newInstance()->args);
@@ -330,7 +334,7 @@ class RequestController
 		if ( NULL !== $id = $request->id AND in_array($reflector->getName(), ['create', 'show', 'edit', 'update', 'destroy']) ) {
 
 			$nested_model = null;
-
+			
 			/**
 			 * Model record key value
 			 * 

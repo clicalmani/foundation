@@ -62,8 +62,10 @@ class HttpKernel extends Kernel
              * 
              * @var \Clicalmani\Foundation\Http\Middlewares\Web
              */
-            'web' => array_merge([
-                'web' => \Clicalmani\Foundation\Http\Middlewares\Web::class], 
+            'web' => array_merge(
+                [
+                    'web' => \Clicalmani\Foundation\Http\Middlewares\Web::class
+                ], 
                 array_merge($this->middleware['web'], Web::getGlobals())
             ), 
 
@@ -78,8 +80,10 @@ class HttpKernel extends Kernel
              * 
              * @var \Clicalmani\Foundation\Http\Middlewares\Api
              */
-            'api' => array_merge([
-                'api' => \Clicalmani\Foundation\Http\Middlewares\Api::class], 
+            'api' => array_merge(
+                [
+                    'api' => \Clicalmani\Foundation\Http\Middlewares\Api::class
+                ], 
                 array_merge($this->middleware['api'], Api::getGlobals())
             )
         ];

@@ -122,6 +122,7 @@ class Application
 
     public function handleCommands()
     {
+        $this->db_config = require_once config_path( '/database.php' );
         $this->console->make();
         $this->boot();
         $this->console->run();
@@ -349,6 +350,8 @@ class Application
             if ( is_array($this->viewSharedData)) return $this->viewSharedData;
             elseif ( is_callable($this->viewSharedData) ) return call($this->viewSharedData, Request::getCurrentRequest());
         }
+
+        return [];
     }
 
     /**

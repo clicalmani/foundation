@@ -30,7 +30,7 @@ class ParameterReflector
                     settype($value, $name);
                 }
             }
-        } elseif ($type->isBuiltin()) {
+        } elseif ($type?->isBuiltin()) {
             settype($value, $type->getName());
         } else {
             $reflector = new Reflector;

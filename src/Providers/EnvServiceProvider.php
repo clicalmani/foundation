@@ -23,7 +23,7 @@ class EnvServiceProvider extends ServiceProvider
             dirname( __DIR__, 5)
         )->safeLoad();
         
-        if ( inConsoleMode() ) {
+        if ( isConsoleMode() ) {
             app()->database = require_once config_path('/database.php');
         }
     }

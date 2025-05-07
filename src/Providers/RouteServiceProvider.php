@@ -172,7 +172,7 @@ class RouteServiceProvider extends ServiceProvider
     public function storeCSRFToken() : void
     {
         // Escape console mode
-        if ( FALSE == inConsoleMode() ) {
+        if ( FALSE == isConsoleMode() ) {
             // Generate CSRF token and Store it in $_SESSION global variable
             if ( ! isset($_SESSION['csrf_token']) ) {
                 $_SESSION['csrf_token'] = with ( new \Clicalmani\Foundation\Auth\CSRF )->getToken(); 

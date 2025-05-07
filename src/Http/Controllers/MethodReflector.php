@@ -42,7 +42,7 @@ class MethodReflector extends Reflector implements ReflectorInterface
                 }
             }
         }
-
+        
         return $this->reflect->invoke($object, ...$args);
     }
 }

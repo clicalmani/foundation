@@ -128,13 +128,13 @@ abstract class SessionStorageServiceProvider extends ServiceProvider
             'session.use_strict_mode' => 1
         ];
 
-        if (FALSE === inConsoleMode())
+        if (FALSE === isConsoleMode())
             foreach ($config as $k => $v) ini_set($k, $v);
     }
 
     public function boot(): void
     {
-        if (FALSE === inConsoleMode() && FALSE === Route::isApi()) {
+        if (FALSE === isConsoleMode() && FALSE === Route::isApi()) {
             // Start a session
             if (session_status() === PHP_SESSION_NONE) {
                 

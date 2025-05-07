@@ -62,9 +62,9 @@ abstract class HttpRequest extends \Clicalmani\Psr7\Request
             $this->headers[] = new Header('HTTP_HOST', (array)$this->uri->getHost());
         }
 
-        if ( isset($_SERVER['CONTENT_TYPE']) && strpos($_SERVER['CONTENT_TYPE'], 'application/json') !== FALSE ) {
-            $this->attributes = json_decode($this->body->getContents(), true) ?? [];
-        }
+        // if ( isset($_SERVER['CONTENT_TYPE']) && strpos($_SERVER['CONTENT_TYPE'], 'application/json') !== FALSE ) {
+        //     $this->attributes = json_decode($this->body->getContents(), true) ?? [];
+        // }
         
         if (in_array($this->method, ['put', 'patch'])) {
             
@@ -77,9 +77,11 @@ abstract class HttpRequest extends \Clicalmani\Psr7\Request
                     preg_split("/-+$stream_boundary/", $input, -1, PREG_SPLIT_NO_EMPTY), 
                     fn(array &$parts) => array_pop($parts)
                 );
+
+                $attrs = [];
                 
                 foreach($records as $record) {
-                    $this->retrieveAttributes($record);
+                    $this->retrieveAttributes($attrs, $record);
                     $this->retrieveFiles($record);
                 }
             } else {
@@ -92,7 +94,7 @@ abstract class HttpRequest extends \Clicalmani\Psr7\Request
 
     public function getHeaders() : array
     {
-        if ( inConsoleMode() ) return $this->attributes;
+        if ( isConsoleMode() ) return $this->attributes;
         return $this->headers->all();
     }
     
@@ -133,7 +135,7 @@ abstract class HttpRequest extends \Clicalmani\Psr7\Request
      */
     public function getMethod() : string
     { 
-        if ( inConsoleMode() ) return '@console';
+        if ( isConsoleMode() ) return '@console';
         return strtolower( (string) @ $_SERVER['REQUEST_METHOD'] );
     }
 
@@ -163,7 +165,7 @@ abstract class HttpRequest extends \Clicalmani\Psr7\Request
         if ($this->hasFile($name)) {
 
             $file = $this->uploadedFiles[$name];
-
+            
             if ( is_string($file['name'])) {
                 return new File(
                     $file['tmp_name'],
@@ -370,26 +372,28 @@ abstract class HttpRequest extends \Clicalmani\Psr7\Request
      * @param string $block
      * @return void
      */
-    private function retrieveAttributes(string $block) : void
+    private function retrieveAttributes(array &$params, string $block) : void
     {
-        $data = [];
-
         if (strpos($block, 'application/octet-stream') !== FALSE) {
             preg_match('/name=\"([^\"]*)\".*stream[\n|\r]+([^\n\r].*)?$/s', $block, $matches);
-            $data[$matches[1]] = (@ $matches[2] !== NULL ? $matches[2] : '');
-        } elseif (preg_match('/name=\"([^\"]*)\"[\n|\r]+([^\n\r].*)?\r$/s', $block, $matches)) {
-            if (preg_match('/^(.*)\[\]$/i', $matches[1], $tmp)) { 
-                $data[$tmp[1]][] = (@$matches[2] ?? '');
+            $params[$matches[1]] = @$matches[2] ?? '';
+        } elseif (strpos($block, 'filename') === FALSE AND preg_match('/name=\"([^\"]*)\"[\n|\r]+([^\n\r].*)?\r$/s', $block, $matches)) {
+
+            $value = @$matches[2] ?? '';
+            $name = $matches[1]; 
+            
+            if (preg_match('/^(.*)\[\]$/i', $name, $tmp)) { 
+                $params[$tmp[1]][] = @$value;
             } else {
-                $data[$matches[1]] = (@$matches[2] ?? '');
+                $params[$name] = @$value;
             }
         }
-
-        foreach ($data as $key => $value) {
-            $this->parseParameter($data, $key, $value);
+        
+        foreach ($params as $key => $value) {
+            $this->parseParameter($params, $key, $value);
         }
 
-        $this->attributes = array_merge($this->attributes, $data);
+        $this->attributes = array_merge($this->attributes, $params);
     }
 
     /**
@@ -405,16 +409,17 @@ abstract class HttpRequest extends \Clicalmani\Psr7\Request
         if (strpos($block, 'filename') !== FALSE) {
             
             $data = ltrim($block);
-
+            
             if ($idx = strpos($data, "\r\n\r\n")) {
                 $headers = substr( $data, 0, $idx );
                 $content = substr( $data, $idx + 4, -2 ); // Skip the leading \r\n and strip the final \r\n
-
+                
                 $name = '-unknown-';
                 $filename = '-unknown-';
                 $filetype = 'application/octet-stream';
 
                 $header = strtok( $headers, "\r\n" );
+                
                 while ($header !== FALSE) {
                     if ( substr($header, 0, strlen("Content-Disposition: ")) == "Content-Disposition: " ) {
                         if ( preg_match('/name=\"([^\"]*)\"/', $header, $nmatch ) ) {
@@ -431,22 +436,24 @@ abstract class HttpRequest extends \Clicalmani\Psr7\Request
 
                     $header = strtok("\r\n");
                 }
-
+                
                 if (substr($data, -2) === "\r\n") {
                     $data = substr($data, 0, -2);
                 }
 
-                $ext = substr($filename, strrpos($filename, '.') + 1);
-                $tmp_name = "php-" . substr( sha1(rand()), 0, 6 ) . ".$ext";
-                $path = sys_get_temp_dir() . "/$tmp_name";
-                $bytes = file_put_contents( $path, $content );
-                $this->addFile($filename, $path, $bytes, $filetype);
-
+                if ( $ext = substr($filename, strrpos($filename, '.') + 1) ) {
+                    $tmp_name = "php-" . substr( sha1(rand()), 0, 6 ) . ".$ext";
+                    $path = sys_get_temp_dir() . "/$tmp_name";
+                    $bytes = file_put_contents( $path, $content );
+                    $this->addFile($name, $filename, $path, $bytes, $filetype);
+                }
             } else {
                 Log::warning("ParseInputStream: Could not locate header separator in data:");
                 Log::warning($data);
             }
         }
+
+        $files = [];
 
         foreach ($result as $key => $value) {
             $this->parseParameter($files, $key, $value);
@@ -464,92 +471,38 @@ abstract class HttpRequest extends \Clicalmani\Psr7\Request
      */
     private function parseParameter(array &$params, string $parameter, mixed $value) 
     {
-		if (strpos($parameter, '[') !== FALSE ) {  
-			
-			if ( preg_match('/^([^[]*)\[([^]]*)\](.*)$/', $parameter, $match) ) {
-
-				$name = $match[1];
-				$key  = $match[2];
-				$rem  = $match[3];
-
-				if ( $name !== '' && $name !== NULL ) {
-					if ( ! isset($params[$name]) || ! is_array($params[$name]) ) {
-						$params[$name] = [];
-					}
-
-					if ( strlen($rem) > 0 ) {
-						if ( $key === '' || $key === NULL ) {
-							$arr = [];
-							$this->parseParameter( $arr, $rem, $value );
-							$params[$name][] = $arr;
-						} else {
-							if ( !isset($params[$name][$key]) || !is_array($params[$name][$key]) ) {
-								$params[$name][$key] = [];
-							}
-							$this->parseParameter( $params[$name][$key], $rem, $value );
-						}
-					} else {
-						if ( $key === '' || $key === NULL ) {
-							$params[$name][] = $value;
-						} else {
-							$params[$name][$key] = $value;
-						}
-					}
-				} else {
-					if ( strlen($rem) > 0 ) {
-						if ( $key === '' || $key === NULL ) {
-							$this->parseParameter( $params, $rem, $value );
-						} else {
-							if ( ! isset($params[$key]) || ! is_array($params[$key]) ) {
-								$params[$key] = [];
-							}
-
-							$this->parseParameter( $params[$key], $rem, $value );
-						}
-					} else {
-						if ( $key === '' || $key === NULL ) {
-							$params[] = $value;
-						} else {
-							$params[$key] = $value;
-						}
-					}
-				}
-			} else {
-				Log::warning("ParseInputStream Parameter name regex failed: '" . $parameter . "'");
-			}
-		} else {
-            if (array_key_exists($parameter, $params) && is_array($params[$parameter])) $params[$parameter] = array_merge($params[$parameter], $value);
-			else $params[$parameter] = $value;
-		}
+		if (array_key_exists($parameter, $params) && is_array($params[$parameter])) {
+            $params[$parameter] = array_unique(array_merge($params[$parameter], $value));
+        } else {
+            $params[$parameter] = $value;
+        }
 	}
 
     /**
      * Add uploaded file
      * 
-     * @param string $name File name
+     * @param string $name
+     * @param string $filename File name
      * @param string $path File temp path
      * @param string $size File size
      * @param string $type File mimetype
      * @return void
      */
-    private function addFile(string $name, string $path, int $size, string $type) : void
+    private function addFile(string $name, string $filename, string $path, int $size, string $type) : void
     {
-        $file = (object)$this->uploadedFiles[$name];
-        $is_multiple = $file && property_exists($file, 'name') && is_array( $file?->name ) ? true : false;
-
         if (FALSE === array_key_exists($name, $this->uploadedFiles)) {
             $this->uploadedFiles[$name] = [
-                'name'      => $name,
-                'full_path' => $name,
+                'name'      => $filename,
+                'full_path' => $filename,
                 'type'      => $type,
                 'tmp_name'  => $path,
                 'error'     => !$size ? 1: 0,
                 'size'      => $size,
                 'time'      => time()
             ];
-        } elseif ($is_multiple) {
-            $this->uploadedFiles[$name]['name'][]      = $name;
-            $this->uploadedFiles[$name]['full_path'][] = $name;
+        } elseif ($file = (object)$this->uploadedFiles[$name] AND property_exists($file, 'name') && is_array( $file?->name )) {
+            $this->uploadedFiles[$name]['name'][]      = $filename;
+            $this->uploadedFiles[$name]['full_path'][] = $filename;
             $this->uploadedFiles[$name]['type'][]      = $type;
             $this->uploadedFiles[$name]['tmp_name'][]  = $path;
             $this->uploadedFiles[$name]['error'][]     = !$size ? 1: 0;

@@ -25,7 +25,7 @@ class Log
      */
     public function init() : void
     {
-        static::$is_debug_mode = (env('APP_DEBUG', 'false') === 'false') ? false: true;
+        static::$is_debug_mode = (env('APP_DEBUG', false) === false) ? false: true;
         
         ini_set('log_errors', 1);
         ini_set('error_log', storage_path('/errors/' . static::ERROR_LOG) );
