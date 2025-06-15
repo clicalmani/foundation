@@ -1,13 +1,16 @@
 <?php
 namespace Clicalmani\Foundation\Collection;
 
+use Clicalmani\Foundation\Support\Arr;
+use Clicalmani\Foundation\Support\Func;
+
 /**
  * Class Collection
  * 
  * @package clicalmani/collection 
  * @author @clicalmani
  */
-class Collection extends SPLCollection
+class Collection extends SPLCollection implements CollectionInterface
 {
     public function __construct($elements = [])
     {
@@ -18,9 +21,9 @@ class Collection extends SPLCollection
      * Store one or more elements
      * 
      * @param mixed $elements 
-     * @return static
+     * @return \Clicalmani\Foundation\Collection\CollectionInterface
      */
-    public function add(mixed ...$elements) : static
+    public function add(mixed ...$elements) : \Clicalmani\Foundation\Collection\CollectionInterface
     {
         foreach ($elements as $element) $this[] = $element;
 
@@ -55,7 +58,7 @@ class Collection extends SPLCollection
     public function index(mixed $value) : int
     {
         foreach ($this as $k => $v) {
-            if (is_callable($value) && false != $value($v, $k)) return $k;
+            if (is_callable($value) && FALSE === is_callable($value) && Func::isInternal($value) && FALSE != $value($v, $k)) return $k;
             elseif ($value === $v) return $k;
         }
 
@@ -97,9 +100,9 @@ class Collection extends SPLCollection
      * and element index as its second argument.
      * 
      * @param callable $closure
-     * @return static
+     * @return \Clicalmani\Foundation\Collection\CollectionInterface
      */
-    public function map(callable $closure) : static
+    public function map(callable $closure) : \Clicalmani\Foundation\Collection\CollectionInterface
     {
         foreach ($this as $key => $value) {
             $this[$key] = $closure($value, $key);
@@ -113,9 +116,9 @@ class Collection extends SPLCollection
      * 
      * @param callable $closure A closure function which receive element value as its first argument and 
      * element index as its second argument.
-     * @return static
+     * @return \Clicalmani\Foundation\Collection\CollectionInterface
      */
-    public function each(callable $closure) : static
+    public function each(callable $closure) : \Clicalmani\Foundation\Collection\CollectionInterface
     {
         $arr = $this->toArray();
         array_walk($arr, $closure);
@@ -127,9 +130,9 @@ class Collection extends SPLCollection
      * 
      * @param callable $closure A callback function which receive element value as its first argument and 
      * element index as its second argument.
-     * @return static
+     * @return \Clicalmani\Foundation\Collection\CollectionInterface
      */
-    public function filter(callable $closure) : static
+    public function filter(callable $closure) : \Clicalmani\Foundation\Collection\CollectionInterface
     {
         // return $this->exchange(array_values(array_filter($this->toArray(), $closure)));
         $new = [];
@@ -147,11 +150,11 @@ class Collection extends SPLCollection
      * Merges provided elements to the existing ones.
      * 
      * @param mixed $value A single element or an array of elements
-     * @return static
+     * @return \Clicalmani\Foundation\Collection\CollectionInterface
      */
-    public function merge(mixed $value) : static
+    public function merge(mixed $value) : \Clicalmani\Foundation\Collection\CollectionInterface
     {
-        if ( $value instanceof static ) $value = $value->toArray();
+        if ( $value instanceof \Clicalmani\Foundation\Collection\CollectionInterface ) $value = $value->toArray();
         elseif ( !is_array($value) ) $value = [$value];
 
         $this->exchange(
@@ -196,9 +199,9 @@ class Collection extends SPLCollection
      * Populate storage with new elements by replacing the old ones.
      * 
      * @param array $new_elements New elements to be used
-     * @return static
+     * @return \Clicalmani\Foundation\Collection\CollectionInterface
      */
-    public function exchange(array $new_elements) : static
+    public function exchange(array $new_elements) : \Clicalmani\Foundation\Collection\CollectionInterface
     {
         $this->exchangeArray($new_elements);
 
@@ -209,9 +212,9 @@ class Collection extends SPLCollection
      * Removes duplicated elements and maintain the indexes.
      * 
      * @param mixed $closure [optional] an optional callback function to define the uniqueness of an element.
-     * @return static
+     * @return \Clicalmani\Foundation\Collection\CollectionInterface
      */
-    public function unique(mixed $closure = null) : static
+    public function unique(mixed $closure = null) : \Clicalmani\Foundation\Collection\CollectionInterface
     {
         if (!isset($closure)) return $this->exchange(array_unique( $this->toArray() ));
 
@@ -250,9 +253,9 @@ class Collection extends SPLCollection
      * Sort down elements by mainting the associated indexes.
      * 
      * @param callable $closure a comparison function
-     * @return static
+     * @return \Clicalmani\Foundation\Collection\CollectionInterface
      */
-    public function sort(callable $closure) : static
+    public function sort(callable $closure) : \Clicalmani\Foundation\Collection\CollectionInterface
     {
         $this->uasort($closure);
         return $this;
@@ -292,9 +295,9 @@ class Collection extends SPLCollection
     /**
      * Convert the current collection to array object
      * 
-     * @return static
+     * @return \Clicalmani\Foundation\Collection\CollectionInterface
      */
-    public function toObject() : static
+    public function toObject() : \Clicalmani\Foundation\Collection\CollectionInterface
     {
         $this->setFlags(parent::ARRAY_AS_PROPS);
         return $this;

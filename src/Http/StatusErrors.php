@@ -3,45 +3,25 @@ namespace Clicalmani\Foundation\Http;
 
 trait StatusErrors
 {
-    /**
-     * 404 Not found redirect
-     * 
-     * @return static
-     */
-    public function notFound() : static
+    public function notFound() : \Clicalmani\Foundation\Http\ResponseInterface
     {
         $this->status = 404;
         return $this;
     }
 
-    /**
-     * 401 Unauthorized redirect
-     * 
-     * @return static
-     */
-    public function unauthorized() : static
+    public function unauthorized() : \Clicalmani\Foundation\Http\ResponseInterface
     {
         $this->status = 401;
         return $this;
     }
 
-    /**
-     * 403 Forbiden redirect
-     * 
-     * @return static
-     */
-    public function forbiden() : static
+    public function forbiden() : \Clicalmani\Foundation\Http\ResponseInterface
     {
         $this->status = 403;
         return $this;
     }
 
-    /**
-     * 500 Internal server error
-     * 
-     * @return static
-     */
-    public function internalServerError() : static
+    public function internalServerError() : \Clicalmani\Foundation\Http\ResponseInterface
     {
         $this->status = 500;
         return $this;

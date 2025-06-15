@@ -2,11 +2,10 @@
 namespace Clicalmani\Foundation\Http\Requests;
 
 use Clicalmani\Foundation\Collection\Collection;
+use Clicalmani\Foundation\Collection\CollectionInterface;
 use Clicalmani\Foundation\Support\Facades\Log;
 use Clicalmani\Psr7\Header;
 use Clicalmani\Psr7\HeadersInterface;
-use Clicalmani\Routing\Memory;
-use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UriInterface;
 
@@ -61,10 +60,6 @@ abstract class HttpRequest extends \Clicalmani\Psr7\Request
         if (!isset($this->headers['HTTP_HOST']) || $this->uri->getHost() !== '') {
             $this->headers[] = new Header('HTTP_HOST', (array)$this->uri->getHost());
         }
-
-        // if ( isset($_SERVER['CONTENT_TYPE']) && strpos($_SERVER['CONTENT_TYPE'], 'application/json') !== FALSE ) {
-        //     $this->attributes = json_decode($this->body->getContents(), true) ?? [];
-        // }
         
         if (in_array($this->method, ['put', 'patch'])) {
             
@@ -160,12 +155,19 @@ abstract class HttpRequest extends \Clicalmani\Psr7\Request
         return array_key_exists($name, $this->uploadedFiles);
     }
 
-    public function file(string $name) : File|Collection|null
+    public function file(string $name) : FileInterface|CollectionInterface|null
     {
         if ($this->hasFile($name)) {
+            $request_signatures = \Clicalmani\Foundation\Http\Request::currentRequest()->getSignatures();
 
             $file = $this->uploadedFiles[$name];
             
+            if (array_key_exists($name, $request_signatures)) {
+                $validator = new \Clicalmani\Validation\Validator;
+                $inputs = [$name => $file];
+                $validator->sanitize($inputs, [$name => $request_signatures[$name]]);
+            }
+
             if ( is_string($file['name'])) {
                 return new File(
                     $file['tmp_name'],

@@ -3,6 +3,7 @@ namespace Clicalmani\Foundation\Http;
 
 use Clicalmani\Foundation\Auth\EncryptionServiceProvider;
 use Clicalmani\Foundation\Collection\Collection;
+use Clicalmani\Foundation\Collection\CollectionInterface;
 use Clicalmani\Foundation\Http\Requests\Cookie;
 use Clicalmani\Foundation\Http\Requests\HttpOutputStream;
 use Clicalmani\Foundation\Http\Requests\HttpRequest;
@@ -24,7 +25,7 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
     /**
      * Current request object
      * 
-     * @var static
+     * @var \Clicalmani\Foundation\Http\Requests\RequestInterface
      */
     protected static $current_request;
 
@@ -38,46 +39,26 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
     /**
      * Get or set the current request
      * 
-     * @param ?self $request
-     * @return ?static
+     * @param ?\Clicalmani\Foundation\Http\Requests\RequestInterface $request
+     * @return ?\Clicalmani\Foundation\Http\Requests\RequestInterface
      */
-    public static function currentRequest(?self $request = null) : ?static
+    public static function currentRequest(?RequestInterface $request = null) : ?\Clicalmani\Foundation\Http\Requests\RequestInterface
     {
         if ($request) return self::$current_request = $request;
         return self::$current_request;
     }
 
-    /**
-     * Prepare for validation
-     * 
-     * (non-PHPDoc)
-     * @override
-     */
-    public function signatures() { /** TODO: override */ }
+    public function signatures() : void { /** TODO: override */ }
 
-    /**
-     * Prepare for validation
-     * 
-     * (non-PHPDoc)
-     * @override
-     */
-    public function prepareForValidation() {
+    public function prepareForValidation() : void {
         // TODO: override
     }
 
-    /**
-     * (non-PHPDoc)
-     * @override
-     */
-    public function authorize()
+    public function authorize() : bool
     {
         return true;
     }
 
-    /**
-     * (non-PHPDoc)
-     * @override
-     */
     public function validate(?array $signatures = []) : void
     {
         $this->merge($signatures);
@@ -184,12 +165,6 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
         return @ $token === csrf_token();
     }
 
-    /**
-     * Create request parameters hash
-     * 
-     * @param array $params
-     * @return string
-     */
     public function createParametersHash(array $params) : string
     {
         return tap(
@@ -198,31 +173,16 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
         );
     }
 
-    /**
-     * Verify request parameters validity.
-     * 
-     * @return bool
-     */
     public function verifyParameters() : bool
     {
         return EncryptionServiceProvider::verifyParameters();
     }
 
-    /**
-     * Return current request signature
-     * 
-     * @return mixed
-     */
     public static function getCurrentRequest() : mixed
     {
         return static::$current_request;
     }
 
-    /**
-     * Return authorization bearer header value
-     * 
-     * @return string
-     */
     public function getToken() : string
     {
         $authorization = $this->header('Authorization');
@@ -234,21 +194,11 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
         return '';
     }
 
-    /**
-     * Alias of getToken() method
-     * 
-     * @return string
-     */
     public function bearerToken() : string
     {
         return $this->getToken();
     }
 
-    /**
-     * Get authenticated user
-     * 
-     * @return mixed
-     */
     public function user() : mixed
     {
         if ($authenticatorClass = AuthServiceProvider::userAuthenticator()) {
@@ -271,43 +221,21 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
         return null;
     }
 
-    /**
-     * @override
-     * @see jsonSerialize()
-     */
     public function jsonSerialize() : mixed
     {
         return $this->attributes;
     }
 
-    /**
-     * Make request parameters
-     * 
-     * @param array $params Parameters
-     * @return void
-     */
     public function make(array $params = []) : void
     {
         $this->attributes = $params;
     }
 
-    /**
-     * Request parameter value
-     * 
-     * @param ?string $param Parameter to request the value. If omitted all the parameters will be returned.
-     * @return mixed
-     */
     public function request(?string $param = null) : mixed
     {
         return isset($param) ? request($param): request();
     }
 
-    /**
-     * Associate each request parameter to its value with an egal sign. Useful for filtering.
-     * 
-     * @param array $exclude List of parameters to exclude
-     * @return array
-     */
     public function where(?array $exclude = []) : array
     {
         $exclude[] = \Clicalmani\Foundation\Auth\EncryptionServiceProvider::hashParameter(); // Default
@@ -325,43 +253,27 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
         return $filters;
     }
 
-    /**
-     * Route request
-     * 
-     * @return \Clicalmani\Routing\Route|null
-     */
-    public function route() : \Clicalmani\Routing\Route|null
+    public function serialize(?array $exclude = []) : string
+    {
+        return join('&', $this->where($exclude));
+    }
+
+    public function route() : ?\Clicalmani\Routing\Route
     {
         return \Clicalmani\Foundation\Routing\Route::current();
     }
 
-    /**
-     * Request URL
-     * 
-     * @return string
-     */
     public function url() : string
     {
         if ( isConsoleMode() ) return '@';
         return $_SERVER['REQUEST_URI'];
     }
 
-    /**
-     * Request full url
-     * 
-     * @return string
-     */
     public function fullUrl() : string
     {
         return rtrim(app()->getUrl(), '/').$this->url();
     }
 
-    /**
-     * Get the full URL with query parameters
-     * 
-     * @param ?array $query_parameters
-     * @return string
-     */
     public function fullUrlWithQuery(?array $query_parameters = []) : string
     {
         $url = $this->fullUrl();
@@ -379,13 +291,6 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
         return $url;
     }
 
-    /**
-     * Parse the full URL and remove specified query parameters.
-     * Otherwise all query parameters will be removed.
-     * 
-     * @param ?array $query_parameters
-     * @return string
-     */
     public function fullUrlWithoutQuery(?array $query_parameters = []) : string
     {
         $url = $this->fullUrl();
@@ -401,98 +306,47 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
         return $url.($query_string ? "?$query_string": $query_string);
     }
 
-    /**
-     * Alias of getAttributes
-     * 
-     * @return array
-     */
     public function all(): array
     {
         return $this->getAttributes();
     }
 
-    /**
-     * Get the host name from the current request.
-     * 
-     * @return string
-     */
     public function getHost() : string
     {
         return parse_url($this->fullUrl(), PHP_URL_HOST) ?? '';
     }
 
-    /**
-     * Get the port from the current request.
-     * 
-     * @return string
-     */
     public function getPort() : string
     {
         return parse_url($this->fullUrl(), PHP_URL_PORT) ?? '80';
     }
 
-    /**
-     * Check if the request method matches the given pattern.
-     * 
-     * @param string $pattern
-     * @return bool
-     */
     public function isMethod(string $pattern) : bool
     {
         return preg_match("/^$pattern$/", $this->getMethod()) === 1;
     }
 
-    /**
-     * Get the value of a specific input parameter.
-     * 
-     * @param ?string $name The name of the input parameter.
-     * @param ?string $default The default value to return if the parameter is not found.
-     * @return mixed
-     */
     public function input(?string $name = null, ?string $default = null) : mixed
     {
         return Arr::get($this->attributes, $name, $default);
     }
 
-    /**
-     * Collect input data as an array.
-     * 
-     * @param string $name The name of the input parameter.
-     * @return \Clicalmani\Foundation\Collection\Collection
-     */
-    public function collect(string $name) : Collection
+    public function collect(string $name) : CollectionInterface
     {
         $value = $this->input($name);
         return is_array($value) ? collection($value) : collection([$value]);
     }
 
-    /**
-     * Get the value of a specific query parameter.
-     * 
-     * @param string $name The name of the query parameter.
-     * @return mixed
-     */
     public function query(string $name) : mixed
     {
         return $_GET[$name] ?? null;
     }
 
-    /**
-     * Get the request data as a JSON collection.
-     * 
-     * @return \Clicalmani\Foundation\Collection\Collection
-     */
     public function json() : Collection
     {
         return new Collection(json_decode(file_get_contents('php://input'), true));
     }
 
-    /**
-     * Check if the request has a specific parameter.
-     * 
-     * @param string|array $name The name of the parameter.
-     * @return bool
-     */
     public function has(string|array $name) : bool
     {
         if (is_string($name)) return !!$this->{$name};
@@ -504,12 +358,6 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
         return true;
     }
 
-    /**
-     * Check if the request has any of the specified parameters.
-     * 
-     * @param array $names The names of the parameters.
-     * @return bool
-     */
     public function hasAny(array $names) : bool
     {
         foreach ($names as $name) {
@@ -521,14 +369,6 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
         return false;
     }
 
-    /**
-     * Execute a callback if the request has a specific parameter.
-     * 
-     * @param string|array $name The name of the parameter.
-     * @param callable $callback The callback to execute if success.
-     * @param callable $callback2 The callback to execute if failure.
-     * @return mixed
-     */
     public function whenHas(string|array $name, callable $callback, ?callable $callback2) : mixed
     {
         if ($this->has($name)) {
@@ -540,12 +380,6 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
         return null;
     }
 
-    /**
-     * Get only the specified parameters from the request.
-     * 
-     * @param array $keys The keys of the parameters to retrieve.
-     * @return array
-     */
     public function only(array $keys) : array
     {
         return array_filter(
@@ -555,12 +389,6 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
         );
     }
 
-    /**
-     * Get all parameters except the specified ones.
-     * 
-     * @param array $keys The keys of the parameters to exclude.
-     * @return array
-     */
     public function except(array $keys) : array
     {
         return array_filter(
@@ -570,12 +398,6 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
         );
     }
 
-    /**
-     * Check if the request has a specific parameter and it is not empty.
-     * 
-     * @param string|array $name The name of the parameter.
-     * @return bool
-     */
     public function filled(string|array $name) : bool
     {
         if (is_string($name)) return !empty($this->{$name});
@@ -587,12 +409,6 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
         return true;
     }
 
-    /**
-     * Check if the request does not have a specific parameter or it is empty.
-     * 
-     * @param string|array $name The name of the parameter.
-     * @return bool
-     */
     public function isNotFilled(string|array $name) : bool
     {
         if (is_string($name)) return empty($this->{$name});
@@ -604,12 +420,6 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
         return true;
     }
 
-    /**
-     * Check if any of the specified parameters are filled.
-     * 
-     * @param array $names The names of the parameters.
-     * @return bool
-     */
     public function anyFilled(array $names) : bool
     {
         foreach ($names as $name) {
@@ -621,14 +431,6 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
         return false;
     }
 
-    /**
-     * Execute a callback if the request has a specific parameter and it is not empty.
-     * 
-     * @param string|array $name The name of the parameter.
-     * @param callable $callback The callback to execute if success.
-     * @param callable|null $callback2 The callback to execute if failure.
-     * @return mixed
-     */
     public function whenFilled(string|array $name, callable $callback, ?callable $callback2 = null) : mixed
     {
         if ($this->filled($name)) {
@@ -642,25 +444,11 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
         return null;
     }
 
-    /**
-     * Check if the request is missing a specific parameter.
-     * 
-     * @param string|array $name The name of the parameter.
-     * @return bool
-     */
     public function missing(string|array $name) : bool
     {
         return !$this->has($name);
     }
 
-    /**
-     * Execute a callback if the request is missing a specific parameter.
-     * 
-     * @param string|array $name The name of the parameter.
-     * @param callable $callback The callback to execute if success.
-     * @param callable|null $callback2 The callback to execute if failure.
-     * @return mixed
-     */
     public function whenMissing(string|array $name, callable $callback, ?callable $callback2 = null) : mixed
     {
         if ($this->missing($name)) {
@@ -674,23 +462,11 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
         return null;
     }
 
-    /**
-     * Extend the request with additional data.
-     * 
-     * @param array $data The data to extend the request with.
-     * @return void
-     */
     public function extend(array $data) : void
     {
         $this->attributes = array_merge($this->attributes, $data);
     }
 
-    /**
-     * Extend the request with additional data if the keys are missing.
-     * 
-     * @param array $data The data to extend the request with.
-     * @return void
-     */
     public function extendIfMissing(array $data) : void
     {
         foreach ($data as $key => $value) {
@@ -700,37 +476,20 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
         }
     }
 
-    /**
-     * Flush all request data to the session.
-     * 
-     * @return void
-     */
     public function flush() : void
     {
-        foreach ($this->attributes as $key => $value) $this->session($key, $value);
+        foreach ($this->attributes as $key => $value) $this->session($key, $value)->set();
     }
 
-    /**
-     * Flush only the specified request data to the session.
-     * 
-     * @param array $keys The keys of the parameters to flush.
-     * @return void
-     */
     public function flushOnly(array $keys) : void
     {
         foreach ($keys as $key) {
             if (isset($this->attributes[$key])) {
-                $this->session($key, $this->attributes[$key]);
+                $this->session($key, $this->attributes[$key])->set();
             }
         }
     }
 
-    /**
-     * Flush all request data to the session except the specified keys.
-     * 
-     * @param array $keys The keys of the parameters to exclude.
-     * @return void
-     */
     public function flushExcept(array $keys) : void
     {
         foreach ($this->attributes as $key => $value) {
@@ -740,12 +499,7 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
         }
     }
 
-    /**
-     * Manage the session instance.
-     * 
-     * @return \Clicalmani\Foundation\Http\Session
-     */
-    public function session(?string $key = null, ?string $value = null) : Session
+    public function session(?string $key = null, ?string $value = null) : \Clicalmani\Foundation\Http\Session\SessionInterface
     {
         $session_instance = new Session($key, $value);
 
@@ -754,11 +508,6 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
         return $session_instance;
     }
 
-    /**
-     * Check if the request is trustworthy.
-     * 
-     * @return bool
-     */
     public function isTrustworthy() : bool
     {
         if ($trustedIps = array_shift(static::$trustedProxies) AND is_array($trustedIps)) {
@@ -785,5 +534,10 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
         }
 
         return in_array($this->getHost(), static::$trustedHosts);
+    }
+
+    public function getSignatures() : array
+    {
+        return $this->signatures;
     }
 }

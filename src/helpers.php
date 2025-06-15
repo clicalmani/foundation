@@ -1,9 +1,9 @@
 <?php
 
 use Carbon\Carbon;
-use Clicalmani\Foundation\Resources\View;
-use Clicalmani\Psr7\NonBufferedBody;
-use Clicalmani\Psr7\StatusCodeInterface;
+use Clicalmani\Foundation\Collection\Collection;
+use Clicalmani\Foundation\Resources\ViewInterface;
+use Clicalmani\Foundation\Support\Arr;
 
 if ( ! function_exists('app') ) {
     function app() : \Clicalmani\Foundation\Maker\Application {
@@ -134,9 +134,9 @@ if ( ! function_exists( 'view' ) ) {
      * 
      * @param string $template Template name
      * @param ?array $vars Variables
-     * @return \Clicalmani\Foundation\Resources\View
+     * @return \Clicalmani\Foundation\Resources\ViewInterface
      */
-    function view(string $template, ?array $vars = []) : \Clicalmani\Foundation\Resources\View {
+    function view(string $template, ?array $vars = []) : \Clicalmani\Foundation\Resources\ViewInterface {
         return new \Clicalmani\Foundation\Resources\View($template, $vars);
     }
 }
@@ -265,7 +265,7 @@ if ( ! function_exists('request') ) {
         $request = \Clicalmani\Foundation\Http\Request::currentRequest();
 
         if ('' === $param) {
-            return $request->getAttributes();
+            return $request->all();
         }
 
         if ( $request ) {
@@ -282,7 +282,7 @@ if ( ! function_exists('request') ) {
  * 
  * @return \Clicalmani\Foundation\Http\RedirectInterface
  */
-function redirect(string $uri = '/', int $status = 302) {
+function redirect(string $uri = '/', int $status = 302) : \Clicalmani\Foundation\Http\RedirectInterface {
     return new \Clicalmani\Foundation\Http\Redirect($uri, $status);
 }
 
@@ -291,7 +291,7 @@ function redirect(string $uri = '/', int $status = 302) {
  * 
  * @return \Clicalmani\Foundation\Http\RedirectInterface
  */
-function back() {
+function back() : \Clicalmani\Foundation\Http\RedirectInterface {
     return redirect()->back();
 }
 
@@ -336,9 +336,9 @@ if ( ! function_exists('collection') ) {
     /**
      * Create a collection
      * 
-     * @return \Clicalmani\Foundation\Collection\Collection
+     * @return \Clicalmani\Foundation\Collection\CollectionInterface
      */
-    function collection($items = []) {
+    function collection($items = []) : \Clicalmani\Foundation\Collection\CollectionInterface {
         return new \Clicalmani\Foundation\Collection\Collection( $items );
     }
 }
@@ -348,7 +348,7 @@ if ( ! function_exists('collect') ) {
     /**
      * Alias of collection
      * 
-     * @return \Clicalmani\Foundation\Collection\Collection
+     * @return \Clicalmani\Foundation\Collection\CollectionInterface
      */
     function collect($items = []) {
         return collection($items);
@@ -444,11 +444,11 @@ if ( ! function_exists('mail_smtp') ) {
      * @param array $to
      * @param array $from
      * @param string $subject
-     * @param string|\Clicalmani\Foundation\Resources\View $body
+     * @param string|\Clicalmani\Foundation\Resources\ViewInterface $body
      * @param ?array $options Mail options
      * @return mixed
      */
-    function mail_smtp(array $to, array $from, string $subject, string|View $body, ?array $options = [])
+    function mail_smtp(array $to, array $from, string $subject, string|ViewInterface $body, ?array $options = [])
     {
         $mail = new \Clicalmani\Foundation\MailSMTP;
 
@@ -787,6 +787,68 @@ if ( ! function_exists('abort') ) {
     function abort(int $status_code) : never
     {
         response()->sendStatus($status_code);
+    }
+}
+
+if (! function_exists('get_data')) {
+    /**
+     * Get an item from an array or object using "dot" notation.
+     *
+     * @param  mixed  $target
+     * @param  string|array|int|null  $key
+     * @param  mixed  $default
+     * @return mixed
+     */
+    function get_data($target, $key, $default = null)
+    {
+        if (is_null($key)) {
+            return $target;
+        }
+
+        $key = is_array($key) ? $key : explode('.', $key);
+
+        foreach ($key as $i => $segment) {
+            unset($key[$i]);
+
+            if (is_null($segment)) {
+                return $target;
+            }
+
+            if ($segment === '*') {
+                if ($target instanceof Collection) {
+                    $target = $target->all();
+                } elseif (! is_iterable($target)) {
+                    return value($default);
+                }
+
+                $result = [];
+
+                foreach ($target as $item) {
+                    $result[] = data_get($item, $key);
+                }
+
+                return in_array('*', $key) ? Arr::collapse($result) : $result;
+            }
+
+            $segment = match ($segment) {
+                '\*' => '*',
+                '\{first}' => '{first}',
+                '{first}' => array_key_first(is_array($target) ? $target : (new Collection($target))->all()),
+                '\{last}' => '{last}',
+                '{last}' => array_key_last(is_array($target) ? $target : (new Collection($target))->all()),
+                default => $segment,
+            };
+
+            if (Arr::accessible($target) && Arr::exists($target, $segment)) {
+                $target = $target[$segment];
+            } elseif (is_object($target) && isset($target->{$segment})) {
+                $target = $target->{$segment};
+            } else {
+                return value($default);
+            }
+        }
+
+        return $target;
     }
 }
 

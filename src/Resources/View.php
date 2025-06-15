@@ -5,7 +5,7 @@ use Clicalmani\Foundation\Container\Manager;
 use Clicalmani\Psr7\NonBufferedBody;
 use Clicalmani\Psr7\Response;
 
-class View extends Response
+class View extends Response implements ViewInterface
 {
     /**
      * Twig environment
@@ -32,11 +32,6 @@ class View extends Response
         $this->runComposers();
     }
 
-    /**
-     * Render the view
-     * 
-     * @return string
-     */
     public function render(): string
     {
         return $this->twig->render($this->template, $this->context);
@@ -55,12 +50,6 @@ class View extends Response
         return $this;
     }
 
-    /**
-     * Share data across all views
-     * 
-     * @param string $key
-     * @param mixed $value
-     */
     public static function share(string $key, mixed $value): void
     {
         $sharedData = app()->viewSharedData();
@@ -68,26 +57,12 @@ class View extends Response
         app()->viewSharedData($sharedData);
     }
 
-    /**
-     * Add a view composer
-     * 
-     * @param string|array $views
-     * @param callable $composer
-     * @return void
-     */
     public static function composer(string|array $views, callable $composer): void
     {
         $views = (array) $views;
         foreach ($views as $view) Kernel::$composers[$view] = $composer;
     }
 
-    /**
-     * Add a view creator
-     * 
-     * @param string $view
-     * @param callable $creator
-     * @return void
-     */
     public static function create(string $view, callable $creator) : void
     {
         Kernel::$creators[$view] = $creator;

@@ -24,6 +24,11 @@ class Mock
         $class = get_called_class();
 
         if ( method_exists($class, "_$method") ) {
+            if ($class === \Clicalmani\Foundation\Support\Func::class || $class === \Clicalmani\Foundation\Support\Arr::class) {
+                $element = array_shift($args);
+                return with( new $class($element) )->{"_$method"}( ...$args );
+            }
+
             return with( new $class )->{"_$method"}( ...$args );
         } else throw new \Exception("Method $method does not exists on " . $class);
     }

@@ -14,9 +14,10 @@ use Psr\Http\Message\StreamInterface;
  * @package Clicalmani\Foundation
  * @author @Clicalmani\Foundation
  */
-class Response extends \Clicalmani\Psr7\Response
+class Response extends \Clicalmani\Psr7\Response implements ResponseInterface
 {
     use StatusErrors;
+    use JsonResponse;
 
     public function __construct(
         private string $message = '',
@@ -40,25 +41,7 @@ class Response extends \Clicalmani\Psr7\Response
         );
     }
 
-    /**
-     * Send a json response
-     * 
-     * @param mixed $data
-     * @return static
-     */
-    public function json(mixed $data) : static
-    {
-        $this->sendBody($this->__json($data));
-        return $this;
-    }
-
-    /**
-     * Send a status response
-     * 
-     * @param ?int $code Status code
-     * @return never
-     */
-    public function sendStatus(?int $code = null)
+    public function sendStatus(?int $code = null) : never
     {
         $this->status = $code ?: $this->status;
         http_response_code($this->status);
@@ -77,43 +60,9 @@ class Response extends \Clicalmani\Psr7\Response
             try {
                 $this->sendBody(view($this->status, ['code' => $this->getReasonPhrase()]));
             } catch (ResourceNotFoundException $e) {
-                ;
+                EXIT;
             }
         }
-    }
-
-    /**
-     * Send a success status
-     * 
-     * @param mixed $message
-     * @return static
-     */
-    public function success(mixed $message = null) : static
-    {
-        $this->body->write(
-            $this->__json([
-                'success' => true,
-                'data'    => $message
-            ])
-        );
-        return $this;
-    }
-
-    /**
-     * Send an error status
-     * 
-     * @param mixed $message
-     * @return static
-     */
-    public function error(mixed $message = null) : static
-    {
-        $this->body->write(
-            $this->__json([
-                'success' => false,
-                'data'    => $message
-            ])
-        );
-        return $this;
     }
 
     /**
@@ -126,24 +75,13 @@ class Response extends \Clicalmani\Psr7\Response
         return (string) $this->body;
     }
 
-    /**
-     * Set the message
-     * 
-     * @param string $message
-     * @return static
-     */
     public function setMessage(string $message) : static
     {
         $this->message = $message;
         return $this;
     }
     
-    /**
-     * Send the response headers
-     * 
-     * @return void
-     */
-    public function sendHeaders()
+    public function sendHeaders() : void
     {
         /** @var \Clicalmani\Psr7\Header */
         foreach ($this->headers as $header) {
@@ -151,12 +89,6 @@ class Response extends \Clicalmani\Psr7\Response
         }
     }
 
-    /**
-     * Send the response body
-     * 
-     * @param ?string $content
-     * @return never
-     */
     public function sendBody(?string $content = null) : never
     {
         if ($this->body instanceof NonBufferedBody) {
@@ -210,12 +142,6 @@ class Response extends \Clicalmani\Psr7\Response
         exit;
     }
 
-    /**
-     * Send a response
-     * 
-     * @param string $content
-     * @return never
-     */
     public function send(string $content = '') : never
     {
         $content = $content ?: $this->message;
@@ -229,41 +155,20 @@ class Response extends \Clicalmani\Psr7\Response
         exit;
     }
 
-    /**
-     * Set status
-     * 
-     * @param int $code
-     * @return static
-     */
-    public function status(int $code) : static
+    public function status(int $code) : \Clicalmani\Foundation\Http\ResponseInterface
     {
         $this->status = $code;
         http_response_code($code);
         return $this;
     }
 
-    /**
-     * Set header
-     * 
-     * @param string $name
-     * @param string|array $value
-     * @return static
-     */
     public function header(string $name, string|array $value) : static
     {
         $this->headers[] = new Header($name, (array)$value);
         return $this;
     }
 
-    /**
-     * Send a file for download
-     * 
-     * @param string $file
-     * @param ?string $name
-     * @param ?string $type
-     * @return never
-     */
-    public function sendFile(string $file, string $name = null, string $type = null) : never
+    public function sendFile(string $file, ?string $name = null, ?string $type = null) : never
     {
         $this->withHeader('Content-Type', $type ?? mime_content_type($file))
             ->withHeader('Content-Disposition', "attachment; filename=\"$name\"")
@@ -271,26 +176,11 @@ class Response extends \Clicalmani\Psr7\Response
             ->send();
     }
 
-    /**
-     * Redirect to a url
-     * 
-     * @param string $url
-     * @param int $status
-     * @return \Clicalmani\Foundation\Http\RedirectInterface
-     */
     public function redirect(string $uri = '/', int $status = 302) : RedirectInterface
     {
         return new Redirect($uri, $status);
     }
 
-    /**
-     * Stream a file
-     * 
-     * @param string $file
-     * @param int $status
-     * @param array $headers
-     * @return never
-     */
     public function stream(string $file, int $status = 200, array $headers = []) : never
     {
         $this->status = $status;
@@ -320,18 +210,6 @@ class Response extends \Clicalmani\Psr7\Response
             ->send();
     }
 
-    /**
-     * Set a cookie
-     * 
-     * @param string $name
-     * @param string $value
-     * @param int $expire
-     * @param string $path
-     * @param string $domain
-     * @param bool $secure
-     * @param bool $httponly
-     * @return static
-     */
     public function cookie(
         string $name, 
         string $value, 
@@ -353,39 +231,17 @@ class Response extends \Clicalmani\Psr7\Response
         return $this;
     }
 
-    /**
-     * Delete a cookie
-     * 
-     * @param string $name
-     * @param string $path
-     * @param string $domain
-     * @return static
-     */
     public function deleteCookie(string $name, string $path = '', string $domain = '') : static
     {
         setcookie($name, '', time() - 3600, $path, $domain);
         return $this;
     }
 
-    /**
-     * Set a view
-     * 
-     * @param string $view
-     * @param array $data
-     * @return never
-     */
     public function view(string $view, array $data = []) : never
     {
         $this->send(view($view, $data)->render());
     }
 
-    /**
-     * Set multiple headers
-     * 
-     * @param string $view
-     * @param array $data
-     * @return never
-     */
     public function withHeaders(array $headers) : static
     {
         foreach ($headers as $name => $value) {
@@ -394,13 +250,6 @@ class Response extends \Clicalmani\Psr7\Response
         return $this;
     }
 
-    /**
-     * Create a stream from a path and context
-     * 
-     * @param string $path
-     * @param array $context
-     * @return static
-     */
     public function createStream(string $path, array $context = []) : StreamInterface 
     {
         $this->sendHeaders();
