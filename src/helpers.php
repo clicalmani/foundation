@@ -262,7 +262,7 @@ if ( ! function_exists('request') ) {
      */
     function request(?string $param = '', ?string $value = null) : mixed {
 
-        $request = \Clicalmani\Foundation\Http\Request::currentRequest();
+        $request = \Clicalmani\Foundation\Http\Request::current();
 
         if ('' === $param) {
             return $request->all();

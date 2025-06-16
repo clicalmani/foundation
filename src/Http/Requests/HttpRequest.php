@@ -158,7 +158,7 @@ abstract class HttpRequest extends \Clicalmani\Psr7\Request
     public function file(string $name) : FileInterface|CollectionInterface|null
     {
         if ($this->hasFile($name)) {
-            $request_signatures = \Clicalmani\Foundation\Http\Request::currentRequest()->getSignatures();
+            $request_signatures = \Clicalmani\Foundation\Http\Request::current()->getSignatures();
 
             $file = $this->uploadedFiles[$name];
             

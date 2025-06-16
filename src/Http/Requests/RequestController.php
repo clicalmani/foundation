@@ -71,7 +71,7 @@ class RequestController extends Facade
         
         if ( NULL !== $middleware )
             with( new $middleware )->handle(
-                Request::currentRequest(),
+                Request::current(),
                 new Response(),
                 fn() => http_response_code()
             );

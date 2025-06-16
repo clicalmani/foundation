@@ -348,7 +348,7 @@ class Application
         if (isset($data)) $this->viewSharedData = $data;
         else {
             if ( is_array($this->viewSharedData)) return $this->viewSharedData;
-            elseif ( is_callable($this->viewSharedData) ) return call($this->viewSharedData, Request::getCurrentRequest());
+            elseif ( is_callable($this->viewSharedData) ) return call($this->viewSharedData, Request::current());
         }
 
         return [];

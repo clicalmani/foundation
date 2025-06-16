@@ -9,7 +9,7 @@ interface RequestInterface extends \Psr\Http\Message\ServerRequestInterface
      * @param ?\Clicalmani\Foundation\Http\Requests\RequestInterface $request
      * @return ?\Clicalmani\Foundation\Http\Requests\RequestInterface
      */
-    public static function currentRequest(?RequestInterface $request = null) : ?\Clicalmani\Foundation\Http\Requests\RequestInterface;
+    public static function current(?RequestInterface $request = null) : ?\Clicalmani\Foundation\Http\Requests\RequestInterface;
 
     /**
      * (non-PHPDoc)

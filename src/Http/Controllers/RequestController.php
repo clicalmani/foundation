@@ -161,7 +161,7 @@ class RequestController
 	 */
 	public function invokeMethod(ReflectorInterface $reflector) : \Psr\Http\Message\ResponseInterface|\Clicalmani\Foundation\Http\RedirectInterface
 	{
-		$request = isConsoleMode() ? Request::currentRequest() : new Request; // Fallback to default request
+		$request = isConsoleMode() ? Request::current() : new Request; // Fallback to default request
 		/** @var int|null */
 		$request_pos = null;
 		
@@ -174,7 +174,7 @@ class RequestController
 			$this->validateRequest($request);
 		}
 		
-		Request::currentRequest($request);
+		Request::current($request);
 		
 		$request_parameters = $this->getRequestParameters();
 		/** @var \ReflectionParameter[] */
@@ -283,7 +283,7 @@ class RequestController
 	private function getRequestParameters() : array
     {
 		/** @var \Clicalmani\Foundation\Http\Request */
-		$request = Request::currentRequest();
+		$request = Request::current();
 
 		if ( isConsoleMode() ) return $request->getAttributes();
 		
@@ -321,12 +321,12 @@ class RequestController
 	{
 		$resource = $reflector->getResource()['name'];
 		$nested_resource = @$reflector->getNestedResource()['name'];
-		$request = Request::currentRequest();
+		$request = Request::current();
 		
 		if ($reflector instanceof MethodReflector) {
 			if ($attribute = (new \ReflectionMethod($reflector->getClass(), $reflector->getName()))->getAttributes(AsValidator::class)) {
 				$request->merge($attribute[0]->newInstance()->args);
-				Request::currentRequest($request);
+				Request::current($request);
 			}
 		}
 		

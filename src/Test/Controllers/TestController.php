@@ -214,7 +214,7 @@ abstract class TestController implements TestInterface
             }
 
             $request->make( $parameters );
-            Request::currentRequest($request);
+            Request::current($request);
             
             /**
              * User sequence

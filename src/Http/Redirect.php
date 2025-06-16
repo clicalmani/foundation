@@ -22,7 +22,7 @@ class Redirect implements RedirectInterface
         $this->uri = $uri;
         $this->status = $status;
 
-        if (Request::currentRequest()?->hasHeader('X-Inertia') && in_array((new Request)->getMethod(), ['put', 'patch', 'delete'])) {
+        if (Request::current()?->hasHeader('X-Inertia') && in_array((new Request)->getMethod(), ['put', 'patch', 'delete'])) {
             $this->status = 303;
         }
     }
@@ -86,7 +86,7 @@ class Redirect implements RedirectInterface
     {
         if ($this->message_name) $this->uri .= (strpos($this->uri, '?') === false ? '?' : '&') . $this->message_name . '=' . $this->message;
         
-        if (Request::currentRequest()?->hasHeader('X-Inertia')) {
+        if (Request::current()?->hasHeader('X-Inertia')) {
             return Inertia::location($this->uri);
         }
         

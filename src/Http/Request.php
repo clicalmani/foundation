@@ -42,7 +42,7 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
      * @param ?\Clicalmani\Foundation\Http\Requests\RequestInterface $request
      * @return ?\Clicalmani\Foundation\Http\Requests\RequestInterface
      */
-    public static function currentRequest(?RequestInterface $request = null) : ?\Clicalmani\Foundation\Http\Requests\RequestInterface
+    public static function current(?RequestInterface $request = null) : ?\Clicalmani\Foundation\Http\Requests\RequestInterface
     {
         if ($request) return self::$current_request = $request;
         return self::$current_request;
@@ -176,11 +176,6 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
     public function verifyParameters() : bool
     {
         return EncryptionServiceProvider::verifyParameters();
-    }
-
-    public static function getCurrentRequest() : mixed
-    {
-        return static::$current_request;
     }
 
     public function getToken() : string
