@@ -47,11 +47,6 @@ class File implements FileInterface
         return new Stream(fopen($this->file, 'r'));
     }
 
-    /**
-     * Move file to a new location
-     *
-     * @return void
-     */
     public function moveTo(string $targetPath): void
     {
         if ($this->moved) {
@@ -73,31 +68,16 @@ class File implements FileInterface
         $this->moved = true;
     }
 
-    /**
-     * Get the file size
-     *
-     * @return ?int
-     */
     public function getSize(): ?int
     {
         return $this->size;
     }
 
-    /**
-     * Get the error code
-     *
-     * @return string
-     */
     public function getError(): int
     {
         return $this->error;
     }
 
-    /**
-     * Get the file name
-     *
-     * @return string
-     */
     public function getClientFilename(): string
     {
         return $this->name;
@@ -113,34 +93,17 @@ class File implements FileInterface
         return $this->type;
     }
 
-    /**
-     * Get the file extension
-     *
-     * @return string|null
-     */
     public function getClientExtension(): ?string
     {
         return pathinfo($this->name, PATHINFO_EXTENSION);
     }
 
-    /**
-     * Check if the file is valid
-     *
-     * @return bool
-     */
     public function isValid() : bool
     {
         return $this->error === UPLOAD_ERR_OK;
     }
 
-    /**
-     * Store the file on the disk
-     *
-     * @param string $filename
-     * @param string|null $disk
-     * @return string
-     */
-    public function store(string $filename, ?string $disk = null)
+    public function store(string $filename, ?string $disk = null) : string
     {
         $manager = new FilesystemManager(app());
         $disk = $disk ?: $manager->getDefaultDriver();

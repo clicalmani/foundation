@@ -1,7 +1,7 @@
 <?php
 namespace Clicalmani\Foundation\Auth;
 
-use Clicalmani\Database\Factory\Models\Model;
+use Clicalmani\Database\Factory\Models\Elegant;
 use Clicalmani\Foundation\Http\Requests\RequestInterface;
 use Clicalmani\Foundation\Providers\ServiceProvider;
 
@@ -24,9 +24,9 @@ abstract class Authenticate extends ServiceProvider implements \JsonSerializable
 	/**
 	 * Authenticated user
 	 * 
-	 * @var \Clicalmani\Database\Factory\Models\Model
+	 * @var \Clicalmani\Database\Factory\Models\Elegant
 	 */
-	protected Model $user;
+	protected Elegant $user;
 	 
 	/**
 	 * Constructor
@@ -47,7 +47,7 @@ abstract class Authenticate extends ServiceProvider implements \JsonSerializable
 	public function createUser(mixed $user_id = NULL) : static
 	{
 		$this->user_id = $user_id ?: $this->user_id;
-		$this->user = instance($this->userModel, fn(Model $instance) => $instance, $this->user_id);
+		$this->user = instance($this->userModel, fn(Elegant $instance) => $instance, $this->user_id);
 		return $this;
 	}
 

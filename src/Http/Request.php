@@ -35,7 +35,7 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
      * @var \Clicalmani\Foundation\Fundation\Validation\Validator
      */
     private $validator;
-
+    
     /**
      * Get or set the current request
      * 
@@ -176,6 +176,11 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
     public function verifyParameters() : bool
     {
         return EncryptionServiceProvider::verifyParameters();
+    }
+
+    public static function getcurrent() : mixed
+    {
+        return static::$current_request;
     }
 
     public function getToken() : string

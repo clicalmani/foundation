@@ -698,7 +698,7 @@ if ( ! function_exists('tree') ) {
      * @param callable $callback
      * @return mixed
      */
-    function tree(iterable $iterable, callable $callback) : mixed {
+    function tree(iterable|\Clicalmani\Foundation\Collection\CollectionInterface $iterable, callable $callback) : mixed {
         $ret = [];
         foreach ($iterable as $item) {
             $ret[] = $item;

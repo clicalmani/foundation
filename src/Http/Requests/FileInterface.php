@@ -120,4 +120,20 @@ interface FileInterface
      * @return string|null The file extension or null if none was provided.
      */
     public function getClientExtension(): ?string;
+
+    /**
+     * Check if the file is valid
+     *
+     * @return bool
+     */
+    public function isValid() : bool;
+
+    /**
+     * Store the file on the disk
+     *
+     * @param string $filename
+     * @param string|null $disk
+     * @return string
+     */
+    public function store(string $filename, ?string $disk = null) : string;
 }

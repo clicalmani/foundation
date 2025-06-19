@@ -1,20 +1,20 @@
 <?php
 namespace Clicalmani\Foundation\Http\Middlewares;
 
-use Clicalmani\Foundation\Http\Request;
-use Clicalmani\Foundation\Http\Response;
+use Clicalmani\Foundation\Http\Requests\RequestInterface;
+use Clicalmani\Foundation\Http\ResponseInterface;
 
 class Api extends Middleware
 {
     /**
      * Handler
      * 
-     * @param \Clicalmani\Foundation\Http\Request $request Request object
-     * @param \Clicalmani\Foundation\Http\Response $response Response object
+     * @param \Clicalmani\Foundation\Http\Requests\RequestInterface $request Request object
+     * @param \Clicalmani\Foundation\Http\ResponseInterface $response Response object
      * @param \Closure $next Next middleware function
-     * @return \Clicalmani\Foundation\Http\Response|\Clicalmani\Foundation\Http\RedirectInterface
+     * @return \Clicalmani\Foundation\Http\ResponseInterface|\Clicalmani\Foundation\Http\RedirectInterface
      */
-    public function handle(Request $request, Response $response, \Closure $next) : \Clicalmani\Foundation\Http\Response|\Clicalmani\Foundation\Http\RedirectInterface
+    public function handle(RequestInterface $request, ResponseInterface $response, \Closure $next) : \Clicalmani\Foundation\Http\ResponseInterface|\Clicalmani\Foundation\Http\RedirectInterface
     {
         return $next($request, $response);
     }

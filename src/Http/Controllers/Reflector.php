@@ -149,7 +149,7 @@ class Reflector
     {
         foreach ($this->parameters as $index => $parameter) {
             foreach ($this->getParameterClassNames($parameter) as $class) {
-                if (is_subclass_of($class, \Clicalmani\Database\Factory\Models\Model::class)) yield ['name' => $class, 'pos' => $index];
+                if (is_subclass_of($class, \Clicalmani\Database\Factory\Models\Elegant::class)) yield ['name' => $class, 'pos' => $index];
             }
         }
 

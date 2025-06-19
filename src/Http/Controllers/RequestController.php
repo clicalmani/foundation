@@ -3,7 +3,7 @@ namespace Clicalmani\Foundation\Http\Controllers;
 
 use Clicalmani\Foundation\Http\Request;
 use Clicalmani\Foundation\Exceptions\ModelNotFoundException;
-use Clicalmani\Database\Factory\Models\Model;
+use Clicalmani\Database\Factory\Models\Elegant;
 use Clicalmani\Foundation\Http\Response;
 use Clicalmani\Foundation\Providers\RouteServiceProvider;
 use Clicalmani\Foundation\Routing\Exceptions\RouteNotFoundException;
@@ -240,10 +240,6 @@ class RequestController
 		}
 		
 		if ($reflector instanceof MethodReflector) return $reflector($this->getInstance($reflector->getClass()), ...$args);
-
-		// $args = collection(array_merge($args, array_values($request_parameters)))
-		// 			->filter(fn($arg) => $arg)
-		// 			->toArray();
 		
 		return $reflector(...$args);
 	}
@@ -345,7 +341,7 @@ class RequestController
 			if ( count($key_value) ) {
 				if ( count($key_value) === 1 ) $key_value = $key_value[0];	// Single primary key
 				
-				/** @var \Clicalmani\Database\Factory\Models\Model */
+				/** @var \Clicalmani\Database\Factory\Models\Elegant */
 				$model = new $resource($key_value);
 				$this->resolveRouteBinding($model, $resource);
 
@@ -353,7 +349,7 @@ class RequestController
 
 			} else throw new ModelNotFoundException("$resource not found");
 		} else {
-			/** @var \Clicalmani\Database\Factory\Models\Model */
+			/** @var \Clicalmani\Database\Factory\Models\Elegant */
 			$model = new $resource;
 		}
 
@@ -369,7 +365,7 @@ class RequestController
 			if ( count($nested_key_value) ) {
 				if ( count($nested_key_value) === 1 ) $nested_key_value = $nested_key_value[0];	// Single primary key
 				
-				/** @var \Clicalmani\Database\Factory\Models\Model */
+				/** @var \Clicalmani\Database\Factory\Models\Elegant */
 				$nested_model = new $nested_resource($nested_key_value);
 				$this->resolveRouteBinding($nested_model, $nested_resource);
 
@@ -377,7 +373,7 @@ class RequestController
 
 			} else throw new ModelNotFoundException("$nested_resource not found");
 		} else {
-			/** @var \Clicalmani\Database\Factory\Models\Model|null */
+			/** @var \Clicalmani\Database\Factory\Models\Elegant|null */
 			$nested_model = $nested_resource ? new $nested_resource: null;
 		}
 
@@ -394,11 +390,11 @@ class RequestController
 	/**
 	 * Resolve route binding
 	 * 
-	 * @param \Clicalmani\Database\Factory\Models\Model $model
+	 * @param \Clicalmani\Database\Factory\Models\Elegant $model
 	 * @param string $resource
 	 * @return void
 	 */
-	private function resolveRouteBinding(Model $model, string $resource) : void
+	private function resolveRouteBinding(Elegant $model, string $resource) : void
 	{
 		if ($scope = $this->route->scoped()) {
 			$scope_name = collection(explode('_', $model))->map(fn(string $part) => ucfirst($part))->join('');
@@ -417,10 +413,10 @@ class RequestController
 	/**
 	 * Bind resource routines
 	 * 
-	 * @param \Clicalmani\Database\Factory\Models\Model $obj
+	 * @param \Clicalmani\Database\Factory\Models\Elegant $obj
 	 * @return void
 	 */
-	private function bindRoutines(Model $model) : void
+	private function bindRoutines(Elegant $model) : void
 	{
 		/**
 		 * Select distinct
@@ -456,10 +452,10 @@ class RequestController
 	/**
 	 * Distinct rows
 	 * 
-	 * @param \Clicalmani\Database\Factory\Models\Model $obj
+	 * @param \Clicalmani\Database\Factory\Models\Elegant $obj
 	 * @return void
 	 */
-	private function getResourceDistinct(Model $obj) : void
+	private function getResourceDistinct(Elegant $obj) : void
 	{
 		if ( $distinct = $this->route?->distinctResult() ) {
 			$obj->distinct($distinct);
@@ -469,10 +465,10 @@ class RequestController
 	/**
 	 * Ignore duplicates
 	 * 
-	 * @param \Clicalmani\Database\Factory\Models\Model $obj
+	 * @param \Clicalmani\Database\Factory\Models\Elegant $obj
 	 * @return void
 	 */
-	private function createResourceIgnore(Model $obj) : void
+	private function createResourceIgnore(Elegant $obj) : void
 	{
 		if ( $ignore = $this->route?->ignoreKeyWarning() ) {
 			$obj->ignore($ignore);
@@ -482,10 +478,10 @@ class RequestController
 	/**
 	 * Delete from
 	 * 
-	 * @param \Clicalmani\Database\Factory\Models\Model $obj
+	 * @param \Clicalmani\Database\Factory\Models\Elegant $obj
 	 * @return void
 	 */
-	private function resourceDeleteFrom(Model $obj) : void
+	private function resourceDeleteFrom(Elegant $obj) : void
 	{
 		if ( $from = $this->route?->deleteFrom() ) {
 			$obj->from($from);
@@ -495,10 +491,10 @@ class RequestController
 	/**
 	 * Calc rows
 	 * 
-	 * @param \Clicalmani\Database\Factory\Models\Model $obj
+	 * @param \Clicalmani\Database\Factory\Models\Elegant $obj
 	 * @return void
 	 */
-	private function resourceCalcRows(Model $obj) : void
+	private function resourceCalcRows(Elegant $obj) : void
 	{
 		if ( $enable = $this->route?->calcFoundRows() ) {
 			$obj->calcFoundRows($enable);
@@ -508,10 +504,10 @@ class RequestController
 	/**
 	 * Limit rows
 	 * 
-	 * @param \Clicalmani\Database\Factory\Models\Model $obj
+	 * @param \Clicalmani\Database\Factory\Models\Elegant $obj
 	 * @return void
 	 */
-	private function resourceLimit(Model $obj) : void
+	private function resourceLimit(Elegant $obj) : void
 	{
 		if ( $arr = $this->route?->limitResult() ) {
 			$obj->limit($arr['offset'], $arr['count']);
@@ -521,10 +517,10 @@ class RequestController
 	/**
 	 * Order by
 	 * 
-	 * @param \Clicalmani\Database\Factory\Models\Model $obj
+	 * @param \Clicalmani\Database\Factory\Models\Elegant $obj
 	 * @return void
 	 */
-	private function resourceOrderBy(Model $obj) : void
+	private function resourceOrderBy(Elegant $obj) : void
 	{
 		if ( $order_by = $this->route?->orderResultBy() ) {
 			$obj->orderBy($order_by);

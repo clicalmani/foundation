@@ -3,8 +3,8 @@ namespace Clicalmani\Foundation\Http\Middlewares;
 
 use Clicalmani\Foundation\Container\SPL_Loader;
 use Clicalmani\Foundation\Http\RedirectInterface;
-use Clicalmani\Foundation\Http\Request;
-use Clicalmani\Foundation\Http\Response;
+use Clicalmani\Foundation\Http\Requests\RequestInterface;
+use Clicalmani\Foundation\Http\ResponseInterface;
 use Clicalmani\Routing\Group;
 
 /**
@@ -28,12 +28,12 @@ abstract class Middleware
     /**
      * Handler
      * 
-     * @param \Clicalmani\Foundation\Http\Request $request Request object
-     * @param \Clicalmani\Foundation\Http\Response $response Response object
+     * @param \Clicalmani\Foundation\Http\Requests\RequestInterface $request Request object
+     * @param \Clicalmani\Foundation\Http\ResponseInterface $response Response object
      * @param \Closure $next Next middleware function
-     * @return \Clicalmani\Foundation\Http\Response|\Clicalmani\Foundation\Http\RedirectInterface
+     * @return \Clicalmani\Foundation\Http\ResponseInterface|\Clicalmani\Foundation\Http\RedirectInterface
      */
-    public abstract function handle(Request $request, Response $response, \Closure $next) : Response|RedirectInterface;
+    public abstract function handle(RequestInterface $request, ResponseInterface $response, \Closure $next) : ResponseInterface|RedirectInterface;
 
     /**
      * Bootstrap

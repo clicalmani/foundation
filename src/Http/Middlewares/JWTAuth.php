@@ -1,11 +1,11 @@
 <?php
 namespace Clicalmani\Foundation\Http\Middlewares;
 
-use Clicalmani\Foundation\Http\Request;
-use Clicalmani\Foundation\Http\Response;
 use Clicalmani\Foundation\Container\SPL_Loader;
 use Clicalmani\Foundation\Auth\AuthServiceProvider;
 use Clicalmani\Foundation\Http\RedirectInterface;
+use Clicalmani\Foundation\Http\Requests\RequestInterface;
+use Clicalmani\Foundation\Http\ResponseInterface;
 
 /**
  * Class JWTAuth
@@ -31,12 +31,12 @@ abstract class JWTAuth extends AuthServiceProvider
     /**
      * Handler
      * 
-     * @param \Clicalmani\Foundation\Http\Request $request Current request object
-     * @param \Clicalmani\Foundation\Http\Response $response Http response
-     * @param \Closure $next 
-     * @return \Clicalmani\Foundation\Http\Response|\Clicalmani\Foundation\Http\RedirectInterface
+     * @param \Clicalmani\Foundation\Http\Requests\RequestInterface $request Request object
+     * @param \Clicalmani\Foundation\Http\ResponseInterface $response Response object
+     * @param \Closure $next Next middleware function
+     * @return \Clicalmani\Foundation\Http\ResponseInterface|\Clicalmani\Foundation\Http\RedirectInterface
      */
-    public abstract function handle(Request $request, Response $response, \Closure $next) : Response|RedirectInterface;
+    public abstract function handle(RequestInterface $request, ResponseInterface $response, \Closure $next) : ResponseInterface|RedirectInterface;
 
     /**
      * Bootstrap

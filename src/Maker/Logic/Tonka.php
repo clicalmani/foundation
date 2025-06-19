@@ -375,7 +375,7 @@ class Tonka
             $modelClass = substr($modelClass, 0, strlen($modelClass) - 4);
             $modelClass = join('\\', preg_split('/\\\/', $modelClass, -1, PREG_SPLIT_NO_EMPTY));
             
-            /** @var \Clicalmani\Database\Factory\Models\Model */
+            /** @var \Clicalmani\Database\Factory\Models\Elegant */
             $model = new $modelClass;
             $entity = $model->getEntity();
 
@@ -391,7 +391,7 @@ class Tonka
          */
         foreach ($xdt->select('entity') as $node) {
             $node = $xdt->parse($node);
-            /** @var \Clicalmani\Database\Factory\Models\Model */
+            /** @var \Clicalmani\Database\Factory\Models\Elegant */
             $modelClass = $node->attr('model');
             $model = new $modelClass;
             $entity = $model->getEntity();
@@ -604,13 +604,13 @@ class Tonka
      */
     private function isMigrated(XDTNodeList $node) : bool
     {
-        /** @var \Clicalmani\Database\Factory\Models\Model */
+        /** @var \Clicalmani\Database\Factory\Models\Elegant */
         $modelClass = $node->attr('model');
         $model = new $modelClass;
         $table1 = $model->getTable();
 
         foreach ($this->migrated as $n) {
-            /** @var \Clicalmani\Database\Factory\Models\Model */
+            /** @var \Clicalmani\Database\Factory\Models\Elegant */
             $modelClass = $n->attr('model');
             $model = new $modelClass;
             $table2 = $model->getTable();
@@ -632,7 +632,7 @@ class Tonka
     {
         /** @var string */
         $modelClass = $node->attr('model');
-        /** @var \Clicalmani\Database\Factory\Models\Model */
+        /** @var \Clicalmani\Database\Factory\Models\Elegant */
         $model = new $modelClass;
         $entity = $model->getEntity();
         $entity->setModel($model);
@@ -776,13 +776,13 @@ class Tonka
      */
     private function isDroped(XDTNodeList $node) : bool
     {
-        /** @var \Clicalmani\Database\Factory\Models\Model */
+        /** @var \Clicalmani\Database\Factory\Models\Elegant */
         $modelClass = $node->attr('model');
         $model = new $modelClass;
         $table1 = $model->getTable();
 
         foreach ($this->droped as $n) {
-            /** @var \Clicalmani\Database\Factory\Models\Model */
+            /** @var \Clicalmani\Database\Factory\Models\Elegant */
             $modelClass = $n->attr('model');
             $model = new $modelClass;
             $table2 = $model->getTable();

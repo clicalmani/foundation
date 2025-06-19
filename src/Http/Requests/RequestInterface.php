@@ -360,4 +360,11 @@ interface RequestInterface extends \Psr\Http\Message\ServerRequestInterface
      * @return array
      */
     public function getSignatures() : array;
+
+    /**
+     * Check CSRF validity by testing the csrf_token parameter's value.
+     * 
+     * @return bool
+     */
+    public function checkCSRFToken() : bool;
 }

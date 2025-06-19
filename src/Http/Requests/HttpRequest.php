@@ -61,9 +61,10 @@ abstract class HttpRequest extends \Clicalmani\Psr7\Request
             $this->headers[] = new Header('HTTP_HOST', (array)$this->uri->getHost());
         }
         
+        $input = $this->body->getContents();
+        
         if (in_array($this->method, ['put', 'patch'])) {
-            
-            $input = $this->body->getContents();
+
             parse_str(urldecode($input), $stream);
             
             if ($stream_boundary = $this->getStreamBoundary()) {
@@ -80,10 +81,12 @@ abstract class HttpRequest extends \Clicalmani\Psr7\Request
                     $this->retrieveFiles($record);
                 }
             } else {
-                if ( isset($_SERVER['CONTENT_TYPE']) && strpos($_SERVER['CONTENT_TYPE'], 'application/json') !== FALSE ) {
-                    $this->attributes = json_decode($input, true) ?? [];
-                } else $this->attributes = $stream;
+                $this->attributes = $stream;
             }
+        }
+
+        if ( isset($_SERVER['CONTENT_TYPE']) && strpos($_SERVER['CONTENT_TYPE'], 'application/json') !== FALSE ) {
+            $this->attributes = json_decode($input, true) ?? [];
         }
     }
 
