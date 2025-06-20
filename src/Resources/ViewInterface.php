@@ -31,17 +31,17 @@ interface ViewInterface
      * Add a view composer
      * 
      * @param string|array $views
-     * @param callable $composer
+     * @param string|callable $composer
      * @return void
      */
-    public static function composer(string|array $views, callable $composer): void;
+    public static function composer(string|array $views, string|callable $composer): void;
 
     /**
      * Add a view creator
      * 
      * @param string $view
-     * @param callable $creator
+     * @param string|callable $creator
      * @return void
      */
-    public static function create(string $view, callable $creator) : void;
+    public static function create(string $view, string|callable $creator) : void;
 }

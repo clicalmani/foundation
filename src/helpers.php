@@ -3,7 +3,7 @@
 use Carbon\Carbon;
 use Clicalmani\Foundation\Collection\Collection;
 use Clicalmani\Foundation\Resources\ViewInterface;
-use Clicalmani\Foundation\Support\Arr;
+use Clicalmani\Foundation\Support\Facades\Arr;
 
 if ( ! function_exists('app') ) {
     function app() : \Clicalmani\Foundation\Maker\Application {
@@ -149,7 +149,7 @@ if ( ! function_exists( 'client_uri' ) ) {
      * @return string
      */
     function client_uri() : string {
-        return \Clicalmani\Foundation\Routing\Route::uri();
+        return \Clicalmani\Foundation\Support\Facades\Route::uri();
     }
 }
 
@@ -327,7 +327,7 @@ if ( ! function_exists('route') ) {
      * @return mixed
      */
     function route(mixed ...$args) : mixed {
-        return \Clicalmani\Foundation\Routing\Route::resolve(...$args);
+        return \Clicalmani\Foundation\Support\Facades\Route::resolve(...$args);
     }
 }
 
@@ -390,8 +390,8 @@ if ( ! function_exists('slugify') ) {
      * @param string $str
      * @return string
      */
-    function slugify(string $str) : string {
-        return \Clicalmani\Foundation\Support\Facades\Str::slug($str);
+    function slugify(string $str, string $default = '') : string {
+        return \Clicalmani\Foundation\Support\Facades\Str::slug($str, $default);
     }
 }
 
@@ -764,22 +764,9 @@ if ( ! function_exists('console_log') ) {
 }
 
 if ( ! function_exists('config') ) {
-    function config(string $key = null) : mixed
+    function config(?string $key = null) : mixed
     {
-        $config = new \Clicalmani\Foundation\Maker\Logic\Config;
-        $key_parts = explode('.', $key);
-        $method = array_shift($key_parts);
-        
-        $value = $config->{$method}($key_parts[0]);
-        array_shift($key_parts);
-
-        if ( is_array($value) && count($key_parts) > 1 ) {
-            foreach ($key_parts as $part) {
-                $value = $value[$part];
-            }
-        }
-
-        return $key ? $value : $config;
+        return \Clicalmani\Foundation\Support\Facades\Config::get($key);
     }
 }
 
@@ -790,7 +777,7 @@ if ( ! function_exists('abort') ) {
     }
 }
 
-if (! function_exists('get_data')) {
+if (! function_exists('data_get')) {
     /**
      * Get an item from an array or object using "dot" notation.
      *
@@ -799,7 +786,7 @@ if (! function_exists('get_data')) {
      * @param  mixed  $default
      * @return mixed
      */
-    function get_data($target, $key, $default = null)
+    function data_get($target, $key, $default = null)
     {
         if (is_null($key)) {
             return $target;

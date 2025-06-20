@@ -1,11 +1,10 @@
 <?php
-namespace Clicalmani\Foundation\Http\Requests;
+namespace Clicalmani\Foundation\Acme;
 
 use Clicalmani\Foundation\Exceptions\MiddlewareException;
 use Clicalmani\Foundation\Http\Request;
 use Clicalmani\Foundation\Http\Response;
 use Clicalmani\Foundation\Providers\ServiceProvider;
-use Clicalmani\Foundation\Support\Facades\Facade;
 
 /**
  * Handles HTTP requests for the application.
@@ -21,8 +20,13 @@ use Clicalmani\Foundation\Support\Facades\Facade;
  * @method static \Clicalmani\Foundation\Test\Controllers\TestController test(string $action)
  * @method static object getInstance(string $class)
  */
-class RequestController extends Facade
+class Controller
 {
+    protected static function getFacadeAccessor() : string
+    {
+        return 'controller';
+    }
+
     /**
 	 * Controller middleware
 	 * 
@@ -61,7 +65,7 @@ class RequestController extends Facade
     {
         $middleware = null;
 
-        if ($middleware = ServiceProvider::getProvidedMiddleware(\Clicalmani\Foundation\Routing\Route::gateway(), $name_or_class)) ;
+        if ($middleware = ServiceProvider::getProvidedMiddleware(\Clicalmani\Foundation\Support\Facades\Route::gateway(), $name_or_class)) ;
         else {
             if ( class_exists($name_or_class) ) $middleware = $name_or_class;
             else throw new MiddlewareException(
@@ -113,7 +117,7 @@ class RequestController extends Facade
      */
     private function sendStatus(int $code, string $status_code, string $message) : never
 	{
-		if (\Clicalmani\Foundation\Routing\Route::isApi()) response()->status($code, $status_code, $message);
+		if (\Clicalmani\Foundation\Support\Facades\Route::isApi()) response()->status($code, $status_code, $message);
 		else response()->send($code);
 
 		exit;

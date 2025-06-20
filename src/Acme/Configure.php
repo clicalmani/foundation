@@ -1,11 +1,10 @@
 <?php
-namespace Clicalmani\Foundation\Maker\Logic;
+namespace Clicalmani\Foundation\Acme;
 
 use Clicalmani\Foundation\Support\Facades\Arr;
 use Clicalmani\Foundation\Support\Facades\Env;
-use JsonSerializable;
 
-class Config implements \ArrayAccess, JsonSerializable
+class Configure implements \ArrayAccess, \JsonSerializable
 {
     /**
      * App config
@@ -69,7 +68,7 @@ class Config implements \ArrayAccess, JsonSerializable
     public function database(?string $key = null)
     {
         if ( ! isset($key) ) return app()->database;
-        return Arr::get(@app()->database, $key);
+        return Arr::get(@app()->database ?? [], $key);
     }
 
     public function env(?string $key = null)
@@ -133,5 +132,11 @@ class Config implements \ArrayAccess, JsonSerializable
         switch ($key) {
             case 'database': app()->database = array_merge(app()->database, $value); break;
         }
+    }
+
+    public function get(?string $key = null, $default = null)
+    {
+        if (NULL === $key) return $this;
+        return data_get($this, $key, $default);
     }
 }

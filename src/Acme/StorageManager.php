@@ -1,10 +1,7 @@
-<?php 
-namespace Clicalmani\Foundation\Maker\Logic;
+<?php
+namespace Clicalmani\Foundation\Acme;
 
-use Clicalmani\Foundation\Support\Facades\Facade;
-use Clicalmani\Foundation\Support\Facades\Tonka;
-
-class Storage extends Facade
+class StorageManager
 {
     private $manager;
     private $disk;
@@ -44,6 +41,6 @@ class Storage extends Facade
      */
     public static function link()
     {
-        return Tonka::link(storage_path(), root_path('public'));
+        return \Clicalmani\Foundation\Support\Facades\Tonka::link(storage_path(), root_path('public'));
     }
 }

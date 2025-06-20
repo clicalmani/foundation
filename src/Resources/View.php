@@ -1,9 +1,9 @@
 <?php
 namespace Clicalmani\Foundation\Resources;
 
-use Clicalmani\Foundation\Container\Manager;
 use Clicalmani\Psr7\NonBufferedBody;
 use Clicalmani\Psr7\Response;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class View extends Response implements ViewInterface
 {
@@ -57,15 +57,23 @@ class View extends Response implements ViewInterface
         app()->viewSharedData($sharedData);
     }
 
-    public static function composer(string|array $views, callable $composer): void
+    public static function composer(string|array $views, string|callable $composer): void
     {
         $views = (array) $views;
-        foreach ($views as $view) Kernel::$composers[$view] = $composer;
+        foreach ($views as $view) {
+            Kernel::$composers[$view] = $composer;
+            if ( is_string($composer) ) {
+                app()->getContainer()->register("{$view}_composer", $composer);
+            }
+        }
     }
 
-    public static function create(string $view, callable $creator) : void
+    public static function create(string $view, string|callable $creator) : void
     {
         Kernel::$creators[$view] = $creator;
+        if ( is_string($creator) ) {
+            app()->getContainer()->register("{$view}_creator", $creator);
+        }
     }
 
     public function __toString()
@@ -116,11 +124,12 @@ class View extends Response implements ViewInterface
 
     private function attachSharedData(array $data): void
     {
-        foreach ($data as $shared) {
+        foreach ($data as $view => $shared) {
             if ( $shared instanceof \Closure ) $shared($this);
-            elseif ( class_exists($shared) ) {
-                $instance = (new Manager)->injectConstructorDependencies($shared);
-                $instance->{'compose'}($this);
+            elseif ( is_string($shared) ) {
+                (app()->getContainer()->get("{$view}_composer", ContainerInterface::IGNORE_ON_INVALID_REFERENCE) 
+                            ?: app()->getContainer()->get("{$view}_creator", ContainerInterface::IGNORE_ON_INVALID_REFERENCE))
+                    ->{'compose'}($this);
             }
         }
     }

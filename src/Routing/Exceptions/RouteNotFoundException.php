@@ -2,7 +2,7 @@
 namespace Clicalmani\Foundation\Routing\Exceptions;
 
 use Clicalmani\Foundation\Http\Response\Response;
-use Clicalmani\Foundation\Routing\Route;
+use Clicalmani\Foundation\Support\Facades\Route;
 
 /**
  * Class RouteNotFoundException

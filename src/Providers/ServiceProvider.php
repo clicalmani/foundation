@@ -1,9 +1,7 @@
 <?php
 namespace Clicalmani\Foundation\Providers;
 
-use Clicalmani\Foundation\Container\SPL_Loader;
 use Clicalmani\Foundation\Support\Facades\Config;
-use phpseclib3\Math\BigInteger\Engines\PHP;
 
 /**
  * ServiceProvider class
@@ -13,16 +11,8 @@ use phpseclib3\Math\BigInteger\Engines\PHP;
  */
 abstract class ServiceProvider
 {
-    /**
-     * Service container
-     * 
-     * @var \Clicalmani\Foundation\Container\SPL_Loader
-     */
-    protected $container;
-    
     public function __construct()
     {
-        $this->container = new SPL_Loader;
     }
 
     /**

@@ -1,7 +1,6 @@
 <?php
 namespace Clicalmani\Foundation\Http\Middlewares;
 
-use Clicalmani\Foundation\Container\SPL_Loader;
 use Clicalmani\Foundation\Http\RedirectInterface;
 use Clicalmani\Foundation\Http\Requests\RequestInterface;
 use Clicalmani\Foundation\Http\ResponseInterface;
@@ -60,7 +59,7 @@ abstract class Middleware
      */
     protected function include(string $routes_file) : void
     {
-        (new SPL_Loader)->inject(fn() => routes_path("$routes_file.php"));
+        include_once routes_path("$routes_file.php");
     }
 
     /**

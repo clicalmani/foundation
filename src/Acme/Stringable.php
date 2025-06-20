@@ -1,27 +1,28 @@
 <?php
-namespace Clicalmani\Foundation\Maker\Logic;
+namespace Clicalmani\Foundation\Acme;
 
-/**
- * Class Str
- * 
- * @package Clicalmani\Foundation
- * @author @Clicalmani\Foundation
- */
-class Str
+class Stringable implements \Stringable
 {
     /**
      * Mbstring encodings
      * 
      * @var ?array
      */
-    private static ?array $encodings = [];
+    protected ?array $encodings = [];
 
     /**
      * Encoding overloaded
      * 
-     * @var mixed
+     * @var ?bool
      */
-    private static $encoding_overloaded = null;
+    protected ?bool $encoding_overloaded = null;
+
+    /**
+     * Holds the string value
+     * 
+     * @var string
+     */
+    protected string $value = '';
 
     /**
      * Create a slug
@@ -30,10 +31,23 @@ class Str
      * @param ?string $fallback_value
      * @return string
      */
-    public function slug(mixed $value, ?string $fallback_value = '' ) : string 
+    public function slug(mixed $value, ?string $fallback_value = '') : string 
     {
-        if (!$value) return $fallback_value;
-        return strtolower(strtr($this->removeAccents( $value ), [" " => '-', "\\" => '-', "/" => '', "`" => '']) );
+        $this->value = $this->value ?: $value;
+
+        if (!$this->value) return $fallback_value;
+
+        return strtolower(
+            strtr(
+                $this->removeAccents( $value ), 
+                [
+                    " " => '-', 
+                    "\\" => '-', 
+                    "/" => '', 
+                    "`" => ''
+                ]
+            ) 
+        );
     }
 
     /**
@@ -533,25 +547,25 @@ class Str
      */
     public function mbstringBinarySafeEncoding(?bool $reset = false) : void
     {
-        if ( is_null( static::$encoding_overloaded ) ) {
+        if ( is_null( $this->encoding_overloaded ) ) {
             if ( function_exists( 'mb_internal_encoding' )
                 && ( (int) ini_get( 'mbstring.func_overload' ) & 2 ) // phpcs:ignore PHPCompatibility.IniDirectives.RemovedIniDirectives.mbstring_func_overloadDeprecated
             ) {
-                static::$encoding_overloaded = true;
+                $this->encoding_overloaded = true;
             } else {
-                static::$encoding_overloaded = false;
+                $this->encoding_overloaded = false;
             }
         } 
         
-        if (TRUE === static::$encoding_overloaded) {
+        if (TRUE === $this->encoding_overloaded) {
             if ( ! $reset ) {
                 $encoding = mb_internal_encoding();
-                array_push( static::$encodings, $encoding );
+                array_push( $this->encodings, $encoding );
                 mb_internal_encoding( 'ISO-8859-1' );
             }
         
-            if ( $reset && static::$encodings ) {
-                $encoding = array_pop( static::$encodings );
+            if ( $reset && $this->encodings ) {
+                $encoding = array_pop( $this->encodings );
                 mb_internal_encoding( $encoding );
             }
         }
@@ -597,5 +611,10 @@ class Str
     public function unescape(string $escaped) : string
     {
         return stripcslashes($escaped);
+    }
+
+    public function __toString(): string
+    {
+        return '';
     }
 }

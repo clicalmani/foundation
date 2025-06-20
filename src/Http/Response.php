@@ -2,7 +2,7 @@
 namespace Clicalmani\Foundation\Http;
 
 use Clicalmani\Foundation\Exceptions\ResourceNotFoundException;
-use Clicalmani\Foundation\Routing\Route;
+use Clicalmani\Foundation\Support\Facades\Route;
 use Clicalmani\Psr7\Header;
 use Clicalmani\Psr7\NonBufferedBody;
 use Clicalmani\Psr7\Stream;

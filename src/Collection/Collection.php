@@ -1,8 +1,7 @@
 <?php
 namespace Clicalmani\Foundation\Collection;
 
-use Clicalmani\Foundation\Support\Arr;
-use Clicalmani\Foundation\Support\Func;
+use Clicalmani\Foundation\Support\Facades\Func;
 
 /**
  * Class Collection

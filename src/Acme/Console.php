@@ -1,11 +1,11 @@
 <?php
-namespace Clicalmani\Foundation\Maker\Logic;
+namespace Clicalmani\Foundation\Acme;
 
 use Clicalmani\Database\DB;
 use Clicalmani\Foundation\Filesystem\RecursiveFilter;
 use Clicalmani\XPower\XDTNodeList;
 
-class Tonka
+class Console
 {
     /**
      * Migrated nodes
@@ -26,7 +26,7 @@ class Tonka
      * 
      * @var \Symfony\Component\Console\Output\OutputInterface
      */
-    private $output;
+    private static $output;
 
     /**
      * Dump file name
@@ -141,7 +141,7 @@ class Tonka
      */
     public function setOutput(\Symfony\Component\Console\Output\OutputInterface|null $output) : void
     {
-        $this->output = $output;
+        self::$output = $output;
     }
 
     /**
@@ -484,8 +484,8 @@ class Tonka
      */
     private function writeln(?string $message = '', ?bool $format = true) : void
     {
-        if ($this->output) {
-            $this->output->writeln($format ? $this->formatOutput($message): $message);
+        if (self::$output) {
+            self::$output->writeln($format ? $this->formatOutput($message): $message);
         } else {
             printf("%s", $format ? $this->formatOutput($message): $message);
             print("<br/>");

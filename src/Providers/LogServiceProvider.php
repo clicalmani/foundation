@@ -9,11 +9,20 @@ namespace Clicalmani\Foundation\Providers;
  */
 class LogServiceProvider extends ServiceProvider
 {
+    /**
+     * Log file name
+     * 
+     * @var string
+     */
+    protected const ERROR_LOG = 'errors.log';
+
+    protected static $is_debug_mode = false;
+
     public function boot(): void
     {
-        /**
-         * Error log
-         */
-        \Clicalmani\Foundation\Support\Facades\Log::init( root_path() );
+        static::$is_debug_mode = (env('APP_DEBUG', false) === false) ? false: true;
+        
+        ini_set('log_errors', 1);
+        ini_set('error_log', storage_path('/errors/' . static::ERROR_LOG) );
     }
 }

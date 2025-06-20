@@ -1,7 +1,7 @@
 <?php
 namespace Clicalmani\Foundation\Providers;
 
-use Clicalmani\Foundation\Routing\Route;
+use Clicalmani\Foundation\Support\Facades\Route;
 
 /**
  * SessionStorageServiceProvider Class

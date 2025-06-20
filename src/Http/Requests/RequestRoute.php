@@ -1,7 +1,7 @@
 <?php
 namespace Clicalmani\Foundation\Http\Requests;
 
-use Clicalmani\Foundation\Routing\Route;
+use Clicalmani\Foundation\Support\Facades\Route;
 
 /**
  * Class RequestRoute

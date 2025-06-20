@@ -7,7 +7,7 @@ use Clicalmani\Database\Factory\Models\Elegant;
 use Clicalmani\Foundation\Http\Response;
 use Clicalmani\Foundation\Providers\RouteServiceProvider;
 use Clicalmani\Foundation\Routing\Exceptions\RouteNotFoundException;
-use Clicalmani\Foundation\Routing\Route;
+use Clicalmani\Foundation\Support\Facades\Route;
 use Clicalmani\Foundation\Test\Controllers\TestController;
 use Clicalmani\Validation\AsValidator;
 use Clicalmani\Routing\Memory;

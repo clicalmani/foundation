@@ -25,14 +25,4 @@ class Config extends Facade
     {
         return 'config';
     }
-
-    /**
-     * Get the registered name of the component.
-     *
-     * @return string
-     */
-    protected static function getFacadeInstance() : string
-    {
-        return 'config';
-    }
 }

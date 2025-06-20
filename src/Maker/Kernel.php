@@ -1,7 +1,7 @@
 <?php
 namespace Clicalmani\Foundation\Maker;
 
-abstract class Kernel extends \Clicalmani\Foundation\Container\Manager
+abstract class Kernel
 {
     public function __construct(protected \Clicalmani\Foundation\Maker\Application $app)
     {

@@ -260,7 +260,7 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
 
     public function route() : ?\Clicalmani\Routing\Route
     {
-        return \Clicalmani\Foundation\Routing\Route::current();
+        return \Clicalmani\Foundation\Support\Facades\Route::current();
     }
 
     public function url() : string

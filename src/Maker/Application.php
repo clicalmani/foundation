@@ -72,9 +72,11 @@ class Application
      */
     private $commands = [];
 
+    private $container;
+
     public function __construct(private ?string $rootPath = null)
     {
-        $this->config = new \Clicalmani\Foundation\Maker\Logic\Config;
+        $this->config = new \Clicalmani\Foundation\Acme\Configure;
         $paths = $this->config['paths'];
         $paths['root'] = $this->rootPath;
         $this->config['paths'] = $paths;
@@ -117,7 +119,7 @@ class Application
     {
         $this->boot();
         $this->db_config = require_once config_path( '/database.php' );
-        return \Clicalmani\Foundation\Http\Requests\RequestController::render();
+        return \Clicalmani\Foundation\Support\Facades\RequestController::render();
     }
 
     public function handleCommands()
@@ -130,7 +132,7 @@ class Application
 
     public function getContainer()
     {
-        return $this->classLoader;
+        return \Clicalmani\Foundation\Providers\ContainerServiceProvider::get();
     }
 
     /**
@@ -373,6 +375,7 @@ class Application
             'database' => $this->db_config,
             'filesystem' => $this->filesystem,
             'response' => $this->response,
+            'container' => $this->container,
             default => null
         };
     }

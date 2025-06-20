@@ -1,46 +1,20 @@
-<?php 
-namespace Clicalmani\Foundation\Maker\Logic;
+<?php
+namespace Clicalmani\Foundation\Acme;
 
-/**
- * Log Class
- * 
- * @package Clicalmani\Foundation/flesco 
- * @author @Clicalmani\Foundation
- */
-class Log
+use Clicalmani\Foundation\Providers\LogServiceProvider;
+
+class Logger extends LogServiceProvider
 {
-    /**
-     * Log file name
-     * 
-     * @var string
-     */
-    protected const ERROR_LOG = 'errors.log';
-
-    private static $is_debug_mode = false;
-
-    /**
-     * Log errors to file
-     * 
-     * @return void
-     */
-    public function init() : void
-    {
-        static::$is_debug_mode = (env('APP_DEBUG', false) === false) ? false: true;
-        
-        ini_set('log_errors', 1);
-        ini_set('error_log', storage_path('/errors/' . static::ERROR_LOG) );
-    }
-
     /**
      * Log custom error
      * 
      * @param string $error_message
-     * @param ?int $error_level PHP error level
-     * @param ?string $file Error file name
+     * @param int $error_level PHP error level
+     * @param string $file Error file name
      * @param ?int $line Error line
      * @return void
      */
-    public function error(string $error_message, ?int $error_level = E_ERROR, ?string $file = 'Unknow', ?int $line = null) : void
+    public function error(string $error_message, int $error_level = E_ERROR, string $file = 'Unknow', ?int $line = null) : void
     {
         switch ($error_level) {
             case E_NOTICE: 
@@ -84,11 +58,11 @@ class Log
      * Log custom warning
      * 
      * @param string $warning_message
-     * @param ?string $file Error file name
+     * @param string $file Error file name
      * @param ?int $line Error line
      * @return void
      */
-    public function warning(string $warning_message, ?string $file = 'Unknow', ?int $line = null) : void
+    public function warning(string $warning_message, string $file = 'Unknow', ?int $line = null) : void
     {
         $this->error($warning_message, E_WARNING, $file, $line);
     }
@@ -97,11 +71,11 @@ class Log
      * Log custom notice
      * 
      * @param string $notice_message
-     * @param ?string $file Error file name
+     * @param string $file Error file name
      * @param ?int $line Error line
      * @return void
      */
-    public function notice(string $notice_message, ?string $file = 'Unknow', ?int $line = null)
+    public function notice(string $notice_message, string $file = 'Unknow', ?int $line = null)
     {
         $this->error($notice_message, E_NOTICE, $file, $line);
     }
@@ -110,11 +84,11 @@ class Log
      * Log debug message
      * 
      * @param mixed $debug_message
-     * @param ?string $file Error file name
+     * @param string $file Error file name
      * @param ?int $line Error line
      * @return void
      */
-    public function debug(mixed $debug_message, ?string $file = 'Unknow', ?int $line = null)
+    public function debug(mixed $debug_message, string $file = 'Unknow', ?int $line = null)
     {
         if (FALSE == is_string($debug_message)) $debug_message = json_encode($debug_message);
         $this->notice($debug_message, $file, $line);
@@ -124,11 +98,11 @@ class Log
      * Log info message
      * 
      * @param string $info_message
-     * @param ?string $file Error file name
+     * @param string $file Error file name
      * @param ?int $line Error line
      * @return void
      */
-    public function info(string $info_message, ?string $file = 'Unknow', ?int $line = null)
+    public function info(string $info_message, string $file = 'Unknow', ?int $line = null)
     {
         $this->notice($info_message, $file, $line);
     }

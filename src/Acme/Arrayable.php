@@ -1,14 +1,10 @@
 <?php
+namespace Clicalmani\Foundation\Acme;
 
-namespace Clicalmani\Foundation\Maker\Logic;
+use Clicalmani\Foundation\Collection\CollectionInterface;
+use Clicalmani\Foundation\Support\Facades\Arr;
 
-use ArgumentCountError;
-use ArrayAccess;
-use Clicalmani\Foundation\Collection\Collection;
-use InvalidArgumentException;
-use Random\Randomizer;
-
-class Arr
+class Arrayable
 {
     /**
      * Determine whether the given value is array accessible.
@@ -16,9 +12,9 @@ class Arr
      * @param  mixed  $value
      * @return bool
      */
-    public static function accessible($value)
+    public function accessible($value)
     {
-        return is_array($value) || $value instanceof ArrayAccess;
+        return is_array($value) || $value instanceof \ArrayAccess;
     }
 
     /**
@@ -29,7 +25,7 @@ class Arr
      * @param  mixed  $value
      * @return array
      */
-    public static function add($array, $key, $value)
+    public function add($array, $key, $value)
     {
         if (is_null(static::get($array, $key))) {
             static::set($array, $key, $value);
@@ -44,12 +40,12 @@ class Arr
      * @param  iterable  $array
      * @return array
      */
-    public static function collapse($array)
+    public function collapse($array)
     {
         $results = [];
 
         foreach ($array as $values) {
-            if ($values instanceof Collection) {
+            if ($values instanceof CollectionInterface) {
                 $values = $values->all();
             } elseif (! is_array($values)) {
                 continue;
@@ -67,7 +63,7 @@ class Arr
      * @param  iterable  ...$arrays
      * @return array
      */
-    public static function crossJoin(...$arrays)
+    public function crossJoin(...$arrays)
     {
         $results = [[]];
 
@@ -94,7 +90,7 @@ class Arr
      * @param  array  $array
      * @return array
      */
-    public static function divide($array)
+    public function divide($array)
     {
         return [array_keys($array), array_values($array)];
     }
@@ -106,7 +102,7 @@ class Arr
      * @param  string  $prepend
      * @return array
      */
-    public static function dot($array, $prepend = '')
+    public function dot($array, $prepend = '')
     {
         $results = [];
 
@@ -127,7 +123,7 @@ class Arr
      * @param  iterable  $array
      * @return array
      */
-    public static function undot($array)
+    public function undot($array)
     {
         $results = [];
 
@@ -145,7 +141,7 @@ class Arr
      * @param  array|string|int|float  $keys
      * @return array
      */
-    public static function except($array, $keys)
+    public function except($array, $keys)
     {
         static::forget($array, $keys);
 
@@ -159,9 +155,9 @@ class Arr
      * @param  string|int|float  $key
      * @return bool
      */
-    public static function exists($array, $key)
+    public function exists($array, $key)
     {
-        if ($array instanceof ArrayAccess) {
+        if ($array instanceof \ArrayAccess) {
             return $array->offsetExists($key);
         }
 
@@ -184,7 +180,7 @@ class Arr
      * @param  TFirstDefault|(\Closure(): TFirstDefault)  $default
      * @return TValue|TFirstDefault
      */
-    public static function first($array, ?callable $callback = null, $default = null)
+    public function first($array, ?callable $callback = null, $default = null)
     {
         if (is_null($callback)) {
             if (empty($array)) {
@@ -219,7 +215,7 @@ class Arr
      * @param  TLastDefault|(\Closure(): TLastDefault)  $default
      * @return TValue|TLastDefault
      */
-    public static function last($array, ?callable $callback = null, $default = null)
+    public function last($array, ?callable $callback = null, $default = null)
     {
         if (is_null($callback)) {
             return empty($array) ? value($default) : end($array);
@@ -235,7 +231,7 @@ class Arr
      * @param  int  $limit
      * @return array
      */
-    public static function take($array, $limit)
+    public function take($array, $limit)
     {
         if ($limit < 0) {
             return array_slice($array, $limit, abs($limit));
@@ -251,12 +247,12 @@ class Arr
      * @param  int  $depth
      * @return array
      */
-    public static function flatten($array, $depth = INF)
+    public function flatten($array, $depth = INF)
     {
         $result = [];
 
         foreach ($array as $item) {
-            $item = $item instanceof Collection ? $item->all() : $item;
+            $item = $item instanceof CollectionInterface ? $item->all() : $item;
 
             if (! is_array($item)) {
                 $result[] = $item;
@@ -281,7 +277,7 @@ class Arr
      * @param  array|string|int|float  $keys
      * @return void
      */
-    public static function forget(&$array, $keys)
+    public function forget(&$array, $keys)
     {
         $original = &$array;
 
@@ -326,7 +322,7 @@ class Arr
      * @param  mixed  $default
      * @return mixed
      */
-    public static function get($array, $key, $default = null)
+    public function get($array, $key, $default = null)
     {
         if (! static::accessible($array)) {
             return value($default);
@@ -362,7 +358,7 @@ class Arr
      * @param  string|array  $keys
      * @return bool
      */
-    public static function has($array, $keys)
+    public function has($array, $keys)
     {
         $keys = (array) $keys;
 
@@ -396,7 +392,7 @@ class Arr
      * @param  string|array  $keys
      * @return bool
      */
-    public static function hasAny($array, $keys)
+    public function hasAny($array, $keys)
     {
         if (is_null($keys)) {
             return false;
@@ -429,7 +425,7 @@ class Arr
      * @param  array  $array
      * @return bool
      */
-    public static function isAssoc(array $array)
+    public function isAssoc(array $array)
     {
         return ! array_is_list($array);
     }
@@ -442,7 +438,7 @@ class Arr
      * @param  array  $array
      * @return bool
      */
-    public static function isList($array)
+    public function isList($array)
     {
         return array_is_list($array);
     }
@@ -455,7 +451,7 @@ class Arr
      * @param  string  $finalGlue
      * @return string
      */
-    public static function join($array, $glue, $finalGlue = '')
+    public function join($array, $glue, $finalGlue = '')
     {
         if ($finalGlue === '') {
             return implode($glue, $array);
@@ -481,7 +477,7 @@ class Arr
      * @param  string  $prependWith
      * @return array
      */
-    public static function prependKeysWith($array, $prependWith)
+    public function prependKeysWith($array, $prependWith)
     {
         return static::mapWithKeys($array, fn ($item, $key) => [$prependWith.$key => $item]);
     }
@@ -493,7 +489,7 @@ class Arr
      * @param  array|string  $keys
      * @return array
      */
-    public static function only($array, $keys)
+    public function only($array, $keys)
     {
         return array_intersect_key($array, array_flip((array) $keys));
     }
@@ -505,7 +501,7 @@ class Arr
      * @param  array|string  $keys
      * @return array
      */
-    public static function select($array, $keys)
+    public function select($array, $keys)
     {
         $keys = static::wrap($keys);
 
@@ -532,7 +528,7 @@ class Arr
      * @param  string|array|null  $key
      * @return array
      */
-    public static function pluck($array, $value, $key = null)
+    public function pluck($array, $value, $key = null)
     {
         $results = [];
 
@@ -583,13 +579,13 @@ class Arr
      * @param  callable  $callback
      * @return array
      */
-    public static function map(array $array, callable $callback)
+    public function map(array $array, callable $callback)
     {
         $keys = array_keys($array);
 
         try {
             $items = array_map($callback, $array, $keys);
-        } catch (ArgumentCountError) {
+        } catch (\ArgumentCountError) {
             $items = array_map($callback, $array);
         }
 
@@ -610,7 +606,7 @@ class Arr
      * @param  callable(TValue, TKey): array<TMapWithKeysKey, TMapWithKeysValue>  $callback
      * @return array
      */
-    public static function mapWithKeys(array $array, callable $callback)
+    public function mapWithKeys(array $array, callable $callback)
     {
         $result = [];
 
@@ -635,7 +631,7 @@ class Arr
      * @param  callable(mixed...): TValue  $callback
      * @return array<TKey, TValue>
      */
-    public static function mapSpread(array $array, callable $callback)
+    public function mapSpread(array $array, callable $callback)
     {
         return static::map($array, function ($chunk, $key) use ($callback) {
             $chunk[] = $key;
@@ -652,7 +648,7 @@ class Arr
      * @param  mixed  $key
      * @return array
      */
-    public static function prepend($array, $value, $key = null)
+    public function prepend($array, $value, $key = null)
     {
         if (func_num_args() == 2) {
             array_unshift($array, $value);
@@ -671,7 +667,7 @@ class Arr
      * @param  mixed  $default
      * @return mixed
      */
-    public static function pull(&$array, $key, $default = null)
+    public function pull(&$array, $key, $default = null)
     {
         $value = static::get($array, $key, $default);
 
@@ -686,7 +682,7 @@ class Arr
      * @param  array  $array
      * @return string
      */
-    public static function query($array)
+    public function query($array)
     {
         return http_build_query($array, '', '&', PHP_QUERY_RFC3986);
     }
@@ -701,14 +697,14 @@ class Arr
      *
      * @throws \InvalidArgumentException
      */
-    public static function random($array, $number = null, $preserveKeys = false)
+    public function random($array, $number = null, $preserveKeys = false)
     {
         $requested = is_null($number) ? 1 : $number;
 
         $count = count($array);
 
         if ($requested > $count) {
-            throw new InvalidArgumentException(
+            throw new \InvalidArgumentException(
                 "You requested {$requested} items, but there are only {$count} items available."
             );
         }
@@ -717,7 +713,7 @@ class Arr
             return is_null($number) ? null : [];
         }
 
-        $keys = (new Randomizer)->pickArrayKeys($array, $requested);
+        $keys = (new \Random\Randomizer)->pickArrayKeys($array, $requested);
 
         if (is_null($number)) {
             return $array[$keys[0]];
@@ -748,7 +744,7 @@ class Arr
      * @param  mixed  $value
      * @return array
      */
-    public static function set(&$array, $key, $value)
+    public function set(&$array, $key, $value)
     {
         if (is_null($key)) {
             return $array = $value;
@@ -784,9 +780,9 @@ class Arr
      * @param  array  $array
      * @return array
      */
-    public static function shuffle($array)
+    public function shuffle($array)
     {
-        return (new Randomizer)->shuffleArray($array);
+        return (new \Random\Randomizer)->shuffleArray($array);
     }
 
     /**
@@ -796,9 +792,9 @@ class Arr
      * @param  callable|array|string|null  $callback
      * @return array
      */
-    public static function sort($array, $callback = null)
+    public function sort($array, $callback = null)
     {
-        return (new Collection($array))->sort($callback)->all();
+        return collection($array)->sort($callback)->all();
     }
 
     /**
@@ -809,7 +805,7 @@ class Arr
      * @param  bool  $descending
      * @return array
      */
-    public static function sortRecursive($array, $options = SORT_REGULAR, $descending = false)
+    public function sortRecursive($array, $options = SORT_REGULAR, $descending = false)
     {
         foreach ($array as &$value) {
             if (is_array($value)) {
@@ -837,7 +833,7 @@ class Arr
      * @param  int  $options
      * @return array
      */
-    public static function sortRecursiveDesc($array, $options = SORT_REGULAR)
+    public function sortRecursiveDesc($array, $options = SORT_REGULAR)
     {
         return static::sortRecursive($array, $options, true);
     }
@@ -848,7 +844,7 @@ class Arr
      * @param  array  $array
      * @return string
      */
-    public static function toCssClasses($array)
+    public function toCssClasses($array)
     {
         $classList = static::wrap($array);
 
@@ -872,7 +868,7 @@ class Arr
      * @param  callable  $callback
      * @return array
      */
-    public static function where($array, callable $callback)
+    public function where($array, callable $callback)
     {
         return array_filter($array, $callback, ARRAY_FILTER_USE_BOTH);
     }
@@ -883,7 +879,7 @@ class Arr
      * @param  array  $array
      * @return array
      */
-    public static function whereNotNull($array)
+    public function whereNotNull($array)
     {
         return static::where($array, fn ($value) => ! is_null($value));
     }
@@ -894,7 +890,7 @@ class Arr
      * @param  mixed  $value
      * @return array
      */
-    public static function wrap($value)
+    public function wrap($value)
     {
         if (is_null($value)) {
             return [];

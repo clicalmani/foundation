@@ -1,7 +1,5 @@
 <?php
-namespace Clicalmani\Foundation\Routing;
-
-use Clicalmani\Foundation\Support\Facades\Facade;
+namespace Clicalmani\Foundation\Support\Facades;
 
 /**
  * @method static string[] all()
@@ -34,4 +32,9 @@ use Clicalmani\Foundation\Support\Facades\Facade;
  * @method static string getClientVerb()
  */
 class Route extends Facade
-{}
+{
+    protected static function getFacadeAccessor() : string
+    {
+        return 'router';
+    }
+}

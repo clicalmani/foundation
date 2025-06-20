@@ -30,8 +30,7 @@ class Web extends Middleware
      */
     public function boot() : void
     {
-        (new \Clicalmani\Foundation\Container\SPL_Loader)
-            ->inject(fn() => root_path(\Clicalmani\Foundation\Support\Facades\Config::route('web_handler')));
+        include_once root_path(\Clicalmani\Foundation\Support\Facades\Config::route('web_handler'));
     }
 
     public function append(string $middleware): void

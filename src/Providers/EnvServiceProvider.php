@@ -1,6 +1,7 @@
 <?php
 namespace Clicalmani\Foundation\Providers;
 
+use Clicalmani\Foundation\Acme\Environment;
 use Clicalmani\Foundation\Support\Facades\Env;
 
 /**
@@ -11,15 +12,22 @@ use Clicalmani\Foundation\Support\Facades\Env;
  */
 class EnvServiceProvider extends ServiceProvider
 {
+    private $environment;
+
+    public function __construct()
+    {
+        $this->environment = new Environment;
+    }
+
     public function boot(): void
     {
-        Env::enablePutenv();
+        $this->environment->enablePutenv();
 
         /**
          * Load environment variables
          */
         \Dotenv\Dotenv::create(
-            Env::getRepository(), 
+            $this->environment->getRepository(), 
             dirname( __DIR__, 5)
         )->safeLoad();
         

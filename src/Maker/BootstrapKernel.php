@@ -7,7 +7,7 @@ class BootstrapKernel extends Kernel
 
     public function boot() : void
     {
-        $this->bootstrap = $this->require( $this->app->config['paths']['root'] . '/bootstrap/kernel.php' );
+        $this->bootstrap = require_once $this->app->config['paths']['root'] . '/bootstrap/kernel.php';
     }
 
     public function register(): void

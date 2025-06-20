@@ -6,7 +6,7 @@ namespace Clicalmani\Foundation\Support\Facades;
  */
 class Tonka extends Facade
 {
-    public static function getFacadeAccessor()
+    protected static function getFacadeAccessor() : string
     {
         return 'tonka';
     }
