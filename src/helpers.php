@@ -777,7 +777,7 @@ if ( ! function_exists('abort') ) {
     }
 }
 
-if (! function_exists('data_get')) {
+if (! function_exists('get_data')) {
     /**
      * Get an item from an array or object using "dot" notation.
      *
@@ -786,17 +786,17 @@ if (! function_exists('data_get')) {
      * @param  mixed  $default
      * @return mixed
      */
-    function data_get($target, $key, $default = null)
+    function get_data($target, $key, $default = null)
     {
         if (is_null($key)) {
             return $target;
         }
 
         $key = is_array($key) ? $key : explode('.', $key);
-
+        
         foreach ($key as $i => $segment) {
             unset($key[$i]);
-
+            
             if (is_null($segment)) {
                 return $target;
             }
@@ -825,7 +825,7 @@ if (! function_exists('data_get')) {
                 '{last}' => array_key_last(is_array($target) ? $target : (new Collection($target))->all()),
                 default => $segment,
             };
-
+            
             if (Arr::accessible($target) && Arr::exists($target, $segment)) {
                 $target = $target[$segment];
             } elseif (is_object($target) && isset($target->{$segment})) {
@@ -834,7 +834,7 @@ if (! function_exists('data_get')) {
                 return value($default);
             }
         }
-
+        
         return $target;
     }
 }

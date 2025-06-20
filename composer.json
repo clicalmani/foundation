@@ -7,9 +7,11 @@
         "vlucas/phpdotenv": ">=5.5.0",
         "nesbot/carbon": "^2.16",
         "twig/twig": "^3.0",
-        "phpmailer/phpmailer": "^6.9"
+        "phpmailer/phpmailer": "^6.9",
+        "symfony/config": "^7.3",
+        "symfony/dependency-injection": "^7.3"
     },
-    "license": "proprietary",
+    "license": "MIT",
     "autoload": {
         "psr-4": {
             "Clicalmani\\Foundation\\": "src/"

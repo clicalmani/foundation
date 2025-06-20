@@ -41,10 +41,9 @@ class Response extends \Clicalmani\Psr7\Response implements ResponseInterface
         );
     }
 
-    public function sendStatus(?int $code = null) : never
+    public function sendStatus(?int $code = null)
     {
-        $this->status = $code ?: $this->status;
-        http_response_code($this->status);
+        http_response_code($this->status = $code ?: $this->status);
         
         if (Route::isApi()) 
             $this->sendBody(
@@ -58,9 +57,9 @@ class Response extends \Clicalmani\Psr7\Response implements ResponseInterface
 
         else {
             try {
-                $this->sendBody(view($this->status, ['code' => $this->getReasonPhrase()]));
+                $this->sendBody(view($this->status, ['code' => $this->getReasonPhrase()])->render());
             } catch (ResourceNotFoundException $e) {
-                EXIT;
+                ;
             }
         }
     }

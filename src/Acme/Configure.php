@@ -83,7 +83,7 @@ class Configure implements \ArrayAccess, \JsonSerializable
 
     public function offsetExists(mixed $offset): bool
     {
-        return !!in_array($offset, ['app', 'mail', 'bootstrap', 'http']);
+        return !!in_array($offset, ['app', 'mail', 'bootstrap', 'http', 'database']);
     }
 
     public function offsetGet(mixed $offset): mixed
@@ -93,7 +93,8 @@ class Configure implements \ArrayAccess, \JsonSerializable
             'bootstrap' => static::$kernel,
             'http' => static::$http_kernel,
             'paths' => static::$paths,
-            'mail' => static::$mail_config
+            'mail' => static::$mail_config,
+            'database' => app()->database
         };
     }
 
@@ -137,6 +138,6 @@ class Configure implements \ArrayAccess, \JsonSerializable
     public function get(?string $key = null, $default = null)
     {
         if (NULL === $key) return $this;
-        return data_get($this, $key, $default);
+        return get_data($this, $key, $default);
     }
 }

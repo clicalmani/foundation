@@ -57,4 +57,11 @@ return static function (ContainerConfigurator $container): void {
      * Function service
      */
     $services->set('func', \Clicalmani\Foundation\Acme\Invokable::class);
+
+    /**
+     * Inertia service
+     */
+    if (class_exists(\Inertia\Response::class)) {
+        $services->set('inertia', \Inertia\Response::class);
+    }
 };

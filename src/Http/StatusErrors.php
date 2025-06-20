@@ -3,27 +3,23 @@ namespace Clicalmani\Foundation\Http;
 
 trait StatusErrors
 {
-    public function notFound() : \Clicalmani\Foundation\Http\ResponseInterface
+    public function notFound()
     {
-        $this->status = 404;
-        return $this;
+        $this->sendStatus(404);
     }
 
-    public function unauthorized() : \Clicalmani\Foundation\Http\ResponseInterface
+    public function unauthorized()
     {
-        $this->status = 401;
-        return $this;
+        $this->sendStatus(401);
     }
 
-    public function forbiden() : \Clicalmani\Foundation\Http\ResponseInterface
+    public function forbiden()
     {
-        $this->status = 403;
-        return $this;
+        $this->sendStatus(403);
     }
 
-    public function internalServerError() : \Clicalmani\Foundation\Http\ResponseInterface
+    public function internalServerError()
     {
-        $this->status = 500;
-        return $this;
+        $this->sendStatus(500);
     }
 }

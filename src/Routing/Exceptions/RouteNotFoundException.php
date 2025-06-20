@@ -1,9 +1,6 @@
 <?php
 namespace Clicalmani\Foundation\Routing\Exceptions;
 
-use Clicalmani\Foundation\Http\Response\Response;
-use Clicalmani\Foundation\Support\Facades\Route;
-
 /**
  * Class RouteNotFoundException
  * 
@@ -26,8 +23,7 @@ class RouteNotFoundException extends \Exception
 		 * Render response
 		 */
 		else {
-			if (Route::isApi()) response()->status(404, 'NOT_FOUND', 'Not Found');	
-			else response()->notFound();
+			response()->notFound();
 		}
 	}
 }

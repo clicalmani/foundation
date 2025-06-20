@@ -19,7 +19,7 @@ interface ResponseInterface extends Responses\StatusErrorInterface, Responses\Js
      * @param ?int $code Status code
      * @return never
      */
-    public function sendStatus(?int $code = null) : never;
+    public function sendStatus(?int $code = null);
 
     /**
      * Send a success status
