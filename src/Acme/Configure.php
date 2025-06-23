@@ -83,7 +83,14 @@ class Configure implements \ArrayAccess, \JsonSerializable
 
     public function offsetExists(mixed $offset): bool
     {
-        return !!in_array($offset, ['app', 'mail', 'bootstrap', 'http', 'database']);
+        return !!in_array(
+            $offset, [
+                'app', 
+                'mail', 
+                'bootstrap', 
+                'http', 
+                'database'
+            ]);
     }
 
     public function offsetGet(mixed $offset): mixed

@@ -1,8 +1,8 @@
 <?php
 namespace Clicalmani\Foundation\Acme;
 
-use Clicalmani\Database\DB;
 use Clicalmani\Foundation\Filesystem\RecursiveFilter;
+use Clicalmani\Foundation\Support\Facades\DB;
 use Clicalmani\XPower\XDTNodeList;
 
 class Console

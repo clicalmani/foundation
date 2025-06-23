@@ -13,6 +13,11 @@ namespace Clicalmani\Foundation\Support\Facades;
  * @method static mixed bootstrap(?string $key = null)
  * @method static mixed database(?string $key = null)
  * @method static mixed env(?string $key = null)
+ * @method static string string(?string $key = null, string $default = '')
+ * @method static int integer(?string $key = null, int $default = 0)
+ * @method static float float(?string $key = null, float $default = 0)
+ * @method static array array(?string $key = null, array $default = [])
+ * @method static bool boolean(?string $key = null, bool $default = false)
  */
 class Config extends Facade
 {

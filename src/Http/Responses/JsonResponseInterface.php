@@ -7,23 +7,23 @@ interface JsonResponseInterface
      * Send a json response
      * 
      * @param mixed $data
-     * @return \Clicalmani\Foundation\Http\ResponseInterface
+     * @return self
      */
-    public function json(mixed $data) : \Clicalmani\Foundation\Http\ResponseInterface;
+    public function json(mixed $data) : self;
 
     /**
      * Send a success status
      * 
      * @param mixed $message
-     * @return \Clicalmani\Foundation\Http\ResponseInterface
+     * @return self
      */
-    public function success(mixed $message = null) : \Clicalmani\Foundation\Http\ResponseInterface;
+    public function success(mixed $message = null) : self;
 
     /**
      * Send an error status
      * 
      * @param mixed $message
-     * @return \Clicalmani\Foundation\Http\ResponseInterface
+     * @return self
      */
-    public function error(mixed $message = null) : \Clicalmani\Foundation\Http\ResponseInterface;
+    public function error(mixed $message = null) : self;
 }

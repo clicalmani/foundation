@@ -9,9 +9,9 @@ interface ResponseInterface extends Responses\StatusErrorInterface, Responses\Js
      * Send a json response
      * 
      * @param mixed $data
-     * @return \Clicalmani\Foundation\Http\ResponseInterface
+     * @return self
      */
-    public function json(mixed $data) : \Clicalmani\Foundation\Http\ResponseInterface;
+    public function json(mixed $data) : self;
 
     /**
      * Send a status response
@@ -25,25 +25,25 @@ interface ResponseInterface extends Responses\StatusErrorInterface, Responses\Js
      * Send a success status
      * 
      * @param mixed $message
-     * @return \Clicalmani\Foundation\Http\ResponseInterface
+     * @return self
      */
-    public function success(mixed $message = null) : \Clicalmani\Foundation\Http\ResponseInterface;
+    public function success(mixed $message = null) : self;
 
     /**
      * Send an error status
      * 
      * @param mixed $message
-     * @return \Clicalmani\Foundation\Http\ResponseInterface
+     * @return self
      */
-    public function error(mixed $message = null) : \Clicalmani\Foundation\Http\ResponseInterface;
+    public function error(mixed $message = null) : self;
 
     /**
      * Set the message
      * 
      * @param string $message
-     * @return \Clicalmani\Foundation\Http\ResponseInterface
+     * @return self
      */
-    public function setMessage(string $message) : \Clicalmani\Foundation\Http\ResponseInterface;
+    public function setMessage(string $message) : self;
 
     /**
      * Send the response headers
@@ -72,18 +72,18 @@ interface ResponseInterface extends Responses\StatusErrorInterface, Responses\Js
      * Set status
      * 
      * @param int $code
-     * @return \Clicalmani\Foundation\Http\ResponseInterface
+     * @return self
      */
-    public function status(int $code) : \Clicalmani\Foundation\Http\ResponseInterface;
+    public function status(int $code) : self;
 
     /**
      * Set header
      * 
      * @param string $name
      * @param string|array $value
-     * @return \Clicalmani\Foundation\Http\ResponseInterface
+     * @return self
      */
-    public function header(string $name, string|array $value) : \Clicalmani\Foundation\Http\ResponseInterface;
+    public function header(string $name, string|array $value) : self;
 
     /**
      * Send a file for download
@@ -124,7 +124,7 @@ interface ResponseInterface extends Responses\StatusErrorInterface, Responses\Js
      * @param string $domain
      * @param bool $secure
      * @param bool $httponly
-     * @return \Clicalmani\Foundation\Http\ResponseInterface
+     * @return self
      */
     public function cookie(
         string $name, 
@@ -134,7 +134,7 @@ interface ResponseInterface extends Responses\StatusErrorInterface, Responses\Js
         string $domain = '', 
         bool $secure = false, 
         bool $httponly = false
-    ) : \Clicalmani\Foundation\Http\ResponseInterface;
+    ) : self;
 
     /**
      * Delete a cookie
@@ -142,9 +142,9 @@ interface ResponseInterface extends Responses\StatusErrorInterface, Responses\Js
      * @param string $name
      * @param string $path
      * @param string $domain
-     * @return \Clicalmani\Foundation\Http\ResponseInterface
+     * @return self
      */
-    public function deleteCookie(string $name, string $path = '', string $domain = '') : \Clicalmani\Foundation\Http\ResponseInterface;
+    public function deleteCookie(string $name, string $path = '', string $domain = '') : self;
 
     /**
      * Set a view
@@ -160,9 +160,9 @@ interface ResponseInterface extends Responses\StatusErrorInterface, Responses\Js
      * 
      * @param string $view
      * @param array $data
-     * @return \Clicalmani\Foundation\Http\ResponseInterface
+     * @return self
      */
-    public function withHeaders(array $headers) : \Clicalmani\Foundation\Http\ResponseInterface;
+    public function withHeaders(array $headers) : self;
 
     /**
      * Create a stream from a path and context

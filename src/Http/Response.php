@@ -156,12 +156,11 @@ class Response extends \Clicalmani\Psr7\Response implements ResponseInterface
 
     public function status(int $code) : \Clicalmani\Foundation\Http\ResponseInterface
     {
-        $this->status = $code;
-        http_response_code($code);
+        http_response_code($this->status = $code);
         return $this;
     }
 
-    public function header(string $name, string|array $value) : static
+    public function header(string $name, string|array $value) : \Clicalmani\Foundation\Http\ResponseInterface
     {
         $this->headers[] = new Header($name, (array)$value);
         return $this;
@@ -217,7 +216,7 @@ class Response extends \Clicalmani\Psr7\Response implements ResponseInterface
         string $domain = '', 
         bool $secure = false, 
         bool $httponly = false
-    ) : static {
+    ) : \Clicalmani\Foundation\Http\ResponseInterface {
         (new \Clicalmani\Cookie\Cookie(
             $name,
             $value,
@@ -230,7 +229,7 @@ class Response extends \Clicalmani\Psr7\Response implements ResponseInterface
         return $this;
     }
 
-    public function deleteCookie(string $name, string $path = '', string $domain = '') : static
+    public function deleteCookie(string $name, string $path = '', string $domain = '') : \Clicalmani\Foundation\Http\ResponseInterface
     {
         setcookie($name, '', time() - 3600, $path, $domain);
         return $this;
@@ -241,7 +240,7 @@ class Response extends \Clicalmani\Psr7\Response implements ResponseInterface
         $this->send(view($view, $data)->render());
     }
 
-    public function withHeaders(array $headers) : static
+    public function withHeaders(array $headers) : \Clicalmani\Foundation\Http\ResponseInterface
     {
         foreach ($headers as $name => $value) {
             $this->header($name, $value);

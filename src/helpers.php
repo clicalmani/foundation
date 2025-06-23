@@ -300,9 +300,9 @@ if ( ! function_exists('response') ) {
     /**
      * Returns the response instance
      * 
-     * @return \Clicalmani\Foundation\Http\Response
+     * @return \Clicalmani\Foundation\Http\ResponseInterface
      */
-    function response(?string $message = '', int $status = 200) : \Clicalmani\Foundation\Http\Response 
+    function response(?string $message = '', int $status = 200) : \Clicalmani\Foundation\Http\ResponseInterface
     {
         $response = app()->response;
 

@@ -8,6 +8,6 @@ class Tonka extends Facade
 {
     protected static function getFacadeAccessor() : string
     {
-        return 'tonka';
+        return 'console';
     }
 }

@@ -2,7 +2,6 @@
 namespace Clicalmani\Foundation\Maker;
 
 use Clicalmani\Foundation\Http\Middlewares\Api;
-use Clicalmani\Foundation\Http\Middlewares\Middleware;
 use Clicalmani\Foundation\Http\Middlewares\Web;
 
 class HttpKernel extends Kernel
@@ -46,7 +45,7 @@ class HttpKernel extends Kernel
      *
      * @var array
      */
-    protected array $validator = [];
+    protected array $custom_rules = [];
 
     public function boot(): void
     {
@@ -94,7 +93,7 @@ class HttpKernel extends Kernel
         $http_config = $this->app->config['http'];
         $http_config['web'] = $this->middleware['web'];
         $http_config['api'] = $this->middleware['api'];
-        $http_config['validators'] = $this->validator;
+        $http_config['custom_rules'] = $this->custom_rules;
         $this->app->config['http'] = $http_config;
     }
 }

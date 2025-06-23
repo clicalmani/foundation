@@ -59,6 +59,25 @@ return static function (ContainerConfigurator $container): void {
     $services->set('func', \Clicalmani\Foundation\Acme\Invokable::class);
 
     /**
+     * Database service
+     */
+    $services->set('database', \Clicalmani\Foundation\Acme\Database::class);
+
+    /**
+     * Response service
+     */
+    $services->set('response', \Clicalmani\Foundation\Http\Response::class)
+        ->args([
+            \Clicalmani\Psr7\StatusCodeInterface::STATUS_OK,
+            200
+        ]);
+
+    /**
+     * Console service
+     */
+    $services->set('console', \Clicalmani\Foundation\Acme\Console::class);
+
+    /**
      * Inertia service
      */
     if (class_exists(\Inertia\Response::class)) {

@@ -3,13 +3,13 @@ namespace Clicalmani\Foundation\Http;
 
 trait JsonResponse
 {
-    public function json(mixed $data) : \Clicalmani\Foundation\Http\ResponseInterface
+    public function json(mixed $data) : self
     {
         $this->sendBody($this->__json($data));
         return $this;
     }
 
-    public function success(mixed $message = null) : \Clicalmani\Foundation\Http\ResponseInterface
+    public function success(mixed $message = null) : self
     {
         $this->body->write(
             $this->__json([
@@ -20,7 +20,7 @@ trait JsonResponse
         return $this;
     }
 
-    public function error(mixed $message = null) : \Clicalmani\Foundation\Http\ResponseInterface
+    public function error(mixed $message = null) : self
     {
         $this->body->write(
             $this->__json([

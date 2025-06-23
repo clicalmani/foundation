@@ -37,9 +37,9 @@ class StorageManager
     /**
      * Create storage symbolic link in the public directory
      * 
-     * @return bool True on success, false on failure
+     * @return mixed
      */
-    public static function link()
+    public static function link() : mixed
     {
         return \Clicalmani\Foundation\Support\Facades\Tonka::link(storage_path(), root_path('public'));
     }

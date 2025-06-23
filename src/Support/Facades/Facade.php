@@ -14,7 +14,7 @@ abstract class Facade
     {
         if ($accessor = get_called_class()::getFacadeAccessor()) {
             $service = app()->getContainer()->get($accessor);
-
+            
             if ( method_exists($service, $method) ) {
                 return $service->{$method}(...$args);
             }
@@ -25,6 +25,20 @@ abstract class Facade
                 if ( method_exists($service, $method) ) {
                     return $service->{$method}(...$args);
                 }
+            }
+
+            if ($service instanceof \Clicalmani\Foundation\Http\Response) {
+                return response();
+            }
+
+            if ($service instanceof \Clicalmani\Foundation\Acme\Configure) {
+                return match($method) {
+                    'string' => (string)$service->get(...$args),
+                    'integer' => (int)$service->get(...$args),
+                    'array' => (array)$service->get(...$args),
+                    'float' => (float)$service->get(...$args),
+                    'boolean' => (bool)$service->get(...$args)
+                };
             }
         }
 

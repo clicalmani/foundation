@@ -14,11 +14,6 @@ use Clicalmani\Foundation\Providers\ServiceProvider;
  * 
  * @package Clicalmani\Foundation/flesco 
  * @author @Clicalmani\Foundation
- * 
- * @method static never render()
- * @method static mixed invokeMethod(\Clicalmani\Foundation\Http\Controllers\ReflectorInterface $reflector)
- * @method static \Clicalmani\Foundation\Test\Controllers\TestController test(string $action)
- * @method static object getInstance(string $class)
  */
 class Controller
 {

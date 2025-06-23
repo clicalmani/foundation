@@ -200,4 +200,21 @@ interface CollectionInterface
      * @return int The number of public properties in the ArrayObject.
      */
     public function count(): int;
+
+    /**
+     * Check if the specified element exists in the items list.
+     * 
+     * @param mixed $element
+     * @return bool
+     */
+    public function has($element) : bool;
+
+    /**
+     * Conditionally extends the list.
+     * 
+     * @param iterable $elements
+     * @param ?callable $callback
+     * @return self
+     */
+    public function extends(iterable $elements, ?callable $callback = null) : self;
 }

@@ -249,6 +249,17 @@ class Collection extends SPLCollection implements CollectionInterface
     }
 
     /**
+     * Check if the specified element exists in the items list.
+     * 
+     * @param mixed $element
+     * @return bool
+     */
+    public function has($element) : bool
+    {
+        return !!$this->find(fn($value) => $value === $element);
+    }
+
+    /**
      * Sort down elements by mainting the associated indexes.
      * 
      * @param callable $closure a comparison function
@@ -337,4 +348,21 @@ class Collection extends SPLCollection implements CollectionInterface
 
         return $map;
     }
+
+    /**
+     * Conditionally extends the list.
+     * 
+     * @param iterable $elements
+     * @param ?callable $callback
+     * @return self
+     */
+    public function extends(iterable $elements, ?callable $callback = null) : self
+    {
+        foreach ($elements as $element) {
+            if ($callback && !$callback($element)) continue;
+            $this->add($element);
+        }
+
+        return $this;
+    } 
 }

@@ -1,6 +1,7 @@
 <?php
 namespace Clicalmani\Foundation\Providers;
 
+use Clicalmani\Foundation\Collection\Collection;
 use Clicalmani\Foundation\Support\Facades\Config;
 
 class ValidationServiceProvider extends ServiceProvider
@@ -19,22 +20,16 @@ class ValidationServiceProvider extends ServiceProvider
 	 */
     public function boot() : void
 	{
-        $validators = ( new \Clicalmani\Validation\Kernel )->validators();
-        $custom_validators = \Clicalmani\Foundation\Support\Facades\Config::http('validators');
+        $rules = collection(\Clicalmani\Foundation\Support\Facades\Config::http('custom_rules') ?? [])
+                                ->unique();
+        $arguments = collection($rules)->map(fn(string $validator) => $validator::getArgument());
+        
+        $rules->extends(
+            ( new \Clicalmani\Validation\Kernel )->validators(), 
+            fn(string $validator) => !$arguments->has($validator::getArgument())
+        );
 
-        /**
-         * |-------------------------------------------------------
-         * |                  ***** Notice *****
-         * |-------------------------------------------------------
-         * 
-         * Custom validators will override builtin validators with same argument names.
-         */
-        if ( $custom_validators ) $validators = array_merge($validators, $custom_validators);
-
-        if ( $validators )
-            foreach ($validators as $validator) {
-                static::$validators[( new $validator )->getArgument()] = $validator;
-            }
+        self::$validators = $rules->toArray();
 	}
 
     /**
@@ -43,9 +38,9 @@ class ValidationServiceProvider extends ServiceProvider
      * @param string $argument
      * @return bool
      */
-    public function seemsValidator(string $argument) : bool
+    public static function seemsValidator(string $argument) : bool
     {
-        return !!array_key_exists($argument, $this->getValidators());
+        return !!collection(static::getValidators())->find(fn(string $validator) => $argument === $validator::getArgument());
     }
 
     /**
@@ -54,9 +49,12 @@ class ValidationServiceProvider extends ServiceProvider
      * @param string $argument
      * @return mixed Validator class on success, NULL on failure.
      */
-    public function getValidator(string $argument) : mixed
+    public static function getValidator(string $argument) : ?string
     {
-        return @ static::$validators[$argument];
+        return collection(self::$validators)
+                ->find(function(string $class) use($argument) {
+                    return $argument === $class::getArgument();
+                });
     }
 
     /**
@@ -64,8 +62,8 @@ class ValidationServiceProvider extends ServiceProvider
      * 
      * @return array
      */
-    public function getValidators() : array
+    public static function getValidators() : array
     {
-        return static::$validators;
+        return self::$validators;
     }
 }
