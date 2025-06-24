@@ -50,8 +50,8 @@ abstract class ServiceProvider
         if ( class_exists( $service_class ) ) {
             $service = new $service_class;
             
-            if ( method_exists($service, 'register') ) $service->register();
             if ( method_exists($service, 'boot') ) $service->boot();
+            if ( method_exists($service, 'register') ) $service->register();
         }
     }
 }

@@ -6,9 +6,9 @@ abstract class RouteService
     /**
      * Current route
      * 
-     * @var \Clicalmani\Routing\Route
+     * @var \Clicalmani\Routing\Route|false
      */
-    protected $route;
+    protected \Clicalmani\Routing\Route|false $route;
 
     /**
      * Request object
@@ -19,7 +19,7 @@ abstract class RouteService
 
     public function __construct()
     {
-        $this->request = new \Clicalmani\Foundation\Http\Request;
+        $this->request = \Clicalmani\Foundation\Http\Request::current();
     }
 
     /**

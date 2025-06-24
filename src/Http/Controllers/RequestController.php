@@ -4,6 +4,7 @@ namespace Clicalmani\Foundation\Http\Controllers;
 use Clicalmani\Foundation\Http\Request;
 use Clicalmani\Foundation\Exceptions\ModelNotFoundException;
 use Clicalmani\Database\Factory\Models\Elegant;
+use Clicalmani\Foundation\Acme\Container;
 use Clicalmani\Foundation\Http\Response;
 use Clicalmani\Foundation\Providers\RouteServiceProvider;
 use Clicalmani\Foundation\Routing\Exceptions\RouteNotFoundException;
@@ -42,6 +43,13 @@ class RequestController
 	protected $instance;
 
 	/**
+	 * Application container instance
+	 * 
+	 * @var \Clicalmani\Foundation\Acme\Container
+	 */
+	protected Container $container;
+
+	/**
 	 * This method returns an instance of the given class.
 	 * 
 	 * @param string $class
@@ -50,17 +58,10 @@ class RequestController
     public function getInstance(string $class) : object
     {
 		if ($this->instance instanceof $class) return $this->instance;
-
-        if ( method_exists($class, '__construct') ) {
-            $reflector = new MethodReflector( (new \ReflectionClass($class))->getConstructor() );
-			$args = collection($reflector->getParameters())
-						->map(fn(\ReflectionParameter $parameter) => instance($reflector->getParameterClassNames($parameter)[0]))
-						->toArray();
-
-			$this->instance = new $class(...$args);
-        } else $this->instance = new $class;
-
-		return $this->instance;
+		
+		$this->container = new Container;
+		$this->container->set($class);
+		return $this->instance = $this->container->get($class);
     }
 
 	/**
@@ -162,84 +163,72 @@ class RequestController
 	public function invokeMethod(ReflectorInterface $reflector) : \Psr\Http\Message\ResponseInterface|\Clicalmani\Foundation\Http\RedirectInterface
 	{
 		$request = isConsoleMode() ? Request::current() : new Request; // Fallback to default request
-		/** @var int|null */
-		$request_pos = null;
-		
-		if ($arr = $reflector->getRequest()) {
-			$data = $request->all();
-			/** @var \Clicalmani\Foundation\Http\Request */
-			$request = new $arr['name'];
-			$request_pos = $arr['pos'];
-			if ($data) $request->extend($data);
-			$this->validateRequest($request);
-		}
 		
 		Request::current($request);
-		
-		$request_parameters = $this->getRequestParameters();
+
 		/** @var \ReflectionParameter[] */
 		$parameters = $reflector->getParameters();
-		/** @var string */
-		$resource = null;
-		/** @var int */
-		$resource_pos = null;
-		/** @var string */
-		$nested_resource = null;
-		/** @var int */
-		$nested_resource_pos = null;
-
-		if ($arr = $reflector->getResource()) {
-			try {
-				$resources = $this->bindResources($reflector);
-				$resource = $resources[0];
-				$nested_resource = @$resources[1] ?? null;
-				$resource_pos = $arr['pos'];
-
-				if ($arr = $reflector->getNestedResource()) {
-					$nested_resource_pos = $arr['pos'];
-				}
-			} catch(ModelNotFoundException $e) {
-				
-				if ( $callback = $this->route->missing() ) {
-					return $callback($e);
-				}
-
-				return new Response;
-			}
-		}
-
-		if ($reflector instanceof MethodReflector) {
-			if ($attribute = (new \ReflectionMethod($reflector->getClass(), $reflector->getName()))->getAttributes(AsValidator::class)) {
-				$request->merge($attribute[0]->newInstance()->args);
-			}
-		}
+		$request_parameters = $this->getRequestParameters();
 
 		$args = collection($parameters)->map(fn() => null)->toArray();
-		
-		if (NULL !== $request_pos) {
-			$args[$request_pos] = $request;
-		}
 
-		if (NULL !== $resource) {
-			$args[$resource_pos] = $resource;
-		}
-
-		if (NULL !== $nested_resource) {
-			$args[$nested_resource_pos] = $nested_resource;
-		}
-		
 		foreach ($parameters as $i => $param) {
-			$param_reflector = new ParameterReflector($param);
-			$arg = @$args[$i] ?? null;
-			$param_reflector->setType($arg);
-			$args[$i] = $arg;
+			$param_type = $param->getType();
 
-			if (array_key_exists($param->name, $request_parameters)) {
-				$args[$i] = $request_parameters[$param->name];
-			}
+			if ($param_type?->isBuiltin()) {
+				$name = $param->getName();
+				$value = isset($request_parameters[$name]) ? $request_parameters[$name]: $param->getDefaultValue();
+				$args[$i] = $value;
+			} else {
+
+				foreach (Reflector::getParameterClassNames($param) as $class) {
+					
+					if ((new \ReflectionClass($class))->isInterface()) {
+						$instance = $this->container->getInterfaceInstance($class, false);
+					} else $instance = $this->container->getClassIntance($class, false);
+
+					// Request
+					if (is_subclass_of($instance, \Clicalmani\Foundation\Http\Request::class) ||
+                    	$instance::class === \Clicalmani\Foundation\Http\Request::class) {
+							$data = $request->all();
+							/** @var \Clicalmani\Foundation\Http\Request */
+							$request = $instance;
+							$request->extend($data);
+
+							if ($reflector instanceof MethodReflector) {
+								if ($attribute = (new \ReflectionMethod($reflector->getClass(), $reflector->getName()))->getAttributes(AsValidator::class)) {
+									$request->merge($attribute[0]->newInstance()->args);
+								}
+							}
+
+							$this->validateRequest($request);
+							$args[$i] = $request;
+						}
+
+					// Resources
+					if (is_subclass_of($instance, \Clicalmani\Database\Factory\Models\Elegant::class)) {
+						
+						try {
+							$resources = $this->bindResources($reflector);
+							$args[$i] = $resources[0];
+
+							if ($arr = $reflector->getNestedResource()) {
+								$args[$arr['pos']] = $resources[1];
+							}
+						} catch(ModelNotFoundException $e) {
+							
+							if ( $callback = $this->route->missing() ) {
+								return $callback($e);
+							}
+
+							return new Response;
+						}
+					}
+				}
+            }
 		}
 		
-		if ($reflector instanceof MethodReflector) return $reflector($this->getInstance($reflector->getClass()), ...$args);
+		if ($reflector instanceof MethodReflector) return $reflector($this->container->getClassIntance($reflector->getClass()), ...$args);
 		
 		return $reflector(...$args);
 	}

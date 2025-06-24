@@ -8,7 +8,7 @@ use Clicalmani\Foundation\Http\Requests\Cookie;
 use Clicalmani\Foundation\Http\Requests\HttpOutputStream;
 use Clicalmani\Foundation\Http\Requests\HttpRequest;
 use Clicalmani\Foundation\Http\Requests\Redirect;
-use Clicalmani\Foundation\Http\Requests\RequestInterface;
+use Clicalmani\Foundation\Http\RequestInterface;
 use Clicalmani\Foundation\Http\Session;
 use Clicalmani\Foundation\Providers\AuthServiceProvider;
 use Clicalmani\Foundation\Support\Facades\Arr;
@@ -25,7 +25,7 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
     /**
      * Current request object
      * 
-     * @var \Clicalmani\Foundation\Http\Requests\RequestInterface
+     * @var \Clicalmani\Foundation\Http\RequestInterface
      */
     protected static $current_request;
 
@@ -39,10 +39,10 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
     /**
      * Get or set the current request
      * 
-     * @param ?\Clicalmani\Foundation\Http\Requests\RequestInterface $request
-     * @return ?\Clicalmani\Foundation\Http\Requests\RequestInterface
+     * @param ?\Clicalmani\Foundation\Http\RequestInterface $request
+     * @return ?\Clicalmani\Foundation\Http\RequestInterface
      */
-    public static function current(?RequestInterface $request = null) : ?\Clicalmani\Foundation\Http\Requests\RequestInterface
+    public static function current(?RequestInterface $request = null) : ?\Clicalmani\Foundation\Http\RequestInterface
     {
         if ($request) return self::$current_request = $request;
         return self::$current_request;
@@ -136,12 +136,6 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
         }
     }
 
-    /**
-     * Merge request signatures
-     * 
-     * @param ?array $new_signatures New signatures to merge into
-     * @return void
-     */
     public function merge(?array $new_signatures = []) : void
     {
         $this->signatures = array_merge((array) $this->signatures, $new_signatures);

@@ -253,7 +253,7 @@ class RouteServiceProvider extends ServiceProvider
     public static function routeBindingCallback(?\Closure $callback = null) : mixed
     {
         if (NULL === $callback) return static::$route_binding_callback;
-        static::$route_binding_callback = $callback;
+        return static::$route_binding_callback = $callback;
     }
 
     public function boot(): void

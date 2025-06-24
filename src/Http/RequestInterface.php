@@ -1,15 +1,15 @@
 <?php
-namespace Clicalmani\Foundation\Http\Requests;
+namespace Clicalmani\Foundation\Http;
 
 interface RequestInterface extends \Psr\Http\Message\ServerRequestInterface
 {
     /**
      * Get or set the current request
      * 
-     * @param ?\Clicalmani\Foundation\Http\Requests\RequestInterface $request
-     * @return ?\Clicalmani\Foundation\Http\Requests\RequestInterface
+     * @param ?self $request
+     * @return ?self
      */
-    public static function current(?RequestInterface $request = null) : ?\Clicalmani\Foundation\Http\Requests\RequestInterface;
+    public static function current(?RequestInterface $request = null) : ?self;
 
     /**
      * (non-PHPDoc)
@@ -19,6 +19,14 @@ interface RequestInterface extends \Psr\Http\Message\ServerRequestInterface
      * @return void
      */
     public function signatures() : void;
+
+    /**
+     * Merge request signatures
+     * 
+     * @param ?array $new_signatures New signatures to merge into
+     * @return void
+     */
+    public function merge(?array $new_signatures = []) : void;
 
     /**
      * (non-PHPDoc)

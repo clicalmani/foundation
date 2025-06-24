@@ -7,6 +7,8 @@ use Clicalmani\Foundation\Support\Facades\Arr;
 use Clicalmani\Psr7\NonBufferedBody;
 use Clicalmani\Psr7\StatusCodeInterface;
 use Composer\Autoload\ClassLoader;
+use Symfony\Component\DependencyInjection\Loader\Configurator\DefaultsConfigurator;
+use Symfony\Component\DependencyInjection\Loader\Configurator\ServiceConfigurator;
 
 /**
  * Make an application
@@ -74,6 +76,14 @@ class Application
 
     private $container;
 
+    /**
+     * Container services
+     * 
+     * @var \Symfony\Component\DependencyInjection\Loader\Configurator\ServiceConfigurator|
+     * \Symfony\Component\DependencyInjection\Loader\Configurator\DefaultsConfigurator|null
+     */
+    protected ServiceConfigurator|DefaultsConfigurator $services;
+
     public function __construct(private ?string $rootPath = null)
     {
         $this->config = new \Clicalmani\Foundation\Acme\Configure;
@@ -94,8 +104,7 @@ class Application
     {
         if ( isset(static::$instance) ) return static::$instance;
 
-        static::$instance = new self($rootPath);
-        return static::$instance;
+        return static::$instance = new self($rootPath);
     }
 
     /**
@@ -367,6 +376,17 @@ class Application
         return $this->commands;
     }
 
+    public function initServices(DefaultsConfigurator $services)
+    {
+        $this->services = $services;
+        return $this;
+    }
+
+    public function getServices()
+    {
+        return $this->services;
+    }
+
     public function __get($name)
     {
         return match ($name) {
@@ -388,5 +408,39 @@ class Application
             'database' => $this->db_config = $value,
             'response' => $this->response = $value
         };
+    }
+
+    public function registerCoreContainerServices()
+    {
+        foreach ([
+            'logger' => [\Clicalmani\Foundation\Acme\Logger::class],
+            'str' => [\Clicalmani\Foundation\Acme\Stringable::class],
+            'router' => [\Clicalmani\Foundation\Acme\Router::class],
+            'array' => [\Clicalmani\Foundation\Acme\Arrayable::class],
+            'env' => [\Clicalmani\Foundation\Acme\Environment::class],
+            'config' => [\Clicalmani\Foundation\Acme\Configure::class],
+            'console' => [\Clicalmani\Foundation\Acme\Console::class],
+            'storage' => [\Clicalmani\Foundation\Acme\StorageManager::class],
+            'controller' => [\Clicalmani\Foundation\Acme\Controller::class],
+            'func' => [\Clicalmani\Foundation\Acme\Invokable::class],
+            'database' => [\Clicalmani\Foundation\Acme\Database::class],
+            'response' => [\Clicalmani\Foundation\Http\Response::class, [\Clicalmani\Psr7\StatusCodeInterface::STATUS_OK, 200]],
+            'console' => [\Clicalmani\Foundation\Acme\Console::class],
+            // 'inertia' => [\Inertia\Response::class, null, true]
+        ] as $key => $value) {
+            if ($this->services) {
+                if (!(isset($value[2]) && class_exists($value[0]))) {
+                    $this->services = $this->services->set($key, $value[0]);
+                } else {
+                    if (class_exists($value[0])) {
+                        $this->services = $this->services->set($key, $value[0]);
+                    }
+                }
+
+                if (isset($value[1])) {
+                    $this->services->args($value[1]);
+                }
+            }
+        }
     }
 }
