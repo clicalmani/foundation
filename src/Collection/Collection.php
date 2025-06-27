@@ -365,4 +365,82 @@ class Collection extends SPLCollection implements CollectionInterface
 
         return $this;
     } 
+
+    /**
+     * Sorts the collection by a specific key.
+     * 
+     * @param string $key The key to sort by
+     * @return \Clicalmani\Foundation\Collection\CollectionInterface
+     */
+    public function sortBy(string $key) : \Clicalmani\Foundation\Collection\CollectionInterface
+    {
+        $this->uasort(function ($a, $b) use ($key) {
+            return $a[$key] <=> $b[$key];
+        });
+
+        return $this;
+    }
+
+    public function sortByDesc(string $key) : \Clicalmani\Foundation\Collection\CollectionInterface
+    {
+        $this->uasort(function ($a, $b) use ($key) {
+            return $b[$key] <=> $a[$key];
+        });
+
+        return $this;
+    }
+
+    public function isNotEmpty() : bool
+    {
+        return !$this->isEmpty();
+    }
+
+    public function isEmptyOrNull() : bool
+    {
+        return $this->isEmpty() || $this->firstOrNull() === null;
+    }
+
+    public function isNotEmptyOrNull() : bool
+    {
+        return !$this->isEmptyOrNull();
+    }
+
+    public function isNotEmptyAndNull() : bool
+    {
+        return !$this->isEmpty() && $this->firstOrNull() !== null;
+    }
+
+    public function sortByKey(string $key) : \Clicalmani\Foundation\Collection\CollectionInterface
+    {
+        $this->uasort(function ($a, $b) use ($key) {
+            return $a[$key] <=> $b[$key];
+        });
+
+        return $this;
+    }
+
+    public function contains(mixed $value) : bool
+    {
+        return $this->index($value) !== -1;
+    }
+
+    public function containsKey(mixed $key) : bool
+    {
+        return isset($this[$key]);
+    }
+
+    public function clear() : void
+    {
+        $this->exchange([]);
+    }
+
+    public function firstOrNull() : mixed
+    {
+        return $this->count() ? $this->first() : null;
+    }
+
+    public function __toString() : string
+    {
+        return json_encode($this->toArray());
+    }
 }
