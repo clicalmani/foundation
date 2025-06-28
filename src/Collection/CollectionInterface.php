@@ -7,9 +7,9 @@ interface CollectionInterface
      * Store one or more elements
      * 
      * @param mixed $elements 
-     * @return \Clicalmani\Foundation\Collection\CollectionInterface
+     * @return self
      */
-    public function add(mixed ...$elements) : \Clicalmani\Foundation\Collection\CollectionInterface;
+    public function add(mixed ...$elements) : self;
 
     /**
      * @override
@@ -19,10 +19,10 @@ interface CollectionInterface
     /**
      * Gets element at the specified index
      * 
-     * @param mixed $index Element index
+     * @param int|string $index Element index
      * @return mixed 
      */
-    public function get(mixed $index = null) : mixed;
+    public function get(int|string $index) : mixed;
 
     /**
      * Find element index
@@ -58,35 +58,35 @@ interface CollectionInterface
      * and element index as its second argument.
      * 
      * @param callable $closure
-     * @return \Clicalmani\Foundation\Collection\CollectionInterface
+     * @return self
      */
-    public function map(callable $closure) : \Clicalmani\Foundation\Collection\CollectionInterface;
+    public function map(callable $closure) : self;
 
     /**
      * Iterate through elements
      * 
      * @param callable $closure A closure function which receive element value as its first argument and 
      * element index as its second argument.
-     * @return \Clicalmani\Foundation\Collection\CollectionInterface
+     * @return self
      */
-    public function each(callable $closure) : \Clicalmani\Foundation\Collection\CollectionInterface;
+    public function each(callable $closure) : self;
 
     /**
      * Filter elements
      * 
      * @param callable $closure A callback function which receive element value as its first argument and 
      * element index as its second argument.
-     * @return \Clicalmani\Foundation\Collection\CollectionInterface
+     * @return self
      */
-    public function filter(callable $closure) : \Clicalmani\Foundation\Collection\CollectionInterface;
+    public function filter(callable $closure) : self;
 
     /**
      * Merges provided elements to the existing ones.
      * 
      * @param mixed $value A single element or an array of elements
-     * @return \Clicalmani\Foundation\Collection\CollectionInterface
+     * @return self
      */
-    public function merge(mixed $value) : \Clicalmani\Foundation\Collection\CollectionInterface;
+    public function merge(mixed $value) : self;
 
     /**
      * Detect if there is no elements in the storage.
@@ -114,17 +114,25 @@ interface CollectionInterface
      * Populate storage with new elements by replacing the old ones.
      * 
      * @param array $new_elements New elements to be used
-     * @return \Clicalmani\Foundation\Collection\CollectionInterface
+     * @return self
      */
-    public function exchange(array $new_elements) : \Clicalmani\Foundation\Collection\CollectionInterface;
+    public function exchange(array $new_elements) : self;
 
     /**
      * Removes duplicated elements and maintain the indexes.
      * 
      * @param mixed $closure [optional] an optional callback function to define the uniqueness of an element.
-     * @return \Clicalmani\Foundation\Collection\CollectionInterface
+     * @return self
      */
-    public function unique(mixed $closure = null) : \Clicalmani\Foundation\Collection\CollectionInterface;
+    public function unique(mixed $closure = null) : self;
+
+    /**
+     * Returns a new collection with unique elements based on a specific key.
+     * 
+     * @param string $key The key to check for uniqueness
+     * @return self
+     */
+    public function uniqueBy(string $key) : self;
 
     /**
      * Find element
@@ -138,9 +146,9 @@ interface CollectionInterface
      * Sort down elements by mainting the associated indexes.
      * 
      * @param callable $closure a comparison function
-     * @return \Clicalmani\Foundation\Collection\CollectionInterface
+     * @return self
      */
-    public function sort(callable $closure) : \Clicalmani\Foundation\Collection\CollectionInterface;
+    public function sort(callable $closure) : self;
 
     /**
      * Joins elements by separating them with a separator specified as first argument. Which means elements should be joinable.
@@ -167,9 +175,9 @@ interface CollectionInterface
     /**
      * Convert the current collection to array object
      * 
-     * @return \Clicalmani\Foundation\Collection\CollectionInterface
+     * @return self
      */
-    public function toObject() : \Clicalmani\Foundation\Collection\CollectionInterface;
+    public function toObject() : self;
 
     /**
      * Create a new set
@@ -217,4 +225,94 @@ interface CollectionInterface
      * @return self
      */
     public function extends(iterable $elements, ?callable $callback = null) : self;
+
+    /**
+     * Sorts the collection by a specific key.
+     * 
+     * @param string $key The key to sort by
+     * @return self
+     */
+    public function sortBy(string $key) : self;
+
+    /**
+     * Sorts the collection by a specific key in descending order.
+     * 
+     * @param string $key The key to sort by
+     * @return self
+     */
+    public function sortByDesc(string $key) : self;
+
+    /**
+     * Checks if the collection is not empty.
+     * 
+     * @return bool
+     */
+    public function isNotEmpty() : bool;
+
+    /**
+     * Checks if the collection is empty or contains a null value.
+     * 
+     * @return bool
+     */
+    public function isEmptyOrNull() : bool;
+
+    /**
+     * Checks if the collection is not empty and does not contain a null value.
+     * 
+     * @return bool
+     */
+    public function isNotEmptyOrNull() : bool;
+
+    /**
+     * Checks if the collection is not empty and the first element is not null.
+     * 
+     * @return bool
+     */
+    public function isNotEmptyAndNull() : bool;
+
+    /**
+     * Checks if the collection contains a specific value.
+     * 
+     * @param mixed $value The value to check for
+     * @return bool
+     */
+    public function contains(mixed $value) : bool;
+
+    /**
+     * Checks if the collection contains a specific key.
+     * 
+     * @param mixed $key The key to check for
+     * @return bool
+     */
+    public function containsKey(mixed $key) : bool;
+
+    /**
+     * Clears the collection by removing all elements.
+     * 
+     * @return void
+     */
+    public function clear() : void;
+
+    /**
+     * Returns the first element or null if the collection is empty.
+     * 
+     * @return mixed
+     */
+    public function firstOrNull() : mixed;
+
+    /**
+     * Returns the last element or null if the collection is empty.
+     * 
+     * @return mixed
+     */
+    public function __toString() : string;
+
+    /**
+     * Applies a callback function against an accumulator and each element in the collection (from left to right) to reduce it to a single value.
+     *
+     * @param callable $callback The callback function to apply. It receives the accumulator, the current value, and the current key.
+     * @param mixed $initial The initial value to start the reduction.
+     * @return mixed The reduced value.
+     */
+    public function reduce(callable $callback, mixed $initial = null): mixed;
 }

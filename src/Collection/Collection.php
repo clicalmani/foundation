@@ -2,6 +2,7 @@
 namespace Clicalmani\Foundation\Collection;
 
 use Clicalmani\Foundation\Support\Facades\Func;
+use TypeError;
 
 /**
  * Class Collection
@@ -11,17 +12,11 @@ use Clicalmani\Foundation\Support\Facades\Func;
  */
 class Collection extends SPLCollection implements CollectionInterface
 {
-    public function __construct($elements = [])
+    public function __construct(iterable $elements = [])
     {
         $this->add( ...$elements );
     }
 
-    /**
-     * Store one or more elements
-     * 
-     * @param mixed $elements 
-     * @return \Clicalmani\Foundation\Collection\CollectionInterface
-     */
     public function add(mixed ...$elements) : \Clicalmani\Foundation\Collection\CollectionInterface
     {
         foreach ($elements as $element) $this[] = $element;
@@ -29,31 +24,16 @@ class Collection extends SPLCollection implements CollectionInterface
         return $this;
     }
 
-    /**
-     * @override
-     */
     public function append(mixed $value): void
     {
         $this->add($value);
     }
 
-    /**
-     * Gets element at the specified index
-     * 
-     * @param mixed $index Element index
-     * @return mixed 
-     */
-    public function get(mixed $index = null) : mixed
+    public function get(int|string $index) : mixed
     {
         return @ $this[$index];
     }
 
-    /**
-     * Find element index
-     * 
-     * @param mixed $value
-     * @return int
-     */
     public function index(mixed $value) : int
     {
         foreach ($this as $k => $v) {
@@ -64,43 +44,21 @@ class Collection extends SPLCollection implements CollectionInterface
         return -1;
     }
 
-    /**
-     * Get the first element
-     * 
-     * @return mixed
-     */
     public function first() : mixed
     {
         return $this->get(0);
     }
 
-    /**
-     * Get all elements
-     * 
-     * @return array
-     */
     public function all() : array
     {
         return $this->toArray();
     }
 
-    /**
-     * Get the last element
-     * 
-     * @return mixed
-     */
     public function last() : mixed
     {
         return $this->count() ? $this[$this->count() - 1]: null;
     }
 
-    /**
-     * Manipulate elements through a callback function which receive element value as its first argument 
-     * and element index as its second argument.
-     * 
-     * @param callable $closure
-     * @return \Clicalmani\Foundation\Collection\CollectionInterface
-     */
     public function map(callable $closure) : \Clicalmani\Foundation\Collection\CollectionInterface
     {
         foreach ($this as $key => $value) {
@@ -110,13 +68,6 @@ class Collection extends SPLCollection implements CollectionInterface
         return $this;
     }
 
-    /**
-     * Iterate through elements
-     * 
-     * @param callable $closure A closure function which receive element value as its first argument and 
-     * element index as its second argument.
-     * @return \Clicalmani\Foundation\Collection\CollectionInterface
-     */
     public function each(callable $closure) : \Clicalmani\Foundation\Collection\CollectionInterface
     {
         $arr = $this->toArray();
@@ -124,13 +75,6 @@ class Collection extends SPLCollection implements CollectionInterface
         return $this;
     }
 
-    /**
-     * Filter elements
-     * 
-     * @param callable $closure A callback function which receive element value as its first argument and 
-     * element index as its second argument.
-     * @return \Clicalmani\Foundation\Collection\CollectionInterface
-     */
     public function filter(callable $closure) : \Clicalmani\Foundation\Collection\CollectionInterface
     {
         // return $this->exchange(array_values(array_filter($this->toArray(), $closure)));
@@ -145,12 +89,6 @@ class Collection extends SPLCollection implements CollectionInterface
         return $this->exchange($new);
     }
 
-    /**
-     * Merges provided elements to the existing ones.
-     * 
-     * @param mixed $value A single element or an array of elements
-     * @return \Clicalmani\Foundation\Collection\CollectionInterface
-     */
     public function merge(mixed $value) : \Clicalmani\Foundation\Collection\CollectionInterface
     {
         if ( $value instanceof \Clicalmani\Foundation\Collection\CollectionInterface ) $value = $value->toArray();
@@ -163,43 +101,21 @@ class Collection extends SPLCollection implements CollectionInterface
         return $this;
     }
 
-    /**
-     * Detect if there is no elements in the storage.
-     * 
-     * @return bool true on success, or false otherwise.
-     */
     public function isEmpty() : bool
     {
         return $this->count() === 0;
     }
 
-    /**
-     * Verify wether an element exists at the given index.
-     * 
-     * @param int $index element index to check
-     * @return bool true on success, or false otherwise.
-     */
     public function exists(int $index) : bool
     {
         return isset($this[$index]);
     }
 
-    /**
-     * Do a shallow copy of the storage.
-     * 
-     * @return array The copy
-     */
     public function copy() : array
     {
         return $this->getArrayCopy();
     }
 
-    /**
-     * Populate storage with new elements by replacing the old ones.
-     * 
-     * @param array $new_elements New elements to be used
-     * @return \Clicalmani\Foundation\Collection\CollectionInterface
-     */
     public function exchange(array $new_elements) : \Clicalmani\Foundation\Collection\CollectionInterface
     {
         $this->exchangeArray($new_elements);
@@ -207,12 +123,6 @@ class Collection extends SPLCollection implements CollectionInterface
         return $this;
     }
 
-    /**
-     * Removes duplicated elements and maintain the indexes.
-     * 
-     * @param mixed $closure [optional] an optional callback function to define the uniqueness of an element.
-     * @return \Clicalmani\Foundation\Collection\CollectionInterface
-     */
     public function unique(mixed $closure = null) : \Clicalmani\Foundation\Collection\CollectionInterface
     {
         if (!isset($closure)) return $this->exchange(array_unique( $this->toArray() ));
@@ -233,12 +143,30 @@ class Collection extends SPLCollection implements CollectionInterface
         return $this->exchange($stack);
     }
 
-    /**
-     * Find element
-     * 
-     * @param callable $callback
-     * @return mixed
-     */
+    public function uniqueBy(string $key) : \Clicalmani\Foundation\Collection\CollectionInterface
+    {
+        $stack  = [];
+        $filter = [];
+
+        foreach ($this as $key => $value)
+        {
+            if (is_array($value) && isset($value[$key])) {
+                $v = $value[$key];
+            } elseif (is_object($value) && isset($value->{$key})) {
+                $v = $value->{$key};
+            } else {
+                continue;
+            }
+
+            if (!in_array($v, $filter)) {
+                $stack[] = $value;
+                $filter[] = $v;
+            }
+        }
+
+        return $this->exchange($stack);
+    }
+
     public function find(callable $callback) : mixed
     {
         foreach ($this as $key => $value) {
@@ -248,114 +176,65 @@ class Collection extends SPLCollection implements CollectionInterface
         return null;
     }
 
-    /**
-     * Check if the specified element exists in the items list.
-     * 
-     * @param mixed $element
-     * @return bool
-     */
     public function has($element) : bool
     {
         return !!$this->find(fn($value) => $value === $element);
     }
 
-    /**
-     * Sort down elements by mainting the associated indexes.
-     * 
-     * @param callable $closure a comparison function
-     * @return \Clicalmani\Foundation\Collection\CollectionInterface
-     */
     public function sort(callable $closure) : \Clicalmani\Foundation\Collection\CollectionInterface
     {
         $this->uasort($closure);
         return $this;
     }
 
-    /**
-     * Joins elements by separating them with a separator specified as first argument. Which means elements should be joinable.
-     * 
-     * @param string $delimiter Separator
-     * @return string
-     */
     public function join(string $delimiter = ',') : string
     {
         return join($delimiter, $this->toArray());
     }
 
-    /**
-     * Calculate the sum of values in the collection
-     * 
-     * @return int|float
-     */
     public function sum() : int|float
     {
         return array_sum($this->toArray());
     }
     
-    /**
-     * Returns the array representation of the stored elements.
-     * 
-     * @return array 
-     */
     public function toArray() : array
     {
         return (array) $this;
     }
 
-    /**
-     * Convert the current collection to array object
-     * 
-     * @return \Clicalmani\Foundation\Collection\CollectionInterface
-     */
     public function toObject() : \Clicalmani\Foundation\Collection\CollectionInterface
     {
         $this->setFlags(parent::ARRAY_AS_PROPS);
         return $this;
     }
 
-    /**
-     * Create a new set
-     * 
-     * @return \Clicalmani\Foundation\Collection\Set
-     */
     public function asSet() : Set
     {
         return new Set;
     }
 
-    /**
-     * Create a new map
-     * 
-     * @return \Clicalmani\Foundation\Collection\Map
-     */
     public function asMap() : Map
     {
         return new Map;
     }
 
-    /**
-     * Pluck a specific key from each element in the collection
-     * 
-     * @param string $key
-     * @return \Clicalmani\Foundation\Collection\Map
-     */
     public function pluck(string $key) : Map
     {
         $map = new Map;
-        foreach ($this as $element) {
-            $map->put($key, @$element[$key]);
+
+        foreach ($this as $index => $item) {
+            if (is_array($item) && isset($item[$key])) {
+                $map[$item[$key]] = $item;
+            } elseif (is_object($item) && isset($item->{$key})) {
+                $map[$item->{$key}] = $item;
+            } else {
+                if ($index !== $key) $map[$index] = $item;
+            }
         }
 
         return $map;
     }
 
-    /**
-     * Conditionally extends the list.
-     * 
-     * @param iterable $elements
-     * @param ?callable $callback
-     * @return self
-     */
     public function extends(iterable $elements, ?callable $callback = null) : self
     {
         foreach ($elements as $element) {
@@ -366,16 +245,11 @@ class Collection extends SPLCollection implements CollectionInterface
         return $this;
     } 
 
-    /**
-     * Sorts the collection by a specific key.
-     * 
-     * @param string $key The key to sort by
-     * @return \Clicalmani\Foundation\Collection\CollectionInterface
-     */
     public function sortBy(string $key) : \Clicalmani\Foundation\Collection\CollectionInterface
     {
-        $this->uasort(function ($a, $b) use ($key) {
-            return $a[$key] <=> $b[$key];
+        $this->uasort(function ($a, $b) use ($key) { 
+            if ((is_array($a) && is_array($b)) || (is_object($a) && is_object($b))) return $a[$key] <=> $b[$key];
+            throw new TypeError("Both elements must be arrays or objects to sort by key '$key'.");
         });
 
         return $this;
@@ -383,8 +257,9 @@ class Collection extends SPLCollection implements CollectionInterface
 
     public function sortByDesc(string $key) : \Clicalmani\Foundation\Collection\CollectionInterface
     {
-        $this->uasort(function ($a, $b) use ($key) {
-            return $b[$key] <=> $a[$key];
+        $this->uasort(function ($a, $b) use ($key) { 
+            if ((is_array($a) && is_array($b)) || (is_object($a) && is_object($b))) return -1*($a[$key] <=> $b[$key]);
+            throw new TypeError("Both elements must be arrays or objects to sort by key '$key'.");
         });
 
         return $this;
@@ -410,15 +285,6 @@ class Collection extends SPLCollection implements CollectionInterface
         return !$this->isEmpty() && $this->firstOrNull() !== null;
     }
 
-    public function sortByKey(string $key) : \Clicalmani\Foundation\Collection\CollectionInterface
-    {
-        $this->uasort(function ($a, $b) use ($key) {
-            return $a[$key] <=> $b[$key];
-        });
-
-        return $this;
-    }
-
     public function contains(mixed $value) : bool
     {
         return $this->index($value) !== -1;
@@ -429,6 +295,11 @@ class Collection extends SPLCollection implements CollectionInterface
         return isset($this[$key]);
     }
 
+    /**
+     * Clears the collection by removing all elements.
+     * 
+     * @return void
+     */
     public function clear() : void
     {
         $this->exchange([]);
@@ -437,6 +308,15 @@ class Collection extends SPLCollection implements CollectionInterface
     public function firstOrNull() : mixed
     {
         return $this->count() ? $this->first() : null;
+    }
+
+    public function reduce(callable $callback, mixed $initial = null): mixed
+    {
+        $result = $initial;
+        foreach ($this as $key => $value) {
+            $result = $callback($result, $value, $key);
+        }
+        return $result;
     }
 
     public function __toString() : string
