@@ -26,7 +26,7 @@ class ContainerServiceProvider extends ServiceProvider
             ->load('services.php');
     }
 
-    public static function get() : \Symfony\Component\DependencyInjection\ContainerBuilder
+    public static function get() : ?\Symfony\Component\DependencyInjection\ContainerBuilder
     {
         return self::$container;
     }

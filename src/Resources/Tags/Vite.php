@@ -1,7 +1,6 @@
 <?php
 namespace Clicalmani\Foundation\Resources\Tags;
 
-use Clicalmani\Foundation\Http\Request;
 use Clicalmani\Foundation\Resources\TemplateTag;
 
 class Vite extends TemplateTag
@@ -20,6 +19,6 @@ class Vite extends TemplateTag
      */
     public function render() : string
     {
-        return '<script type="module" src="' . (app()->env() !== 'production' ? app()->config('app.asset_url', ''): '@') . '/{{ strip_quotes($1) }}"></script>';
+        return '<script type="module" src="' . env('ASSET_URL') . '/{{ strip_quotes($1) }}"></script>';
     }
 }

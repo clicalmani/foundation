@@ -76,7 +76,7 @@ class Environment
      */
     public function get(string $key, $default = null)
     {
-        return self::getRepository()->get($key, $default);
+        return static::getRepository()->get($key, $default);
     }
 
     /**

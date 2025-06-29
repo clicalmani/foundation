@@ -171,7 +171,7 @@ class RequestController
 		$request_parameters = $this->getRequestParameters();
 
 		$args = collection($parameters)->map(fn() => null)->toArray();
-
+		
 		foreach ($parameters as $i => $param) {
 			$param_type = $param->getType();
 

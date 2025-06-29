@@ -175,7 +175,7 @@ if ( ! function_exists( 'env' ) ) {
      * @return mixed
      */
     function env(string $key, ?string $default = '') : mixed {
-        return \Clicalmani\Foundation\Support\Facades\Env::get($key, $default) ?? $default;
+        return @$_ENV[$key] ?? $default;
     }
 }
 
@@ -764,9 +764,9 @@ if ( ! function_exists('console_log') ) {
 }
 
 if ( ! function_exists('config') ) {
-    function config(?string $key = null) : mixed
+    function config(?string $key = null, $default = null) : mixed
     {
-        return \Clicalmani\Foundation\Support\Facades\Config::get($key);
+        return \Clicalmani\Foundation\Support\Facades\Config::get($key, $default);
     }
 }
 
@@ -811,7 +811,7 @@ if (! function_exists('get_data')) {
                 $result = [];
 
                 foreach ($target as $item) {
-                    $result[] = data_get($item, $key);
+                    $result[] = get_data($item, $key);
                 }
 
                 return in_array('*', $key) ? Arr::collapse($result) : $result;

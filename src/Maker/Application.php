@@ -424,18 +424,12 @@ class Application
             'controller' => [\Clicalmani\Foundation\Acme\Controller::class],
             'func' => [\Clicalmani\Foundation\Acme\Invokable::class],
             'database' => [\Clicalmani\Foundation\Acme\Database::class],
+            'inertia' => [\Inertia\Response::class, null, true],
             'response' => [\Clicalmani\Foundation\Http\Response::class, [\Clicalmani\Psr7\StatusCodeInterface::STATUS_OK, 200]],
             'console' => [\Clicalmani\Foundation\Acme\Console::class],
-            // 'inertia' => [\Inertia\Response::class, null, true]
         ] as $key => $value) {
             if ($this->services) {
-                if (!(isset($value[2]) && class_exists($value[0]))) {
-                    $this->services = $this->services->set($key, $value[0]);
-                } else {
-                    if (class_exists($value[0])) {
-                        $this->services = $this->services->set($key, $value[0]);
-                    }
-                }
+                $this->services = $this->services->set($key, $value[0]);
 
                 if (isset($value[1])) {
                     $this->services->args($value[1]);

@@ -3,6 +3,7 @@ namespace Clicalmani\Foundation\Acme;
 
 use Clicalmani\Foundation\Support\Facades\Arr;
 use Clicalmani\Foundation\Support\Facades\Env;
+use Clicalmani\Foundation\Support\Facades\Log;
 
 class Configure implements \ArrayAccess, \JsonSerializable
 {

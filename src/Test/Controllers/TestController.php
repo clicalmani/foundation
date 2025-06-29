@@ -164,7 +164,7 @@ abstract class TestController implements TestInterface
      * @param int|\Clicalmani\Database\Factory\Sequence $param
      * @return static
      */
-    public function user(int|Sequence $param) : static
+    public function actingAs(int|Sequence $param) : static
     {
         if ( is_int($param) ) $this->user = (int) $param;
         elseif ( $param instanceof Sequence ) $this->user = $param();
@@ -228,7 +228,7 @@ abstract class TestController implements TestInterface
             print_r( $this->controller::invokeMethod(
                     new \Clicalmani\Foundation\Http\Controllers\MethodReflector(
                         new \ReflectionMethod(
-                            \Clicalmani\Foundation\Acme\Controller::getInstance($this->controller), 
+                            \Clicalmani\Foundation\Support\Facades\RequestController::getInstance($this->controller), 
                             $this->action
                         )
                     )
@@ -245,7 +245,7 @@ abstract class TestController implements TestInterface
      * @param array|\Clicalmani\Database\Factory\Sequence $parameters
      * @return static
      */
-    public function hash(Sequence|array $parameters) : static
+    public function hash(array|Sequence $parameters) : static
     {
         if ( is_array($parameters) ) $this->hash = with( new Request )->createParametersHash($parameters);
         elseif ( $parameters instanceof Sequence ) $this->hash = $parameters;

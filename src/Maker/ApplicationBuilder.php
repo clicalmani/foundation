@@ -30,7 +30,10 @@ class ApplicationBuilder
      */
     public function withKernels() : static
     {
-        \Clicalmani\Foundation\Providers\ServiceProvider::provideServices([\Clicalmani\Foundation\Providers\EnvServiceProvider::class]);
+        \Clicalmani\Foundation\Providers\ServiceProvider::provideServices([
+            \Clicalmani\Foundation\Providers\EnvServiceProvider::class
+        ]);
+        
         foreach ($this->kernels as $kernel) {
             $this->app->addKernel($kernel);
         }
