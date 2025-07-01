@@ -7,7 +7,7 @@ namespace Clicalmani\Foundation\Support\Facades;
  * @method static \Clicalmani\Foundation\Test\Controllers\TestController test(string $action)
  * @method static object getInstance(string $class)
  */
-class RequestController extends Facade
+abstract class RequestController extends Facade
 {
     protected static function getFacadeAccessor(): string
     {

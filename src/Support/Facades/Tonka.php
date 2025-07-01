@@ -4,7 +4,7 @@ namespace Clicalmani\Foundation\Support\Facades;
 /**
  * @method static mixed link(string $source, string $destination)
  */
-class Tonka extends Facade
+abstract class Tonka extends Facade
 {
     protected static function getFacadeAccessor() : string
     {

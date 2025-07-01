@@ -51,4 +51,10 @@ class ApplicationBuilder
         $callback(new Web);
         return $this;
     }
+
+    public function withService(string $key, array $data) : static
+    {
+        $this->app->addService($key, $data);
+        return $this;
+    }
 }

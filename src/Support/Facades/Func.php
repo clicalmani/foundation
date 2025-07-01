@@ -10,7 +10,7 @@ namespace Clicalmani\Foundation\Support\Facades;
  * @method ?\ReflectionClass getClosureScopeClass(string $func_name)
  * @method ?\ReflectionClass getClosureCalledClass(string $func_name)
  */
-class Func extends Facade
+abstract class Func extends Facade
 {
     protected static function getFacadeAccessor(): string
     {

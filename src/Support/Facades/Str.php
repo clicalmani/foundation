@@ -17,7 +17,7 @@ use Clicalmani\Foundation\Support\Facades\Facade;
  * @method static string escape(string $str, ?array $exclude = [' '])
  * @method static string unescape(string $escaped)
  */
-class Str extends Facade
+abstract class Str extends Facade
 {
     protected static function getFacadeAccessor() : string
     {

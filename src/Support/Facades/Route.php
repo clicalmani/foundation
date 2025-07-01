@@ -31,7 +31,7 @@ namespace Clicalmani\Foundation\Support\Facades;
  * @method static string gateway()
  * @method static string getClientVerb()
  */
-class Route extends Facade
+abstract class Route extends Facade
 {
     protected static function getFacadeAccessor() : string
     {

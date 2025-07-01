@@ -382,6 +382,18 @@ class Application
         return $this;
     }
 
+    /**
+     * Add a custom service to the service container
+     * 
+     * @param string $key Service key
+     * @param array $data Service data
+     * @return void
+     */
+    public function addService(string $key, array $data) : void
+    {
+        $this->coreServices = [$key => $data, ...$this->coreServices];
+    }
+
     public function getServices()
     {
         return $this->services;
@@ -410,31 +422,34 @@ class Application
         };
     }
 
-    public function registerCoreContainerServices()
+    public function registerCoreContainerServices() : void
     {
-        foreach ([
-            'logger' => [\Clicalmani\Foundation\Acme\Logger::class],
-            'str' => [\Clicalmani\Foundation\Acme\Stringable::class],
-            'router' => [\Clicalmani\Foundation\Acme\Router::class],
-            'array' => [\Clicalmani\Foundation\Acme\Arrayable::class],
-            'env' => [\Clicalmani\Foundation\Acme\Environment::class],
-            'config' => [\Clicalmani\Foundation\Acme\Configure::class],
-            'console' => [\Clicalmani\Foundation\Acme\Console::class],
-            'storage' => [\Clicalmani\Foundation\Acme\StorageManager::class],
-            'controller' => [\Clicalmani\Foundation\Acme\Controller::class],
-            'func' => [\Clicalmani\Foundation\Acme\Invokable::class],
-            'database' => [\Clicalmani\Foundation\Acme\Database::class],
-            'inertia' => [\Inertia\Response::class, null, true],
-            'response' => [\Clicalmani\Foundation\Http\Response::class, [\Clicalmani\Psr7\StatusCodeInterface::STATUS_OK, 200]],
-            'console' => [\Clicalmani\Foundation\Acme\Console::class],
-        ] as $key => $value) {
-            if ($this->services) {
+        if ($this->services) {
+            foreach ($this->coreServices as $key => $value) {
                 $this->services = $this->services->set($key, $value[0]);
 
                 if (isset($value[1])) {
-                    $this->services->args($value[1]);
+                    $this->services = $this->services->args($value[1]);
                 }
             }
+
+            $this->services->set('view', \Clicalmani\Foundation\Resources\View::class);
         }
     }
+
+    private array $coreServices = [
+        'logger' => [\Clicalmani\Foundation\Acme\Logger::class],
+        'str' => [\Clicalmani\Foundation\Acme\Stringable::class],
+        'router' => [\Clicalmani\Foundation\Acme\Router::class],
+        'array' => [\Clicalmani\Foundation\Acme\Arrayable::class],
+        'env' => [\Clicalmani\Foundation\Acme\Environment::class],
+        'config' => [\Clicalmani\Foundation\Acme\Configure::class],
+        'console' => [\Clicalmani\Foundation\Acme\Console::class],
+        'response' => [\Clicalmani\Foundation\Http\Response::class, [\Clicalmani\Psr7\StatusCodeInterface::STATUS_OK, 200]],
+        'storage' => [\Clicalmani\Foundation\Acme\StorageManager::class],
+        'controller' => [\Clicalmani\Foundation\Acme\Controller::class],
+        'func' => [\Clicalmani\Foundation\Acme\Invokable::class],
+        'database' => [\Clicalmani\Foundation\Acme\Database::class],
+        'view' => [\Clicalmani\Foundation\Resources\View::class],
+    ];
 }

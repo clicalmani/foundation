@@ -20,7 +20,7 @@ class View extends Response implements ViewInterface
      * @param string $template
      * @param ?array $vars
      */
-    public function __construct(private string $template, private ?array $context = [])
+    public function __construct(private string $template = '', private ?array $context = [])
     {
         $this->runCreators();
         $sharedData = app()->viewSharedData();

@@ -15,9 +15,16 @@ abstract class Facade
     public static function __callStatic($method, $args) : mixed
     {
         try {
-            if ($accessor = get_called_class()::getFacadeAccessor() AND $container = app()->getContainer() AND $service = $container?->get($accessor)) {
-            
+            if ($accessor = get_called_class()::getFacadeAccessor() AND $container = app()->getContainer() AND $container->hash($accessor)) {
+                
+                $service = $container->get($accessor);
+                
                 if ( method_exists($service, $method) ) {
+
+                    if ($service instanceof \Clicalmani\Foundation\Resources\View) {
+                        return view(...$args);
+                    }
+                    
                     return $service->{$method}(...$args);
                 }
                 

@@ -15,7 +15,7 @@ namespace Clicalmani\Foundation\Support\Facades;
  * @method static never view(string $view, array $data = []) Send a view
  * @method static \Clicalmani\Foundation\Http\ResponseInterface withHeaders(array $headers) Set multiple headers
  */
-class Response extends Facade
+abstract class Response extends Facade
 {
     protected static function getFacadeAccessor(): string
     {

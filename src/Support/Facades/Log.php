@@ -15,7 +15,7 @@ use Clicalmani\Foundation\Support\Facades\Facade;
  * @method static void notice(string $notice_message, ?string $file = 'Unknow', ?int $line = null)
  * @method static void debug(string $debug_message, ?string $file = 'Unknow', ?int $line = null)
  */
-class Log extends Facade
+abstract class Log extends Facade
 {
     protected static function getFacadeAccessor() : string
     {
