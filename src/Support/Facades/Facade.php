@@ -22,7 +22,11 @@ abstract class Facade
                 if ( method_exists($service, $method) ) {
 
                     if ($service instanceof \Clicalmani\Foundation\Resources\View) {
-                        return view(...$args);
+                        if ($method === 'render') {
+                            return view(...$args);
+                        }
+
+                        return view('')->{$method}(...$args);
                     }
                     
                     return $service->{$method}(...$args);

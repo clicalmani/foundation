@@ -843,33 +843,9 @@ function session(?string $name = null, mixed $value = null) {
     return new \Clicalmani\Foundation\Http\Session($name, $value);
 }
 
-// if (!function_exists('dd')) {
-//     function dd(mixed ...$vars): never
-//     {
-//         if ( ! class_exists(\Symfony\Component\VarDumper::class) ) {
-//             throw new \RuntimeException(
-//                 sprintf("To enable support for dumping, please install the symfony/var-dumper package.")
-//             );
-//         }
-
-//         if (!\in_array(\PHP_SAPI, ['cli', 'phpdbg', 'embed'], true) && !headers_sent()) {
-//             header('HTTP/1.1 500 Internal Server Error');
-//         }
-
-//         if (!$vars) {
-//             VarDumper::dump(new ScalarStub('🐛'));
-
-//             exit(1);
-//         }
-
-//         if (array_key_exists(0, $vars) && 1 === count($vars)) {
-//             VarDumper::dump($vars[0]);
-//         } else {
-//             foreach ($vars as $k => $v) {
-//                 VarDumper::dump($v, is_int($k) ? 1 + $k : $k);
-//             }
-//         }
-
-//         exit(1);
-//     }
-// }
+if (!function_exists('auth')) {
+    function auth()
+    {
+        return \Clicalmani\Foundation\Http\Request::current()->user();
+    }
+}

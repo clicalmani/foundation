@@ -79,6 +79,11 @@ abstract class Authenticate extends ServiceProvider implements \JsonSerializable
 
 		return json_encode($this->user);
 	}
+
+	public function user() : mixed
+	{
+		return $this->user;
+	}
 	
 	/**
 	 * @override

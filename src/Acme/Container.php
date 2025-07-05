@@ -48,7 +48,12 @@ class Container extends Application
             $id = $this->resolved[$id];
         }
 
-        return \Clicalmani\Foundation\Providers\ContainerServiceProvider::get()->get($id);
+        return $this->builder()->get($id);
+    }
+
+    public function builder()
+    {
+        return \Clicalmani\Foundation\Providers\ContainerServiceProvider::get();
     }
 
     public function resolve(string $class) : void
@@ -86,9 +91,19 @@ class Container extends Application
         }
     }
 
-    public static function injectInterfaces(\Closure $callback) : void
+    public static function injectInterfaces(array $interfaces) : void
     {
-        self::$injected_interfaces = $callback();
+        self::$injected_interfaces = $interfaces;
+    }
+
+    public function has(string $id)
+    {
+        return $this->builder()->has($id);
+    }
+
+    public function getServiceIds()
+    {
+        return $this->builder()->getServiceIds();
     }
 }
 

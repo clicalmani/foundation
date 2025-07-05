@@ -59,7 +59,6 @@ class RequestController
     {
 		if ($this->instance instanceof $class) return $this->instance;
 		
-		$this->container = new Container;
 		$this->container->set($class);
 		return $this->instance = $this->container->get($class);
     }
@@ -71,6 +70,7 @@ class RequestController
 	 */
 	public function render() : never
 	{
+		$this->container = Container::getInstance();
 		$response = $this->getResponse();
 		
 		/**
@@ -168,7 +168,7 @@ class RequestController
 
 		/** @var \ReflectionParameter[] */
 		$parameters = $reflector->getParameters();
-		$request_parameters = $this->getRequestParameters();
+		$route_parameters = collection($this->route->getParameters())->map(fn($segment) => $segment->value)->toArray();
 
 		$args = collection($parameters)->map(fn() => null)->toArray();
 		
@@ -176,9 +176,7 @@ class RequestController
 			$param_type = $param->getType();
 
 			if ($param_type?->isBuiltin()) {
-				$name = $param->getName();
-				$value = isset($request_parameters[$name]) ? $request_parameters[$name]: $param->getDefaultValue();
-				$args[$i] = $value;
+				$args[$i] = array_shift($route_parameters);
 			} else {
 
 				foreach (Reflector::getParameterClassNames($param) as $class) {
@@ -216,21 +214,19 @@ class RequestController
 								$args[$arr['pos']] = $resources[1];
 							}
 						} catch(ModelNotFoundException $e) {
-							
-							if ( $callback = $this->route->missing() ) {
-								return $callback($e);
-							}
-
-							return new Response;
+							return $this->handleMissingResource($e->getMessage());
 						}
 					}
 				}
             }
 		}
 		
-		if ($reflector instanceof MethodReflector) return $reflector($this->container->getClassIntance($reflector->getClass()), ...$args);
-		
-		return $reflector(...$args);
+		try {
+			if ($reflector instanceof MethodReflector) return $reflector($this->container->getClassIntance($reflector->getClass()), ...$args);
+			return $reflector(...$args);
+		} catch (ModelNotFoundException $e) {
+			return $this->handleMissingResource($e->getMessage());
+		}
 	}
 
 	/**
@@ -260,43 +256,6 @@ class RequestController
 	}
 
 	/**
-	 * Gather request parameters
-	 * 
-	 * @param \Clicalmani\Foundation\Http\Request
-	 * @return array
-	 */
-	private function getRequestParameters() : array
-    {
-		/** @var \Clicalmani\Foundation\Http\Request */
-		$request = Request::current();
-
-		if ( isConsoleMode() ) return $request->getAttributes();
-		
-        preg_match_all('/' . config('route.parameter_prefix') . '[^\/]+/', (string) $this->route, $mathes);
-
-        $parameters = [];
-        
-        if ( count($mathes) ) {
-
-            $mathes = $mathes[0];
-            
-            foreach ($mathes as $name) {
-                $name = substr($name, 1);    				      // Remove prefix
-                
-                if (preg_match('/@/', $name)) {
-                    $name = substr($name, 0, strpos($name, '@')); // Remove validation part
-                }
-                
-                if ($request->{$name}) {
-                    $parameters[$name] = $request->{$name};
-                }
-            }
-        }
-
-        return $parameters;
-    }
-
-	/**
 	 * Bind models resources
 	 * 
 	 * @param \Clicalmani\Foundation\Http\Controllers\ReflectorInterface $reflector
@@ -314,11 +273,12 @@ class RequestController
 				Request::current($request);
 			}
 		}
+
+		$model = null;
+		$nested_model = null;
 		
 		// Check if resource is present
 		if ( NULL !== $id = $request->id AND in_array($reflector->getName(), ['create', 'show', 'edit', 'update', 'destroy']) ) {
-
-			$nested_model = null;
 			
 			/**
 			 * Model record key value
@@ -329,14 +289,27 @@ class RequestController
 			
 			if ( count($key_value) ) {
 				if ( count($key_value) === 1 ) $key_value = $key_value[0];	// Single primary key
+
+				if ($scoped = $this->route->scoped()) {
+					foreach ($scoped as $skey => $scope) {
+						$key_class = "App\\Models\\" . collection(explode('_', $skey))->map(fn(string $part) => ucfirst($part))->join('');
+
+						if ($key_class === $resource AND $model = $resource::where("$scope = ?", [$key_value])->first()) {
+							break;
+						}
+					}
+				}
 				
-				/** @var \Clicalmani\Database\Factory\Models\Elegant */
-				$model = new $resource($key_value);
-				$this->resolveRouteBinding($model, $resource);
+				if (!isset($model)) {
+					/** @var \Clicalmani\Database\Factory\Models\Elegant */
+					$model = new $resource($key_value);
+				}
 
-				if ( $model->get()->isEmpty() ) throw new ModelNotFoundException("$resource not found");
+				$this->resolveRouteBinding($model);
 
-			} else throw new ModelNotFoundException("$resource not found");
+				if ( $model->get()->isEmpty() ) throw new ModelNotFoundException($resource);
+
+			} else throw new ModelNotFoundException($resource);
 		} else {
 			/** @var \Clicalmani\Database\Factory\Models\Elegant */
 			$model = new $resource;
@@ -353,14 +326,27 @@ class RequestController
 
 			if ( count($nested_key_value) ) {
 				if ( count($nested_key_value) === 1 ) $nested_key_value = $nested_key_value[0];	// Single primary key
+
+				if ($scoped = $this->route->scoped()) {
+					foreach ($scoped as $skey => $scope) {
+						$nested_key_class = "App\\Models\\" . collection(explode('_', $skey))->map(fn(string $part) => ucfirst($part))->join('');
+
+						if ($nested_key_class === $nested_resource AND $nested_model = $nested_resource::where("$scope = ?", [$key_value])->first()) {
+							break;
+						}
+					}
+				}
 				
-				/** @var \Clicalmani\Database\Factory\Models\Elegant */
-				$nested_model = new $nested_resource($nested_key_value);
-				$this->resolveRouteBinding($nested_model, $nested_resource);
+				if (!isset($nested_model)) {
+					/** @var \Clicalmani\Database\Factory\Models\Elegant */
+					$nested_model = new $nested_resource($nested_key_value);
+				}
 
-				if ( $nested_model->get()->isEmpty() ) throw new ModelNotFoundException("$nested_resource not found");
+				$this->resolveRouteBinding($nested_model);
 
-			} else throw new ModelNotFoundException("$nested_resource not found");
+				if ( $nested_model->get()->isEmpty() ) throw new ModelNotFoundException($nested_resource);
+
+			} else throw new ModelNotFoundException($nested_resource);
 		} else {
 			/** @var \Clicalmani\Database\Factory\Models\Elegant|null */
 			$nested_model = $nested_resource ? new $nested_resource: null;
@@ -383,7 +369,7 @@ class RequestController
 	 * @param string $resource
 	 * @return void
 	 */
-	private function resolveRouteBinding(Elegant $model, string $resource) : void
+	private function resolveRouteBinding(Elegant $model) : void
 	{
 		if ($scope = $this->route->scoped()) {
 			$scope_name = collection(explode('_', $model))->map(fn(string $part) => ucfirst($part))->join('');
@@ -396,7 +382,7 @@ class RequestController
 
 		// Global route binding
 		if (NULL !== $callback = \App\Providers\RouteServiceProvider::routeBindingCallback())
-			$callback($model->{$keyName}, $keyName, $resource);
+			$callback($model->{$keyName}, $keyName, $model);
 	}
 
 	/**
@@ -549,5 +535,14 @@ class RequestController
 		}
 
 		exit;
+	}
+
+	private function handleMissingResource(string $resource) : mixed
+	{
+		if ( $callback = $this->route->missing() ) {
+			return $callback();
+		}
+		$this->resolveRouteBinding(new $resource);
+		return response()->notFound();
 	}
 }

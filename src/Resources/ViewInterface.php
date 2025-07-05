@@ -25,7 +25,7 @@ interface ViewInterface
      * @param string $key
      * @param mixed $value
      */
-    public static function share(string $key, mixed $value): void;
+    public function share(string $key, mixed $value): void;
 
     /**
      * Add a view composer
@@ -34,7 +34,7 @@ interface ViewInterface
      * @param string|callable $composer
      * @return void
      */
-    public static function composer(string|array $views, string|callable $composer): void;
+    public function composer(string|array $views, string|callable $composer): void;
 
     /**
      * Add a view creator
@@ -43,5 +43,5 @@ interface ViewInterface
      * @param string|callable $creator
      * @return void
      */
-    public static function create(string $view, string|callable $creator) : void;
+    public function create(string $view, string|callable $creator) : void;
 }

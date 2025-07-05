@@ -1,6 +1,7 @@
 <?php
 namespace Clicalmani\Foundation\Resources;
 
+use Clicalmani\Foundation\Acme\Container;
 use Clicalmani\Psr7\NonBufferedBody;
 use Clicalmani\Psr7\Response;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -13,6 +14,8 @@ class View extends Response implements ViewInterface
      * @var \Twig\Environment
      */
     private \Twig\Environment $twig;
+
+    private $container;
     
     /**
      * Constructor
@@ -22,6 +25,7 @@ class View extends Response implements ViewInterface
      */
     public function __construct(private string $template = '', private ?array $context = [])
     {
+        $this->container = Container::getInstance();
         $this->runCreators();
         $sharedData = app()->viewSharedData();
         $sharedData = array_merge($sharedData, $context);
@@ -50,29 +54,29 @@ class View extends Response implements ViewInterface
         return $this;
     }
 
-    public static function share(string $key, mixed $value): void
+    public function share(string $key, mixed $value): void
     {
         $sharedData = app()->viewSharedData();
         $sharedData[$key] = $value;
         app()->viewSharedData($sharedData);
     }
 
-    public static function composer(string|array $views, string|callable $composer): void
+    public function composer(string|array $views, string|callable $composer): void
     {
         $views = (array) $views;
         foreach ($views as $view) {
-            Kernel::$composers[$view] = $composer;
+            Kernel::$composers[$view][] = $composer;
             if ( is_string($composer) ) {
-                app()->getContainer()->register("{$view}_composer", $composer);
+                $this->container->set($composer);
             }
         }
     }
 
-    public static function create(string $view, string|callable $creator) : void
+    public function create(string $view, string|callable $creator) : void
     {
-        Kernel::$creators[$view] = $creator;
+        Kernel::$creators[$view][] = $creator;
         if ( is_string($creator) ) {
-            app()->getContainer()->register("{$view}_creator", $creator);
+            $this->container->set($creator);
         }
     }
 
@@ -89,7 +93,9 @@ class View extends Response implements ViewInterface
      */
     private function getComposers(): array
     {
-        return Kernel::$composers[$this->parseTemplateName($this->template)] ?? [];
+        if ($composers = @Kernel::$composers[$this->parseTemplateName($this->template)]) return $composers;
+        if ($composers = @Kernel::$composers['*']) return $composers;
+        return [];
     }
 
     /**
@@ -99,7 +105,9 @@ class View extends Response implements ViewInterface
      */
     private function getCreators(): array
     {
-        return Kernel::$creators[$this->parseTemplateName($this->template)] ?? [];
+        if ($creators = @Kernel::$creators[$this->parseTemplateName($this->template)]) return $creators;
+        if ($creators = @Kernel::$creators['*']) return $creators;
+        return [];
     }
 
     /**
@@ -124,12 +132,10 @@ class View extends Response implements ViewInterface
 
     private function attachSharedData(array $data): void
     {
-        foreach ($data as $view => $shared) {
+        foreach ($data as $shared) {
             if ( $shared instanceof \Closure ) $shared($this);
             elseif ( is_string($shared) ) {
-                (app()->getContainer()->get("{$view}_composer", ContainerInterface::IGNORE_ON_INVALID_REFERENCE) 
-                            ?: app()->getContainer()->get("{$view}_creator", ContainerInterface::IGNORE_ON_INVALID_REFERENCE))
-                    ->{'compose'}($this);
+                $this->container->get($shared)->{'compose'}($this);
             }
         }
     }
