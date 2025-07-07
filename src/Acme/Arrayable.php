@@ -2,7 +2,9 @@
 namespace Clicalmani\Foundation\Acme;
 
 use Clicalmani\Foundation\Collection\CollectionInterface;
+use Clicalmani\Foundation\Sandbox\Sandbox;
 use Clicalmani\Foundation\Support\Facades\Arr;
+use Clicalmani\Foundation\Support\Facades\Log;
 
 class Arrayable
 {
@@ -141,11 +143,9 @@ class Arrayable
      * @param  array|string|int|float  $keys
      * @return array
      */
-    public function except($array, $keys)
+    public function except($array, $keys) : array
     {
-        static::forget($array, $keys);
-
-        return $array;
+        return static::forget($array, $keys);
     }
 
     /**
@@ -275,7 +275,7 @@ class Arrayable
      *
      * @param  array  $array
      * @param  array|string|int|float  $keys
-     * @return void
+     * @return array
      */
     public function forget(&$array, $keys)
     {
@@ -312,6 +312,8 @@ class Arrayable
 
             unset($array[array_shift($parts)]);
         }
+        
+        return $array;
     }
 
     /**
@@ -511,7 +513,7 @@ class Arrayable
         [$value, $key] = static::explodePluckParameters($value, $key);
 
         foreach ($array as $item) {
-            $itemValue = data_get($item, $value);
+            $itemValue = get_data($item, $value);
 
             // If the key is "null", we will just append the value to the array and keep
             // looping. Otherwise we will key the array using the value of the key we
@@ -519,7 +521,7 @@ class Arrayable
             if (is_null($key)) {
                 $results[] = $itemValue;
             } else {
-                $itemKey = data_get($item, $key);
+                $itemKey = get_data($item, $key);
 
                 if (is_object($itemKey) && method_exists($itemKey, '__toString')) {
                     $itemKey = (string) $itemKey;
@@ -726,28 +728,16 @@ class Arrayable
             return $array = $value;
         }
 
-        $keys = explode('.', $key);
-
-        foreach ($keys as $i => $key) {
-            if (count($keys) === 1) {
-                break;
-            }
-
-            unset($keys[$i]);
-
-            // If the key doesn't exist at this depth, we will just create an empty array
-            // to hold the next value, allowing us to create the arrays to hold final
-            // values at the correct depth. Then we'll keep digging into the array.
-            if (! isset($array[$key]) || ! is_array($array[$key])) {
-                $array[$key] = [];
-            }
-
-            $array = &$array[$key];
-        }
-
-        $array[array_shift($keys)] = $value;
-
-        return $array;
+        return Sandbox::eval(
+            "function() use(\$array, \$value) { \$array" . 
+            join('', array_map(fn(string $key) => "['$key']", explode('.', $key))) . 
+            " = \$value; return \$array;}",
+            [
+                'array' => $array,
+                'value' => $value
+            ],
+            true
+        )();
     }
 
     /**

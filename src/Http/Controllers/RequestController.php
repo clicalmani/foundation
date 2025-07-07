@@ -5,13 +5,14 @@ use Clicalmani\Foundation\Http\Request;
 use Clicalmani\Foundation\Exceptions\ModelNotFoundException;
 use Clicalmani\Database\Factory\Models\Elegant;
 use Clicalmani\Foundation\Acme\Container;
-use Clicalmani\Foundation\Http\Response;
 use Clicalmani\Foundation\Providers\RouteServiceProvider;
 use Clicalmani\Foundation\Routing\Exceptions\RouteNotFoundException;
 use Clicalmani\Foundation\Support\Facades\Route;
 use Clicalmani\Foundation\Test\Controllers\TestController;
 use Clicalmani\Validation\AsValidator;
 use Clicalmani\Routing\Memory;
+use Clicalmani\Validation\Exceptions\ValidationException;
+use Inertia\ComponentData;
 
 /**
  * RequestController class
@@ -91,7 +92,7 @@ class RequestController
 		 * redirect the route to a different location or set response headers.
 		 */
 		RouteServiceProvider::fireTPS($response, 1);
-		
+
 		die($response);
 	}
 
@@ -198,7 +199,7 @@ class RequestController
 									$request->merge($attribute[0]->newInstance()->args);
 								}
 							}
-
+							
 							$this->validateRequest($request);
 							$args[$i] = $request;
 						}
@@ -249,7 +250,7 @@ class RequestController
 		}
 		
 		if (method_exists($request, 'signatures')) {
-			$request->signatures();                             // Set parameters signatures
+			$request->signatures();  // Set parameters signatures
 		}
 
 		return null;

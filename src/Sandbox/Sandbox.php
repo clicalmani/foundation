@@ -39,7 +39,7 @@ class Sandbox
 
     private static function getResult(string $content)
     {
-        file_put_contents(sys_get_temp_dir() . '/' . static::$tmp_name, $content);
+        file_put_contents(sys_get_temp_dir() . '/' . static::$tmp_name, $content, LOCK_EX);
         return include sys_get_temp_dir() . '/' . static::$tmp_name;
     }
 }

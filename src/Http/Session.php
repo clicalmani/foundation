@@ -2,6 +2,7 @@
 namespace Clicalmani\Foundation\Http;
 
 use Clicalmani\Foundation\Http\Session\SessionInterface;
+use Clicalmani\Foundation\Support\Facades\Arr;
 
 class Session implements SessionInterface
 {
@@ -28,22 +29,22 @@ class Session implements SessionInterface
 
     public function set(?string $name = null, mixed $value = null): void
     {
-        $_SESSION[$this->name ?: $name] = $this->value ?: $value;
+        $_SESSION = Arr::set($_SESSION, $this->name ?: $name, $this->value ?: $value);
     }
 
-    public function get(?string $name = null): ?string
+    public function get(?string $name = null): mixed
     {
-        return @$_SESSION[$name ?: $this->name];
+        return Arr::get(isset($_SESSION) ? $_SESSION: [], $name ?: $this->name);
     }
 
     public function exists(?string $name = null): bool
     {
-        return isset($_SESSION[$name ?: $this->name]);
+        return Arr::exists(isset($_SESSION) ? $_SESSION: [], $name ?: $this->name);
     }
 
     public function remove(?string $name = null): void
     {
-        unset($_SESSION[$name ?: $this->name]);
+        $_SESSION = Arr::forget(isset($_SESSION) ? $_SESSION: [], $name ?: $this->name);
     }
 
     public function destroy(): void
@@ -54,6 +55,11 @@ class Session implements SessionInterface
     public function all(): array
     {
         return $_SESSION;
+    }
+
+    public function allExcept(array $keys)
+    {
+        return Arr::except($this->all(), $keys);
     }
 
     public function allKeys(): array

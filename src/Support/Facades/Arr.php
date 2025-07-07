@@ -19,6 +19,7 @@ namespace Clicalmani\Foundation\Support\Facades;
  * @method array add(\ArrayAccess|array $array, string|int|float $key, mixed $value)
  * @method array set(\ArrayAccess|array $array, string|int|null $key, mixed $value)
  * @method array shuffle(\ArrayAccess|array $array)
+ * @method array except($array, $keys) : array
  */
 class Arr extends Facade
 {
