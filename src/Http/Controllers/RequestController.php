@@ -170,7 +170,7 @@ class RequestController
 		/** @var \ReflectionParameter[] */
 		$parameters = $reflector->getParameters();
 		$route_parameters = collection($this->route->getParameters())->map(fn($segment) => $segment->value)->toArray();
-
+		
 		$args = collection($parameters)->map(fn() => null)->toArray();
 		
 		foreach ($parameters as $i => $param) {

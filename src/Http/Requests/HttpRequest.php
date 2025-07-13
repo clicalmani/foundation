@@ -81,12 +81,12 @@ abstract class HttpRequest extends \Clicalmani\Psr7\Request
                     $this->retrieveFiles($record);
                 }
             } else {
-                $this->attributes = $stream;
+                $this->attributes = array_merge($this->attributes, $stream);
             }
         }
-
+        
         if ( isset($_SERVER['CONTENT_TYPE']) && strpos($_SERVER['CONTENT_TYPE'], 'application/json') !== FALSE ) {
-            $this->attributes = json_decode($input, true) ?? [];
+            $this->attributes = json_decode($input, true) ?? $_REQUEST;
         }
     }
 
