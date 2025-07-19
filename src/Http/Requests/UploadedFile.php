@@ -1,7 +1,7 @@
 <?php
 namespace Clicalmani\Foundation\Http\Requests;
 
-use Clicalmani\Psr7\Stream;
+use Clicalmani\Psr\Stream;
 use Psr\Http\Message\StreamInterface;
 
 /**

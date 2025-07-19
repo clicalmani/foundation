@@ -12,9 +12,9 @@ use Clicalmani\Foundation\Http\RequestInterface;
 use Clicalmani\Foundation\Http\Session;
 use Clicalmani\Foundation\Providers\AuthServiceProvider;
 use Clicalmani\Foundation\Support\Facades\Arr;
-use Clicalmani\Psr7\Headers;
-use Clicalmani\Psr7\Stream;
-use Clicalmani\Psr7\Uri;
+use Clicalmani\Psr\Headers;
+use Clicalmani\Psr\Stream;
+use Clicalmani\Psr\Uri;
 
 class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \JsonSerializable 
 {

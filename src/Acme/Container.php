@@ -47,7 +47,7 @@ class Container extends Application
         if ($this->resolved($id)) {
             $id = $this->resolved[$id];
         }
-
+        
         return $this->builder()->get($id);
     }
 

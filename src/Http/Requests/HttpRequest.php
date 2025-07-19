@@ -4,8 +4,8 @@ namespace Clicalmani\Foundation\Http\Requests;
 use Clicalmani\Foundation\Collection\Collection;
 use Clicalmani\Foundation\Collection\CollectionInterface;
 use Clicalmani\Foundation\Support\Facades\Log;
-use Clicalmani\Psr7\Header;
-use Clicalmani\Psr7\HeadersInterface;
+use Clicalmani\Psr\Header;
+use Clicalmani\Psr\HeadersInterface;
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UriInterface;
 
@@ -18,7 +18,7 @@ use Psr\Http\Message\UriInterface;
  *
  * @package Clicalmani\Foundation\Http
  */
-abstract class HttpRequest extends \Clicalmani\Psr7\Request
+abstract class HttpRequest extends \Clicalmani\Psr\Request
 {
     const HEADER_X_FORWARDED_ALL = 'X-Forwarded-*';
 
@@ -103,7 +103,7 @@ abstract class HttpRequest extends \Clicalmani\Psr7\Request
 
     private function __getHeader(string $name) : ?Header
     {
-        /** @var \Clicalmani\Psr7\Header */
+        /** @var \Clicalmani\Psr\Header */
         foreach ($this->headers as $header) {
             if ($header->name === strtolower($name)) return $header;
         }

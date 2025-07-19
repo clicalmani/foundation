@@ -2,8 +2,8 @@
 namespace Clicalmani\Foundation\Resources;
 
 use Clicalmani\Foundation\Acme\Container;
-use Clicalmani\Psr7\NonBufferedBody;
-use Clicalmani\Psr7\Response;
+use Clicalmani\Psr\NonBufferedBody;
+use Clicalmani\Psr\Response;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class View extends Response implements ViewInterface

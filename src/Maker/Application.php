@@ -4,11 +4,15 @@ namespace Clicalmani\Foundation\Maker;
 use Clicalmani\Foundation\Http\Request;
 use Clicalmani\Foundation\Http\Response;
 use Clicalmani\Foundation\Support\Facades\Arr;
-use Clicalmani\Psr7\NonBufferedBody;
-use Clicalmani\Psr7\StatusCodeInterface;
+use Clicalmani\Psr\NonBufferedBody;
+use Clicalmani\Psr\StatusCodeInterface;
 use Composer\Autoload\ClassLoader;
 use Symfony\Component\DependencyInjection\Loader\Configurator\DefaultsConfigurator;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ServiceConfigurator;
+
+use function Clicalmani\Foundation\Acme\reference;
+use function Symfony\Component\DependencyInjection\Loader\Configurator\param;
+use function Symfony\Component\DependencyInjection\Loader\Configurator\service;
 
 /**
  * Make an application
@@ -74,6 +78,11 @@ class Application
      */
     private $commands = [];
 
+    /**
+     * Container instance
+     * 
+     * @var \Clicalmani\Foundation\Acme\Container
+     */
     private $container;
 
     /**
@@ -391,7 +400,23 @@ class Application
      */
     public function addService(string $key, array $data) : void
     {
-        $this->coreServices = [$key => $data, ...$this->coreServices];
+        $this->coreServices = [
+            static function() use($key, $data) {
+                return [
+                    $key => array_map(static function($item) {
+                        if (is_array($item)) {
+                            foreach ($item as $index => $value) {
+                                if (is_string($value) && preg_match("/^%.*%$/", $value)) {
+                                    $item[$index] = service(trim($value, '%'));
+                                }
+                            }
+                        }
+                        return $item;
+                    }, $data)
+                ];
+            }, 
+            ...$this->coreServices
+        ];
     }
 
     public function getServices()
@@ -426,13 +451,20 @@ class Application
     {
         if ($this->services) {
             foreach ($this->coreServices as $key => $value) {
+
+                if (is_callable($value)) {
+                    $value = $value();
+                    $key = key($value);
+                    $value = $value[$key];
+                }
+
                 $this->services = $this->services->set($key, $value[0]);
 
                 if (isset($value[1])) {
                     $this->services = $this->services->args($value[1]);
                 }
             }
-
+            
             $this->services->set('view', \Clicalmani\Foundation\Resources\View::class);
         }
     }
@@ -445,7 +477,7 @@ class Application
         'env' => [\Clicalmani\Foundation\Acme\Environment::class],
         'config' => [\Clicalmani\Foundation\Acme\Configure::class],
         'console' => [\Clicalmani\Foundation\Acme\Console::class],
-        'response' => [\Clicalmani\Foundation\Http\Response::class, [\Clicalmani\Psr7\StatusCodeInterface::STATUS_OK, 200]],
+        'response' => [\Clicalmani\Foundation\Http\Response::class, [\Clicalmani\Psr\StatusCodeInterface::STATUS_OK, 200]],
         'storage' => [\Clicalmani\Foundation\Acme\StorageManager::class],
         'controller' => [\Clicalmani\Foundation\Acme\Controller::class],
         'func' => [\Clicalmani\Foundation\Acme\Invokable::class],

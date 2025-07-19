@@ -3,7 +3,7 @@ namespace Clicalmani\Foundation\Http\Requests;
 
 use Clicalmani\Foundation\Filesystem\FilesystemManager;
 use Clicalmani\Foundation\Support\Facades\Storage;
-use Clicalmani\Psr7\Stream;
+use Clicalmani\Psr\Stream;
 use Psr\Http\Message\StreamInterface;
 
 class File implements FileInterface

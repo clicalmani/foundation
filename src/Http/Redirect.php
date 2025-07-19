@@ -3,7 +3,7 @@ namespace Clicalmani\Foundation\Http;
 
 use Clicalmani\Foundation\Http\Controllers\MethodReflector;
 use Clicalmani\Foundation\Support\Facades\RequestController;
-use Clicalmani\Psr7\NonBufferedBody;
+use Clicalmani\Psr\NonBufferedBody;
 use Clicalmani\Routing\Memory;
 use Inertia\Inertia;
 

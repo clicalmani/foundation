@@ -1,7 +1,9 @@
 <?php
 namespace Clicalmani\Foundation\Maker;
 
+use Clicalmani\Foundation\Acme\TransportInterface;
 use Clicalmani\Foundation\Http\Middlewares\Web;
+use Symfony\Component\Mailer\Transport;
 
 class ApplicationBuilder
 {
@@ -37,7 +39,7 @@ class ApplicationBuilder
         foreach ($this->kernels as $kernel) {
             $this->app->addKernel($kernel);
         }
-
+        
         return $this;
     }
 
@@ -48,13 +50,15 @@ class ApplicationBuilder
      */
     public function withMiddleware(\Closure $callback) : static
     {
+        \Closure::bind($callback, null);
         $callback(new Web);
         return $this;
     }
 
-    public function withService(string $key, array $data) : static
+    public function withService(\Closure $callback) : static
     {
-        $this->app->addService($key, $data);
+        \Closure::bind($callback, null);
+        $callback($this->app);
         return $this;
     }
 }

@@ -323,4 +323,18 @@ class Collection extends SPLCollection implements CollectionInterface
     {
         return json_encode($this->toArray());
     }
+
+    public function slice(int $offset, ?int $length = null) : iterable
+    {
+        return $this->exchange(array_slice($this->toArray(), $offset, $length))->toArray();
+    }
+
+    public function remove(mixed $element) : mixed
+    {
+        if (-1 !== $index = $this->index($element)) {
+            return array_splice($this->toArray(), $index, 1)[0];
+        }
+
+        return null;
+    }
 }

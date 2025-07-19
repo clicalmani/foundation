@@ -72,9 +72,9 @@ class Configure implements \ArrayAccess, \JsonSerializable
         return Arr::get(@app()->database ?? [], $key);
     }
 
-    public function env(?string $key = null)
+    public function env(?string $key = null, ?string $default = null)
     {
-        return $key ? Env::get($this->parseKey($key)) : $_ENV;
+        return $key ? Env::get($this->parseKey($key), $default) : $_ENV;
     }
 
     private function parseKey(string $key)

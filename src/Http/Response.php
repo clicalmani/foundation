@@ -3,9 +3,9 @@ namespace Clicalmani\Foundation\Http;
 
 use Clicalmani\Foundation\Exceptions\ResourceNotFoundException;
 use Clicalmani\Foundation\Support\Facades\Route;
-use Clicalmani\Psr7\Header;
-use Clicalmani\Psr7\NonBufferedBody;
-use Clicalmani\Psr7\Stream;
+use Clicalmani\Psr\Header;
+use Clicalmani\Psr\NonBufferedBody;
+use Clicalmani\Psr\Stream;
 use Psr\Http\Message\StreamInterface;
 
 /**
@@ -14,7 +14,7 @@ use Psr\Http\Message\StreamInterface;
  * @package Clicalmani\Foundation
  * @author @Clicalmani\Foundation
  */
-class Response extends \Clicalmani\Psr7\Response implements ResponseInterface
+class Response extends \Clicalmani\Psr\Response implements ResponseInterface
 {
     use StatusErrors;
     use JsonResponse;
@@ -82,7 +82,7 @@ class Response extends \Clicalmani\Psr7\Response implements ResponseInterface
     
     public function sendHeaders() : void
     {
-        /** @var \Clicalmani\Psr7\Header */
+        /** @var \Clicalmani\Psr\Header */
         foreach ($this->headers as $header) {
             $header->send();
         }
@@ -94,7 +94,7 @@ class Response extends \Clicalmani\Psr7\Response implements ResponseInterface
             if ($content) {
                 $this->body->write($content);
             }
-        } elseif ($this->body instanceof \Clicalmani\Psr7\Stream) {
+        } elseif ($this->body instanceof \Clicalmani\Psr\Stream) {
 
             $size = $this->body->getSize();
             $length = $size;
@@ -170,7 +170,7 @@ class Response extends \Clicalmani\Psr7\Response implements ResponseInterface
     {
         $this->withHeader('Content-Type', $type ?? mime_content_type($file))
             ->withHeader('Content-Disposition', "attachment; filename=\"$name\"")
-            ->withBody(\Clicalmani\Psr7\Stream::createFromFile($file, 'r'))
+            ->withBody(\Clicalmani\Psr\Stream::createFromFile($file, 'r'))
             ->send();
     }
 
@@ -184,7 +184,7 @@ class Response extends \Clicalmani\Psr7\Response implements ResponseInterface
         $this->status = $status;
         $this->withHeaders($headers);
 
-        $stream = \Clicalmani\Psr7\Stream::createFromFile($file, 'r');
+        $stream = \Clicalmani\Psr\Stream::createFromFile($file, 'r');
         $size = $stream->getSize();
         $length = $size;
 
