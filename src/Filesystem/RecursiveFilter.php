@@ -9,8 +9,12 @@ class RecursiveFilter extends \RecursiveFilterIterator
 
     private $types = [];
 
+    private bool $recurseSubFolders = true;
+
     public function accept(): bool
     {
+        if (!$this->recurseSubFolders && $this->current()->isDir()) return false;
+
         $filename = $this->current()->getFilename();
         $pathname = $this->current()->getPathname();
         
@@ -78,5 +82,10 @@ class RecursiveFilter extends \RecursiveFilterIterator
     public function setFilter(array $filter)
     {
         $this->filter = $filter;
+    }
+
+    public function recurseSubFolders(bool $recurse) : void
+    {
+        $this->recurseSubFolders = $recurse;
     }
 }

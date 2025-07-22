@@ -317,4 +317,6 @@ interface CollectionInterface
     public function reduce(callable $callback, mixed $initial = null): mixed;
 
     public function slice(int $offset, ?int $length = null) : iterable;
+
+    public function remove(mixed $element) : mixed;
 }
