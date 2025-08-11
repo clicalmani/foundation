@@ -1,11 +1,10 @@
 <?php
-namespace Clicalmani\Foundation\Acme;
+namespace Clicalmani\Foundation\Mail;
 
 use Symfony\Component\Mailer\Envelope;
-use Symfony\Component\Mailer\Transport;
 use Symfony\Component\Mime\Email;
 
-class Mailer
+class Mailer implements MailerInterface
 {
     /**
      * Mailer transport instance
@@ -32,7 +31,7 @@ class Mailer
      * @param \Symfony\Component\Mime\Email $email
      * @return void
      */
-    public function send(Email $email, ?Envelope $envelope = null)
+    public function send(Email $email, ?Envelope $envelope = null) : void
     {
         // Ensure the mailer is initialized before sending
         if (!$this->mailer) {
@@ -47,7 +46,7 @@ class Mailer
      * 
      * @return \Symfony\Component\Mailer\MailerInterface
      */
-    public function get()
+    public function get() : \Symfony\Component\Mailer\MailerInterface
     {
         if (!$this->mailer) {
             $this->mailer = new \Symfony\Component\Mailer\Mailer($this->transport->create());

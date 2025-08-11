@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Foundation\Acme;
+namespace Clicalmani\Foundation\Mail;
 
 interface TransportInterface
 {

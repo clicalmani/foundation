@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Foundation\Acme;
+namespace Clicalmani\Foundation\Mail;
 
 use Symfony\Component\Mailer\Envelope;
 use Symfony\Component\Mime\Email;

@@ -20,7 +20,11 @@ class LogServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        static::$is_debug_mode = 0 === strcasecmp(env('APP_DEBUG'), 'false') ? false: true;
+        if (is_string(env('APP_DEBUG'))) {
+            static::$is_debug_mode = 0 === strcasecmp(env('APP_DEBUG'), 'false') ? false : true;
+        } else {
+            static::$is_debug_mode = env('APP_DEBUG', false);
+        }
         
         ini_set('log_errors', 1);
         ini_set('error_log', storage_path('/errors/' . static::ERROR_LOG) );

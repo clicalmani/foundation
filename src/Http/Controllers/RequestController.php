@@ -5,6 +5,8 @@ use Clicalmani\Foundation\Http\Request;
 use Clicalmani\Foundation\Exceptions\ModelNotFoundException;
 use Clicalmani\Database\Factory\Models\Elegant;
 use Clicalmani\Foundation\Acme\Container;
+use Clicalmani\Foundation\Mail\Mailer;
+use Clicalmani\Foundation\Mail\MailerInterface;
 use Clicalmani\Foundation\Providers\RouteServiceProvider;
 use Clicalmani\Foundation\Routing\Exceptions\RouteNotFoundException;
 use Clicalmani\Foundation\Support\Facades\Route;
@@ -181,6 +183,20 @@ class RequestController
 			} else {
 
 				foreach (Reflector::getParameterClassNames($param) as $class) {
+
+					if (is_subclass_of($class, Mailer::class) || $class === MailerInterface::class) {
+						$mailers = app()->config('mail.mailers', []);
+						foreach ($mailers as $name => $mailer) {
+							if ($this->container->has("$name.mailer")) {
+								$instance = $this->container->get("$name.mailer");
+								if ($instance instanceof $class) {
+									$args[$i] = $instance;
+									break 2; // Break out of both loops
+								}
+								break;
+							}
+						}
+					}
 					
 					if ((new \ReflectionClass($class))->isInterface()) {
 						$instance = $this->container->getInterfaceInstance($class, false);

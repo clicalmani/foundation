@@ -392,27 +392,18 @@ class Application
     }
 
     /**
-     * Add a custom service to the service container
+     * Add a service to the application
      * 
-     * @param string $key Service key
-     * @param array $data Service data
-     * @return void
+     * @param string $key
+     * @param array $data The second element of the service data may be an anonymous function or an invokable class. 
+     * The __invoke method receives the service configurator as its first argument and the application instance as its second argument.
      */
     public function addService(string $key, array $data) : void
     {
         $this->coreServices = [
             static function() use($key, $data) {
                 return [
-                    $key => array_map(static function($item) {
-                        if (is_array($item)) {
-                            foreach ($item as $index => $value) {
-                                if (is_string($value) && preg_match("/^%.*%$/", $value)) {
-                                    $item[$index] = service(trim($value, '%'));
-                                }
-                            }
-                        }
-                        return $item;
-                    }, $data)
+                    $key => array_map(static fn($item) => $item, $data)
                 ];
             }, 
             ...$this->coreServices
@@ -455,13 +446,18 @@ class Application
                 if (is_callable($value)) {
                     $value = $value();
                     $key = key($value);
-                    $value = $value[$key];
+                    @[$class, $config] = $value[$key];
+                    $value = ['class' => $class, 'config' => $config ?? null];
                 }
 
-                $this->services = $this->services->set($key, $value[0]);
+                $this->services = $this->services->set($key, $value['class']);
 
-                if (isset($value[1])) {
-                    $this->services = $this->services->args($value[1]);
+                if ($config = @$value['config']) {
+                    if ($config instanceof \Closure) {
+                        $config($this->services, $this);
+                    } else {
+                        with (new $config)($this->services);
+                    }
                 }
             }
             
@@ -469,19 +465,29 @@ class Application
         }
     }
 
+    public function dependency(string $func, string $arg)
+    {
+        return match ($func) {
+            'service' => service($arg),
+            'param' => param($arg),
+            'reference' => reference($arg),
+            default => throw new \InvalidArgumentException("Unknown dependency function: $func"),
+        };
+    }
+
     private array $coreServices = [
-        'logger' => [\Clicalmani\Foundation\Acme\Logger::class],
-        'str' => [\Clicalmani\Foundation\Acme\Stringable::class],
-        'router' => [\Clicalmani\Foundation\Acme\Router::class],
-        'array' => [\Clicalmani\Foundation\Acme\Arrayable::class],
-        'env' => [\Clicalmani\Foundation\Acme\Environment::class],
-        'config' => [\Clicalmani\Foundation\Acme\Configure::class],
-        'console' => [\Clicalmani\Foundation\Acme\Console::class],
-        'response' => [\Clicalmani\Foundation\Http\Response::class, [\Clicalmani\Psr\StatusCodeInterface::STATUS_OK, 200]],
-        'storage' => [\Clicalmani\Foundation\Acme\StorageManager::class],
-        'controller' => [\Clicalmani\Foundation\Acme\Controller::class],
-        'func' => [\Clicalmani\Foundation\Acme\Invokable::class],
-        'database' => [\Clicalmani\Foundation\Acme\Database::class],
-        'view' => [\Clicalmani\Foundation\Resources\View::class],
+        'logger' => ['class' => \Clicalmani\Foundation\Acme\Logger::class],
+        'str' => ['class' => \Clicalmani\Foundation\Acme\Stringable::class],
+        'router' => ['class' => \Clicalmani\Foundation\Acme\Router::class],
+        'array' => ['class' => \Clicalmani\Foundation\Acme\Arrayable::class],
+        'env' => ['class' => \Clicalmani\Foundation\Acme\Environment::class],
+        'config' => ['class' => \Clicalmani\Foundation\Acme\Configure::class],
+        'console' => ['class' => \Clicalmani\Foundation\Acme\Console::class],
+        'response' => ['class' => \Clicalmani\Foundation\Http\Response::class, 'config' => \Clicalmani\Foundation\Providers\Config\ResponseConfig::class],
+        'storage' => ['class' => \Clicalmani\Foundation\Acme\StorageManager::class],
+        'controller' => ['class' => \Clicalmani\Foundation\Acme\Controller::class],
+        'func' => ['class' => \Clicalmani\Foundation\Acme\Invokable::class],
+        'database' => ['class' => \Clicalmani\Foundation\Acme\Database::class],
+        'view' => ['class' => \Clicalmani\Foundation\Resources\View::class],
     ];
 }
