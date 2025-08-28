@@ -76,7 +76,7 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
         parent::__construct(
             $this->getMethod(),
             new Uri((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http', $this->getHost()),
-            Headers::fromArray( isConsoleMode() ? []: apache_request_headers()),
+            Headers::fromArray( !function_exists('apache_request_headers') ? []: \apache_request_headers()),
             $_COOKIE,
             $_SERVER,
             Stream::createFromResource(fopen('php://input', 'r'))
@@ -260,7 +260,7 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
     public function url() : string
     {
         if ( isConsoleMode() ) return '@';
-        return $_SERVER['REQUEST_URI'];
+        return @$_SERVER['REQUEST_URI'] ?? '/';
     }
 
     public function fullUrl() : string

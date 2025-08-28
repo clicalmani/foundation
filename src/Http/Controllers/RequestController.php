@@ -9,12 +9,11 @@ use Clicalmani\Foundation\Mail\Mailer;
 use Clicalmani\Foundation\Mail\MailerInterface;
 use Clicalmani\Foundation\Providers\RouteServiceProvider;
 use Clicalmani\Foundation\Routing\Exceptions\RouteNotFoundException;
+use Clicalmani\Foundation\Sandbox\Sandbox;
 use Clicalmani\Foundation\Support\Facades\Route;
 use Clicalmani\Foundation\Test\Controllers\TestController;
 use Clicalmani\Validation\AsValidator;
 use Clicalmani\Routing\Memory;
-use Clicalmani\Validation\Exceptions\ValidationException;
-use Inertia\ComponentData;
 
 /**
  * RequestController class
@@ -139,7 +138,7 @@ class RequestController
 	 * 
 	 * @return \Psr\Http\Message\ResponseInterface|\Clicalmani\Foundation\Http\RedirectInterface
 	 */
-	protected function getResponse() : \Psr\Http\Message\ResponseInterface|\Clicalmani\Foundation\Http\RedirectInterface
+	protected function getResponse() : \Psr\Http\Message\ResponseInterface|\Clicalmani\Foundation\Http\ResponseInterface|\Clicalmani\Foundation\Http\RedirectInterface
 	{
 		$action = $this->getAction();
 		
@@ -163,12 +162,15 @@ class RequestController
 	 * @param \Clicalmani\Foundation\Http\Controllers\ReflectorInterface $reflector
 	 * @return \Psr\Http\Message\ResponseInterface|\Clicalmani\Foundation\Http\RedirectInterface
 	 */
-	public function invokeMethod(ReflectorInterface $reflector) : \Psr\Http\Message\ResponseInterface|\Clicalmani\Foundation\Http\RedirectInterface
+	public function invokeMethod(ReflectorInterface $reflector) : \Psr\Http\Message\ResponseInterface|\Clicalmani\Foundation\Http\ResponseInterface|\Clicalmani\Foundation\Http\RedirectInterface
 	{
 		$request = isConsoleMode() ? Request::current() : new Request; // Fallback to default request
-		
 		Request::current($request);
 
+		if ($request->hasHeader('X-Query')) {
+			return response()->json(Sandbox::query($request->query));
+		}
+		
 		/** @var \ReflectionParameter[] */
 		$parameters = $reflector->getParameters();
 		$route_parameters = collection($this->route->getParameters())->map(fn($segment) => $segment->value)->toArray();

@@ -209,7 +209,13 @@ class RouteServiceProvider extends ServiceProvider
      */
     public static function getProvidedTPS(int $service_level = 0) : array 
     {
-        return Config::bootstrap('tps')[$service_level];
+        $tps = Config::bootstrap('tps')[$service_level] ?? [];
+
+        if ($service_level === 0) {
+            $tps[] = \Clicalmani\Foundation\Providers\Config\RedirectService::class;
+        }
+
+        return $tps;
     }
 
     /**

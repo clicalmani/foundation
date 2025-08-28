@@ -100,6 +100,12 @@ abstract class SessionStorageServiceProvider extends ServiceProvider
 
     private $session_dir;
 
+    private const __DEFAULT_KEYS = [
+        'LAST_ACTIVITY' => 'f3in64jecu0k9sdovwm75ayh8pbz12gxqrtl__LAST_ACTIVITY',
+        'IDLE' => '6o3w8hiunfqlms91kb5t7d2yvrapzejxg04c__IDLE',
+        'TRACE_BACK' => 'zjfsr2nyu51elg4mop9v6wt3k8iq70cahbdx__TRACE_BACK'
+    ];
+
     public function __construct()
     {
         $this->session_dir = dirname( __DIR__, 5) . '/storage/framework/sessions';
@@ -148,8 +154,8 @@ abstract class SessionStorageServiceProvider extends ServiceProvider
                 register_shutdown_function('session_write_close');
                 session_start();
                 
-                $_SESSION['_IDLE'] = @$_SESSION['_IDLE'] ?? time();
-                $_SESSION['_LAST_ACTIVITY'] = @$_SESSION['_LAST_ACTIVITY'] ?? time();
+                $_SESSION['6o3w8hiunfqlms91kb5t7d2yvrapzejxg04c__IDLE'] = @$_SESSION['6o3w8hiunfqlms91kb5t7d2yvrapzejxg04c__IDLE'] ?? time();
+                $_SESSION[self::__DEFAULT_KEYS['LAST_ACTIVITY']] = @$_SESSION[self::__DEFAULT_KEYS['LAST_ACTIVITY']] ?? time();
                 setcookie(
                     static::$cookie['name'],
                     session_id(),
@@ -160,16 +166,16 @@ abstract class SessionStorageServiceProvider extends ServiceProvider
                     static::$cookie['http_only']
                 );
                 
-                if (isset($_SESSION['_LAST_ACTIVITY']) && (time() - $_SESSION['_LAST_ACTIVITY'] > static::$max_lifetime)) {
+                if (isset($_SESSION[self::__DEFAULT_KEYS['LAST_ACTIVITY']]) && (time() - $_SESSION[self::__DEFAULT_KEYS['LAST_ACTIVITY']] > static::$max_lifetime)) {
                     // last request was more than $lifetime seconds ago
                     session_unset();     // unset $_SESSION variable for the run-time 
                     session_destroy();   // destroy session data in storage
                 }
                 
-                if (isset($_SESSION['_IDLE']) && (time() - $_SESSION['_IDLE'] > static::$lifetime)) {
+                if (isset($_SESSION[self::__DEFAULT_KEYS['IDLE']]) && (time() - $_SESSION[self::__DEFAULT_KEYS['IDLE']] > static::$lifetime)) {
                     // session started more than $max_lifetime seconds ago
                     session_regenerate_id(true);  // change session ID for the current session and invalidate old session ID
-                    $_SESSION['_IDLE'] = time();  // update creation time
+                    $_SESSION[self::__DEFAULT_KEYS['IDLE']] = time();  // update creation time
                 }
             }
         }
@@ -193,5 +199,10 @@ abstract class SessionStorageServiceProvider extends ServiceProvider
     public static function getDriver() : string
     {
         return static::$driver;
+    }
+
+    public static function backTraceIndex() : string
+    {
+        return self::__DEFAULT_KEYS['TRACE_BACK'];
     }
 }

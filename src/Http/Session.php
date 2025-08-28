@@ -72,6 +72,16 @@ class Session implements SessionInterface
         return array_values($_SESSION);
     }
 
+    public function storeBackTrace(string $back_trace) : void
+    {
+        $this->set(\Clicalmani\Foundation\Providers\SessionStorageServiceProvider::backTraceIndex(), $back_trace);
+    }
+
+    public function retrieveBackTrace() : ?string
+    {
+        return $this->get(\Clicalmani\Foundation\Providers\SessionStorageServiceProvider::backTraceIndex());
+    }
+
     public function __get($name)
     {
         return match ($name) {
