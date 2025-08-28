@@ -22,12 +22,14 @@ final class RedirectService extends RouteService
      */
     public function redirect()
     {
-        if ($this->route->isDirty()) {
-            $this->route->redirect = 302;
-        }
-        
-        if (!\Clicalmani\Foundation\Support\Facades\Route::isApi() && $this->route->isGettable()) {
-            session()->storeBackTrace($this->route->uri());
+        if ($this->route) {
+            if ($this->route->isDirty()) {
+                $this->route->redirect = 302;
+            }
+            
+            if (!\Clicalmani\Foundation\Support\Facades\Route::isApi() && $this->route->isGettable()) {
+                session()->storeBackTrace($this->route->uri());
+            }
         }
     }
 

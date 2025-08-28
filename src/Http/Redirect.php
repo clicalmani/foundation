@@ -46,7 +46,7 @@ class Redirect implements RedirectInterface
 
     public function back(): RedirectInterface
     {
-        if ($uri = \Clicalmani\Foundation\Providers\Config\RedirectService::traceBack()) {
+        if (NULL !== $uri = \Clicalmani\Foundation\Providers\Config\RedirectService::traceBack()) {
             $this->uri = $uri;
             return $this;
         }
@@ -98,7 +98,7 @@ class Redirect implements RedirectInterface
         
         (new Response)->withBody(new NonBufferedBody)
             ->status($this->status)
-            ->header('Location', $this->uri)
+            ->header('Location', $this->uri === '' ? '/': $this->uri)
             ->send();
     }
 }
