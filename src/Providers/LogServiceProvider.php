@@ -25,6 +25,10 @@ class LogServiceProvider extends ServiceProvider
         } else {
             static::$is_debug_mode = env('APP_DEBUG', false);
         }
+
+        if ( !file_exists(storage_path('/errors')) ) {
+            mkdir(storage_path('/errors'));
+        }
         
         ini_set('log_errors', 1);
         ini_set('error_log', storage_path('/errors/' . static::ERROR_LOG) );
