@@ -113,7 +113,7 @@ class AuthServiceProvider
         }
 
         $parts = explode('.', $token);
-
+        
         if ( count( $parts ) < 3 ) {
             return false;
         }

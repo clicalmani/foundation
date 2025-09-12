@@ -86,7 +86,7 @@ abstract class HttpRequest extends \Clicalmani\Psr\Request
         }
         
         if ( isset($_SERVER['CONTENT_TYPE']) && strpos($_SERVER['CONTENT_TYPE'], 'application/json') !== FALSE ) {
-            $this->attributes = json_decode($input, true) ?? $_REQUEST;
+            $this->attributes = array_merge($this->attributes, json_decode($input, true) ?? $_REQUEST);
         }
     }
 

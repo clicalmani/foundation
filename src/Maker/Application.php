@@ -100,11 +100,10 @@ class Application
         $paths['root'] = $this->rootPath;
         $this->config['paths'] = $paths;
         
-        $this->response = new Response(
+        $this->response = (new Response(
+            'Ok',
             StatusCodeInterface::STATUS_OK,
-            200,
-            new NonBufferedBody
-        );
+        ))->withBody(new NonBufferedBody);
 
         $this->commands = \Clicalmani\Console\Kernel::$kernel;
     }

@@ -227,7 +227,7 @@ class RouteServiceProvider extends ServiceProvider
     public static function fireTPS(mixed &$route_response, int $service_level = 0) : void
     {
         foreach (self::getProvidedTPS($service_level) as $tps) {
-            with( new $tps($route_response) )->redirect();
+            with( new $tps($route_response ?? false) )->redirect();
         }
     }
 
