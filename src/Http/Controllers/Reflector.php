@@ -1,6 +1,12 @@
 <?php
 namespace Clicalmani\Foundation\Http\Controllers;
 
+use Clicalmani\Foundation\Acme\Container;
+use Clicalmani\Foundation\Http\Request;
+use Clicalmani\Foundation\Http\RequestInterface;
+use Clicalmani\Foundation\Mail\Mailer;
+use Clicalmani\Foundation\Mail\MailerInterface;
+use Clicalmani\Validation\AsValidator;
 use ReflectionClass;
 use ReflectionEnum;
 use ReflectionNamedType;
@@ -24,7 +30,7 @@ class Reflector
      * @param  \ReflectionParameter  $parameter
      * @return string|null
      */
-    public static function getParameterClassName(\ReflectionParameter $parameter) : string|null
+    protected static function handleNamedType(\ReflectionParameter $parameter) : string|null
     {
         $type = $parameter->getType();
 
@@ -36,30 +42,68 @@ class Reflector
     }
 
     /**
+     * Handle intersection types (PHP 8.1+)
+     *
+     * @param ReflectionIntersectionType $type
+     * @return array
+     */
+    protected static function handleIntersectionType(\ReflectionIntersectionType $type): array
+    {
+        $types = [];
+        
+        foreach ($type->getTypes() as $intersectionType) {
+            if ($intersectionType instanceof ReflectionNamedType) {
+                $types[] = $intersectionType->getName();
+            }
+        }
+        
+        return $types;
+    }
+
+    /**
+     * Handle union types
+     *
+     * @param ReflectionUnionType $type
+     * @return array
+     */
+    protected static function handleUnionType(ReflectionUnionType $type): array
+    {
+        $types = [];
+        
+        foreach ($type->getTypes() as $unionType) {
+            if ($unionType instanceof \ReflectionNamedType) {
+                $types[] = $unionType->getName();
+            } elseif ($unionType instanceof \ReflectionIntersectionType) {
+                $types = array_merge(self::handleIntersectionType($unionType));
+            }
+        }
+
+        return $types;
+    }
+
+    /**
      * Get the class names of the given parameter's type, including union types.
      *
      * @param  \ReflectionParameter  $parameter
      * @return array
      */
-    public static function getParameterClassNames(\ReflectionParameter $parameter) : array
+    public static function listTypes(\ReflectionParameter $parameter) : array
     {
         $type = $parameter->getType();
 
-        if (! $type instanceof ReflectionUnionType) {
-            return array_filter([static::getParameterClassName($parameter)]);
+        if ($type instanceof \ReflectionNamedType) {
+            return array_filter([static::handleNamedType($parameter)]);
         }
 
-        $unionTypes = [];
-
-        foreach ($type->getTypes() as $listedType) {
-            if (! $listedType instanceof ReflectionNamedType || $listedType->isBuiltin()) {
-                continue;
-            }
-
-            $unionTypes[] = static::getTypeName($parameter, $listedType);
+        if ($type instanceof \ReflectionUnionType) {
+            return self::handleUnionType($type);
         }
 
-        return array_filter($unionTypes);
+        if ($type instanceof \ReflectionIntersectionType) {
+            return self::handleIntersectionType($type);
+        }
+
+        return [];
     }
 
     /**
@@ -95,7 +139,7 @@ class Reflector
      */
     public static function isParameterSubclassOf(\ReflectionParameter $parameter, string $className) : bool
     {
-        $paramClassName = static::getParameterClassName($parameter);
+        $paramClassName = static::handleNamedType($parameter);
 
         return $paramClassName
             && (class_exists($paramClassName) || interface_exists($paramClassName))
@@ -148,7 +192,7 @@ class Reflector
     public function getResources() : iterable|null
     {
         foreach ($this->parameters as $index => $parameter) {
-            foreach ($this->getParameterClassNames($parameter) as $class) {
+            foreach ($this->listTypes($parameter) as $class) {
                 if (is_subclass_of($class, \Clicalmani\Database\Factory\Models\Elegant::class)) yield ['name' => $class, 'pos' => $index];
             }
         }
@@ -186,9 +230,59 @@ class Reflector
     public function getRequest() : array|null
     {
         foreach ($this->parameters as $index => $parameter) {
-            foreach ($this->getParameterClassNames($parameter) as $class) {
+            foreach (self::listTypes($parameter) as $class) {
                 if (is_subclass_of($class, \Clicalmani\Foundation\Http\Request::class) ||
                     $class === \Clicalmani\Foundation\Http\Request::class) return ['name' => $class, 'pos' => $index];
+            }
+        }
+
+        return null;
+    }
+
+    public function handleRequest(object $instance) : ?RequestInterface
+    {
+        if (is_subclass_of($instance, \Clicalmani\Foundation\Http\Request::class) ||
+					$instance::class === \Clicalmani\Foundation\Http\Request::class) {
+
+            $request = isConsoleMode() ? Request::current() : new Request; // Fallback to default request
+		
+            $data = $request->all();
+            /** @var \Clicalmani\Foundation\Http\Request */
+            $request = $instance;
+            $request->extend($data);
+
+            if ($this instanceof MethodReflector) {
+                if ($attribute = (new \ReflectionMethod($this->getClass(), $this->getName()))->getAttributes(AsValidator::class)) {
+                    $request->merge($attribute[0]->newInstance()->args);
+                }
+            }
+            
+            Request::current($request);
+
+            return $request;
+        }
+        
+        return null;
+    }
+
+    public function handleMailer(string $class) : ?MailerInterface
+    {
+        if (is_subclass_of($class, Mailer::class) || $class === MailerInterface::class) {
+
+            $mailers = app()->config('mail.mailers', []);
+            $container = Container::getInstance();
+
+            foreach ($mailers as $name => $mailer) {
+                if ($container->has("$name.mailer")) {
+
+                    $instance = $container->get("$name.mailer");
+
+                    if ($instance instanceof $class) {
+                        return $instance;
+                    }
+
+                    break;
+                }
             }
         }
 

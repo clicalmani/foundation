@@ -78,7 +78,7 @@ class Container extends Application
         return $this->get($class);
     }
 
-    public function getInterfaceInstance(string $interface, bool $share = true)
+    public function getImplementingClassInstance(string $interface, bool $share = true)
     {
         $class = isset(self::$injected_interfaces[$interface]) ? self::$injected_interfaces[$interface]: 
                     substr($interface, 0, strlen($interface) - 9);

@@ -1,6 +1,9 @@
 <?php
 namespace Clicalmani\Foundation\Http\Controllers;
 
+use Clicalmani\Foundation\Http\RequestInterface;
+use Clicalmani\Foundation\Mail\MailerInterface;
+
 interface ReflectorInterface
 {
     /**
@@ -30,6 +33,10 @@ interface ReflectorInterface
      * @return array|null
      */
     public function getRequest() : array|null;
+
+    public function handleRequest(object $instance) : ?RequestInterface;
+
+    public function handleMailer(string $class) : ?MailerInterface;
 
     public function __invoke(object $object, mixed ...$args) : mixed;
 }
