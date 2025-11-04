@@ -52,6 +52,18 @@ abstract class InjectionLocator
         $args[$pos] = $value;
     }
 
+    protected function listTypes()
+    {
+        return [$this->class => $this->class]
+             + class_parents($this->class)
+             + class_implements($this->class);
+    }
+
+    protected function canHandle()
+    {
+        return in_array($this->class, $this->listTypes(), true);
+    }
+
     protected function createInstance()
     {
         if (interface_exists($this->class)) {

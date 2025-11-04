@@ -1,9 +1,7 @@
 <?php
 namespace Clicalmani\Foundation\Maker;
 
-use Clicalmani\Foundation\Acme\TransportInterface;
 use Clicalmani\Foundation\Http\Middlewares\Web;
-use Symfony\Component\Mailer\Transport;
 
 class ApplicationBuilder
 {

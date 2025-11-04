@@ -475,6 +475,11 @@ class Application
         };
     }
 
+    public function messenger()
+    {
+        return new \Clicalmani\Foundation\Messenger\Messenger($this);
+    }
+
     private array $coreServices = [
         'logger' => ['class' => \Clicalmani\Foundation\Acme\Logger::class],
         'str' => ['class' => \Clicalmani\Foundation\Acme\Stringable::class],
@@ -498,5 +503,6 @@ class Application
         '*.request' => ['class' => \Clicalmani\Foundation\Http\Controllers\InjectRequest::class],
         '*.resource' => ['class' => \Clicalmani\Foundation\Http\Controllers\InjectResource::class],
         '*.mailer' => ['class' => \Clicalmani\Foundation\Mail\InjectMailer::class],
+        '*.messenger' => ['class' => \Clicalmani\Foundation\Messenger\InjectMessenger::class],
     ];
 }
