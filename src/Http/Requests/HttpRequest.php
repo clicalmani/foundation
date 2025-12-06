@@ -73,7 +73,7 @@ abstract class HttpRequest extends \Clicalmani\Psr\Request
                     preg_split("/-+$stream_boundary/", $input, -1, PREG_SPLIT_NO_EMPTY), 
                     fn(array &$parts) => array_pop($parts)
                 );
-
+                
                 $attrs = [];
                 
                 foreach($records as $record) {

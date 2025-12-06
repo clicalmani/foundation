@@ -52,23 +52,19 @@ abstract class InjectionLocator
         $args[$pos] = $value;
     }
 
-    protected function listTypes()
-    {
-        return [$this->class => $this->class]
-             + class_parents($this->class)
-             + class_implements($this->class);
-    }
-
-    protected function canHandle()
-    {
-        return in_array($this->class, $this->listTypes(), true);
-    }
-
     protected function createInstance()
     {
         if (interface_exists($this->class)) {
             $this->instance = $this->container->getImplementingClassInstance($this->class, false);
         } else $this->instance = $this->container->getClassIntance($this->class, false);
+    }
+
+    protected static function listTypes(string $class): array
+    {
+        return [$class => $class]
+            + class_parents($class)
+            + class_implements($class)
+            + ['*' => '*'];
     }
 
     abstract public function handle() : ?object;

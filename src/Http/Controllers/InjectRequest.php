@@ -9,7 +9,7 @@ class InjectRequest extends InjectionLocator
     public function handle(): ?object
     {
         if (is_subclass_of($this->class, \Clicalmani\Foundation\Http\Request::class) ||
-					$this->class === \Clicalmani\Foundation\Http\Request::class) {
+					$this->class === \Clicalmani\Foundation\Http\Request::class || $this->class === \Clicalmani\Foundation\Http\RequestInterface::class) {
 
 			$this->createInstance();
 
@@ -20,8 +20,8 @@ class InjectRequest extends InjectionLocator
             $request = $this->instance;
             $request->extend($data);
 
-            if ($this instanceof MethodReflector) {
-                if ($attribute = (new \ReflectionMethod($this->getClass(), $this->getName()))->getAttributes(AsValidator::class)) {
+            if ($this->reflector instanceof MethodReflector) {
+                if ($attribute = (new \ReflectionMethod($this->reflector->getClass(), $this->reflector->getName()))->getAttributes(AsValidator::class)) {
                     $request->merge($attribute[0]->newInstance()->args);
                 }
             }
