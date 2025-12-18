@@ -27,7 +27,7 @@ class InjectRequest extends InjectionLocator
             }
             
             Request::current($request);
-			$this->validateRequest($request);
+			self::validateRequest($request);
 
             return $request;
         }
@@ -41,7 +41,7 @@ class InjectRequest extends InjectionLocator
 	 * @param \Clicalmani\Foundation\Http\Request
 	 * @return mixed
 	 */
-	private function validateRequest(Request $request) : mixed
+	public static function validateRequest(Request $request) : mixed
 	{
 		if (method_exists($request, 'authorize')) {
 			if (false == $request->authorize()) {

@@ -89,7 +89,13 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
      */
     public function __get($property)
     {
-        $this->validator->sanitize($this->attributes, $this->signatures ?? []);
+        $inputs = array_merge($this->attributes, $this->uploadedFiles);
+        if ($this->validator->sanitize($inputs, $this->signatures ?? [])) \Clicalmani\Validation\Validator::passed($property);
+
+        if ( array_key_exists($property, $this->attributes) ) {
+            $this->attributes[$property] = @$inputs[$property];
+        }
+        
         return @ $this->attributes[$property];
     }
 

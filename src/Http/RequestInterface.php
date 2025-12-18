@@ -1,6 +1,9 @@
 <?php
 namespace Clicalmani\Foundation\Http;
 
+use Clicalmani\Foundation\Collection\CollectionInterface;
+use Clicalmani\Foundation\Http\Requests\FileInterface;
+
 interface RequestInterface extends \Psr\Http\Message\ServerRequestInterface
 {
     /**
@@ -375,4 +378,6 @@ interface RequestInterface extends \Psr\Http\Message\ServerRequestInterface
      * @return bool
      */
     public function checkCSRFToken() : bool;
+
+    public function file(string $name) : FileInterface|CollectionInterface|null;
 }

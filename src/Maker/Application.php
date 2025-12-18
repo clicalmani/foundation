@@ -86,6 +86,8 @@ class Application
      */
     private $container;
 
+    private $cumulative_time_listeners = [];
+
     /**
      * Container services
      * 
@@ -413,6 +415,16 @@ class Application
     public function getServices()
     {
         return $this->services;
+    }
+
+    public function setTimeTracker(string $event, $handler)
+    {
+        $this->cumulative_time_listeners[$event][] = $handler;
+    }
+
+    public function getTimeTracker()
+    {
+        return $this->cumulative_time_listeners;
     }
 
     public function __get($name)
