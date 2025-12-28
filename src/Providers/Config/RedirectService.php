@@ -24,7 +24,7 @@ final class RedirectService extends RouteService
     {
         if ($this->route) {
             if ($this->route->isDirty()) {
-                $this->route->redirect = 302;
+                $this->route->redirect = $this->route->redirect ?? self::traceBack();
             }
             
             if (!\Clicalmani\Foundation\Support\Facades\Route::isApi() && $this->route->isGettable()) {
