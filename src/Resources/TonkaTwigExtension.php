@@ -27,7 +27,7 @@ class TonkaTwigExtension extends \Twig\Extension\AbstractExtension implements \T
         ];
     }
 
-    public function getTokenParsers()
+    public function getTokenParsers() : array
     {
         return [];
     }

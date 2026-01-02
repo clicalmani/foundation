@@ -11,7 +11,6 @@ use Symfony\Component\DependencyInjection\Loader\Configurator\DefaultsConfigurat
 use Symfony\Component\DependencyInjection\Loader\Configurator\ServiceConfigurator;
 
 use function Clicalmani\Foundation\Acme\reference;
-use Symfony\Component\DependencyInjection\Reference;
 use function Symfony\Component\DependencyInjection\Loader\Configurator\param;
 use function Symfony\Component\DependencyInjection\Loader\Configurator\service;
 
@@ -509,6 +508,6 @@ class Application
          */
         '*.request' => ['class' => \Clicalmani\Foundation\Http\Controllers\InjectRequest::class],
         '*.resource' => ['class' => \Clicalmani\Foundation\Http\Controllers\InjectResource::class],
-        '*.mailer' => ['class' => \Clicalmani\Foundation\Mail\InjectMailer::class],
+        '*.mailer' => ['class' => \Clicalmani\Foundation\Mail\InjectMailer::class]
     ];
 }

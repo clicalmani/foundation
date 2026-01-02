@@ -127,7 +127,7 @@ class Response extends \Clicalmani\Psr\Response implements ResponseInterface
                 'Y' => 1024 * 1024 * 1024 * 1024 * 1024 * 1024 * 1024 * 1024,
                 default => 0
             };
-
+            
             if ($length > $memory_limit) {
                 $this->body->rewind();
                 while (! $this->body->eof()) {

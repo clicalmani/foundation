@@ -380,4 +380,21 @@ interface RequestInterface extends \Psr\Http\Message\ServerRequestInterface
     public function checkCSRFToken() : bool;
 
     public function file(string $name) : FileInterface|CollectionInterface|null;
+
+    /**
+     * Get the client's IP address.
+     * 
+     * @return string
+     */
+    public function ip() : string;
+
+    /**
+     * Returns the specified request header if present. Otherwise
+     * default value will be returned.
+     * 
+     * @param string $name Header name
+     * @param ?string $default Default value
+     * @return ?string
+     */
+    public function header(string $name, ?string $default = null) : ?string;
 }

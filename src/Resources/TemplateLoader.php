@@ -44,7 +44,7 @@ class TemplateLoader implements LoaderInterface
     /**
      * @return bool
      */
-    public function exists(string $name)
+    public function exists(string $name) : bool
     {
         $name = $this->normalizeName($name);
         
