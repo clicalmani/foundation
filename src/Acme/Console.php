@@ -8,18 +8,18 @@ use Clicalmani\XPower\XDTNodeList;
 class Console
 {
     /**
-     * Migrated nodes
+     * Migrated Tables
      * 
      * @var \Clicalmani\XPower\XDTNodeList[]
      */
-    private $migrated = [];
+    private $migratedTables = [];
 
     /**
-     * Droped nodes
+     * Dropped nodes
      * 
      * @var \Clicalmani\XPower\XDTNodeList[]
      */
-    private $droped = [];
+    private $dropped = [];
 
     /**
      * Console output object
@@ -52,19 +52,22 @@ class Console
         /** @var \Clicalmani\XPower\XDTNodeList[] */
         $nodes = [];
 
+        if (FALSE === config('database.strict')) DB::getInstance()->getPdo()->query('SET FOREIGN_KEY_CHECKS = 0');
+
         foreach ($xdt->getDocumentRootElement()->children('entity') as $node) {
             $node = $xdt->parse($node);
             $nodes[] = $node;
         }
 
         /** @var \Clicalmani\XPower\XDTNodeList[] */
-        $skiped = $this->processMigrate($nodes);
+        $skipped = $this->processMigrate($nodes);
         
-        while ( count($skiped) ) $skiped = $this->processMigrate($skiped);
+        while ( count($skipped) ) $skipped = $this->processMigrate($skipped);
 
         $xdt->close();
-        unset($skiped);
-        $this->migrated = [];
+        unset($skipped);
+        $this->migratedTables = [];
+        DB::getInstance()->getPdo()->query('SET FOREIGN_KEY_CHECKS = 1');
     }
 
     /**
@@ -89,13 +92,13 @@ class Console
             $nodes[] = $node;
         }
 
-        $skiped = $this->processDrop($nodes);
+        $skipped = $this->processDrop($nodes);
         
-        while ( count($skiped) ) $skiped = $this->processDrop($skiped);
+        while ( count($skipped) ) $skipped = $this->processDrop($skipped);
 
         $xdt->close();
-        unset($skiped);
-        $this->droped = [];
+        unset($skipped);
+        $this->dropped = [];
     }
 
     /**
@@ -557,7 +560,7 @@ class Console
         /**
          * Walk through nodes with dependences
          */
-        foreach ($nodes as $node) {
+        foreach ($nodes as $index => $node) {
 
             if (FALSE == $node->hasChildren('dependences')) continue;
             
@@ -572,6 +575,18 @@ class Console
             }
             
             if ($count == $children->length) $this->execute($node);
+            else {
+                if ($index == count($nodes) - 1) {
+                    $tables = array_map(function(XDTNodeList $node) {
+                        /** @var \Clicalmani\Database\Factory\Models\Elegant */
+                        $modelClass = $node->attr('model');
+                        $model = new $modelClass;
+                        return $model->getTable();
+                    }, $nodes);
+                    $this->writeln('Some tables have circular dependences: ' . implode(', ', $tables));
+                    return [];
+                }
+            }
         }
 
         $nodes = collection($nodes)->filter(fn(XDTNodeList $node) => !$this->isMigrated($node))->toArray();
@@ -609,7 +624,7 @@ class Console
         $model = new $modelClass;
         $table1 = $model->getTable();
 
-        foreach ($this->migrated as $n) {
+        foreach ($this->migratedTables as $n) {
             /** @var \Clicalmani\Database\Factory\Models\Elegant */
             $modelClass = $n->attr('model');
             $model = new $modelClass;
@@ -650,8 +665,8 @@ class Console
 
                 $this->writeln('Success');
                 
-                if ( $command === 'migrate' ) $this->migrated[] = $node;
-                else $this->droped[] = $node;
+                if ( $command === 'migrate' ) $this->migratedTables[] = $node;
+                else $this->dropped[] = $node;
             }
 
         } catch (\PDOException $e) {
@@ -781,7 +796,7 @@ class Console
         $model = new $modelClass;
         $table1 = $model->getTable();
 
-        foreach ($this->droped as $n) {
+        foreach ($this->dropped as $n) {
             /** @var \Clicalmani\Database\Factory\Models\Elegant */
             $modelClass = $n->attr('model');
             $model = new $modelClass;
