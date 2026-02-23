@@ -33,6 +33,7 @@ class Kernel extends BaseKernel
         \Clicalmani\Foundation\Resources\Tags\Vite::class,
         \Clicalmani\Foundation\Resources\Tags\InertiaHead::class,
         \Clicalmani\Foundation\Resources\Tags\Inertia::class,
+        \Clicalmani\Foundation\Resources\Tags\ReactRefresh::class,
     ];
 
     /**
