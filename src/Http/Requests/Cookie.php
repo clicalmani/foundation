@@ -12,12 +12,8 @@ trait Cookie
      * @param ?string $path Default root path
      * @return mixed
      */
-    public function cookie(string $name, ?string $value = null, ?int $expiry = 604800, ?string $path = '/') : mixed
+    public function cookie(?string $name = null, ?string $value = null, ?int $expiry = 0, ?string $path = '/') : \Clicalmani\Cookie\Cookie
     {
-        if ( ! is_null($value) ) {
-            return setcookie($name, $value, time() + $expiry, $path);
-        }
-
-        return $_COOKIE[$name];
+        return new \Clicalmani\Cookie\Cookie($name, $value, $expiry, $path);
     }
 }

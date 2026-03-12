@@ -29,6 +29,10 @@ class Session implements SessionInterface
 
     public function set(?string $name = null, mixed $value = null): void
     {
+        if ( !isset($_SESSION) ) {
+            throw new \RuntimeException('Session has not been started. Please call the start() method before setting session values.');
+        }
+
         $_SESSION = Arr::set($_SESSION, $this->name ?: $name, $this->value ?: $value);
     }
 

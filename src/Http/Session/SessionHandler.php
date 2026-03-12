@@ -36,7 +36,7 @@ abstract class SessionHandler implements \SessionHandlerInterface
      */
     protected function encrypt(string $data) : string
     {
-        return $this->encrypt ? EncryptionServiceProvider::encrypt($data): base64_encode($data);
+        return $this->encrypt ? EncryptionServiceProvider::encrypt($data): $data;
     }
 
     /**
@@ -47,7 +47,7 @@ abstract class SessionHandler implements \SessionHandlerInterface
      */
     protected function decrypt(string $data) : string
     {
-        return $this->encrypt ? EncryptionServiceProvider::decrypt($data): base64_decode($data);
+        return $this->encrypt ? EncryptionServiceProvider::decrypt($data): $data;
     }
 
     public static function getIdPrefix()

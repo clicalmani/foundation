@@ -205,18 +205,19 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
         if ($authenticatorClass = AuthServiceProvider::userAuthenticator()) {
             /** @var \Clicalmani\Foundation\Auth\Authenticate */
             $authenticator = new $authenticatorClass;
-            $user_id = $authenticator->getConnectedUserID($this);
             
-            /**
-             * |----------------------------------------------------
-             * | Test User
-             * |----------------------------------------------------
-             * | To interact with the app as a normal user when testing, a user ID
-             * | may be specified.
-             */
-            if ( isConsoleMode() ) $user_id = $this->test_user_id;
-            
-            return $authenticator->createUser($user_id);
+            if ($user_id = $authenticator->getConnectedUserID($this)) {
+                /**
+                 * |----------------------------------------------------
+                 * | Test User
+                 * |----------------------------------------------------
+                 * | To interact with the app as a normal user when testing, a user ID
+                 * | may be specified.
+                 */
+                if ( isConsoleMode() ) $user_id = $this->test_user_id;
+                
+                return $authenticator->createUser($user_id);
+            }
         }
 
         return null;

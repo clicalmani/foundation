@@ -51,8 +51,8 @@ class Console
 
         /** @var \Clicalmani\XPower\XDTNodeList[] */
         $nodes = [];
-
-        if (FALSE === config('database.strict')) DB::getInstance()->getPdo()->query('SET FOREIGN_KEY_CHECKS = 0');
+        
+        DB::getInstance()->getPdo()->query('SET FOREIGN_KEY_CHECKS = ' . (int)config('database.strict'));
 
         foreach ($xdt->getDocumentRootElement()->children('entity') as $node) {
             $node = $xdt->parse($node);
@@ -583,8 +583,7 @@ class Console
                         $model = new $modelClass;
                         return $model->getTable();
                     }, $nodes);
-                    $this->writeln('Some tables have circular dependences: ' . implode(', ', $tables));
-                    return [];
+                    $this->writeln('Warning: Some tables have circular dependences: ' . implode(', ', $tables));
                 }
             }
         }
@@ -671,6 +670,9 @@ class Console
 
         } catch (\PDOException $e) {
 
+            if ( config('database.strict') ) throw new \Exception($e->getMessage(), (int)$e->getCode(), $e);
+            
+            else
             /**
              * |------------------------------------------------------------------------
              * | SQL Error Codes

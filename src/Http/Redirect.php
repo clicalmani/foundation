@@ -33,6 +33,16 @@ class Redirect implements RedirectInterface
         return $this;
     }
 
+    public function withError(string $message): RedirectInterface
+    {
+        return $this->with('error', $message);
+    }
+
+    public function withSuccess(string $message): RedirectInterface
+    {
+        return $this->with('success', $message);
+    }
+
     public function status(int $code): RedirectInterface
     {
         $this->status = $code;
@@ -52,15 +62,18 @@ class Redirect implements RedirectInterface
         }
 
         $route = Memory::currentRoute();
-        $this->uri = $route->uri;
-        $parameters = [];
         
-        /** @var \Clicalmani\Routing\Segment */
-        foreach ($route as $segment) {
-            $parameters[$segment->name] = $segment->value;
-        }
+        if ($route->isGettable()) {
+            $this->uri = $route->uri;
+            $parameters = [];
+            
+            /** @var \Clicalmani\Routing\Segment */
+            foreach ($route as $segment) {
+                $parameters[$segment->name] = $segment->value;
+            }
 
-        $this->uri = route($this->uri, ...$parameters);
+            $this->uri = route($this->uri, ...$parameters);
+        }
         
         return $this;
     }

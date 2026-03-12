@@ -722,22 +722,15 @@ class Arrayable
      * @param  mixed  $value
      * @return array
      */
-    public function set(&$array, $key, $value)
+    public function set($array, $key, $value)
     {
         if (is_null($key)) {
             return $array = $value;
         }
 
-        return Sandbox::eval(
-            "function() use(\$array, \$value) { \$array" . 
-            join('', array_map(fn(string $key) => "['$key']", explode('.', $key))) . 
-            " = \$value; return \$array;}",
-            [
-                'array' => $array,
-                'value' => $value
-            ],
-            true
-        )();
+        set_data($array, $key, $value);
+
+        return $array;
     }
 
     /**

@@ -30,10 +30,6 @@ class Kernel extends BaseKernel
         \Clicalmani\Foundation\Resources\Tags\CSRFTokenField::class,
         \Clicalmani\Foundation\Resources\Tags\IfTag::class,
         \Clicalmani\Foundation\Resources\Tags\EndIfTag::class,
-        \Clicalmani\Foundation\Resources\Tags\Vite::class,
-        \Clicalmani\Foundation\Resources\Tags\InertiaHead::class,
-        \Clicalmani\Foundation\Resources\Tags\Inertia::class,
-        \Clicalmani\Foundation\Resources\Tags\ReactRefresh::class,
     ];
 
     /**

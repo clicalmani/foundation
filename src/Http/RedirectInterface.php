@@ -11,13 +11,29 @@ interface RedirectInterface
     public function back() : \Clicalmani\Foundation\Http\RedirectInterface;
 
     /**
-     * Flash a success message to the session.
+     * Flash a status message to the session.
      * 
      * @param string $status
      * @param string $value
      * @return \Clicalmani\Foundation\Http\RedirectInterface
      */
     public function with(string $status, string $value): RedirectInterface;
+
+    /**
+     * Flash an error message to the session.
+     * 
+     * @param string $message
+     * @return \Clicalmani\Foundation\Http\RedirectInterface
+     */
+    public function withError(string $message): RedirectInterface;
+
+    /**
+     * Flash a success message to the session.
+     * 
+     * @param string $message
+     * @return \Clicalmani\Foundation\Http\RedirectInterface
+     */
+    public function withSuccess(string $message): RedirectInterface;
 
     /**
      * Set the HTTP status code for the redirect.

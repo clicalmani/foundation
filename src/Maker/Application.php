@@ -136,8 +136,8 @@ class Application
 
     public function handleRequest()
     {
-        $this->boot();
         $this->db_config = require_once config_path( '/database.php' );
+        $this->boot();
         return \Clicalmani\Foundation\Support\Facades\RequestController::render();
     }
 

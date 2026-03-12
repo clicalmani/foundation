@@ -745,6 +745,78 @@ if (! function_exists('get_data')) {
     }
 }
 
+if ( ! function_exists('set_data') ) {
+    /**
+     * Définit une valeur dans un tableau en utilisant la notation par points.
+     *
+     * @param  mixed  &$target  Le tableau (ou l'objet) à modifier (passé par référence)
+     * @param  string|array|null  $key  La clé (ex: 'users.{first}.name')
+     * @param  mixed  $value  La valeur à définir
+     * @return void
+     */
+    function set_data(&$target, $key, $value): void
+    {
+        if (is_null($key)) {
+            $target = $value;
+            return;
+        }
+
+        $keys = is_array($key) ? $key : explode('.', $key);
+
+        // On récupère le segment actuel
+        $segment = array_shift($keys);
+        
+        // --- LOGIQUE DU WILDCARD (*) ---
+        if ($segment === '*') {
+            // Si la cible est itérable (tableau ou collection), on parcourt chaque élément
+            // et on appelle set_data récursivement sur chacun.
+            if (is_iterable($target)) {
+                foreach ($target as &$item) {
+                    set_data($item, $keys, $value);
+                }
+                unset($item); // On brise la référence
+            }
+            return;
+        }
+
+        // --- LOGIQUE DES CLÉS DYNAMIQUES ({first}, {last}) ---
+        // On ne résout ces clés que si $target est un tableau (pour avoir les clés)
+        if (is_array($target)) {
+            if ($segment === '{first}') {
+                $segment = array_key_first($target);
+            } elseif ($segment === '{last}') {
+                $segment = array_key_last($target);
+            }
+        }
+
+        // --- AFFECTATION FINALE OU DESCENTE ---
+        if (empty($keys)) {
+            // C'est le dernier segment de la chaîne, on affecte la valeur
+            if (is_array($target)) {
+                $target[$segment] = $value;
+            } elseif (is_object($target)) {
+                $target->$segment = $value;
+            }
+        } else {
+            // Il reste des segments, on doit descendre d'un niveau.
+            // Si le chemin n'existe pas encore, on initialise un tableau vide.
+            if (is_array($target)) {
+                if (!isset($target[$segment]) || !is_array($target[$segment])) {
+                    $target[$segment] = [];
+                }
+                set_data($target[$segment], $keys, $value);
+            } elseif (is_object($target)) {
+                // Pour les objets, on doit vérifier si la propriété existe ou est publique.
+                // Note: C'est plus délicat avec les objets, on préfère souvent forcer en tableau.
+                if (!isset($target->$segment) || !is_array($target->$segment)) {
+                    $target->$segment = [];
+                }
+                set_data($target->$segment, $keys, $value);
+            }
+        }
+    }
+}
+
 function session(?string $name = null, mixed $value = null) {
     return new \Clicalmani\Foundation\Http\Session($name, $value);
 }
@@ -753,5 +825,11 @@ if (!function_exists('auth')) {
     function auth()
     {
         return \Clicalmani\Foundation\Http\Request::current()->user();
+    }
+}
+
+if ( !function_exists('inertia') ) {
+    function inertia(string $component, array $props = []) {
+        return \Inertia\Inertia::render($component, $props);
     }
 }

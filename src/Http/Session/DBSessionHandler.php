@@ -1,11 +1,8 @@
 <?php
 namespace Clicalmani\Foundation\Http\Session;
 
-use Clicalmani\Database\DB;
+use Clicalmani\Foundation\Support\Facades\DB;
 
-/**
- * @see https://stackoverflow.com/questions/36753513/how-do-i-save-php-session-data-to-a-database-instead-of-in-the-file-system
- */
 class DBSessionHandler extends SessionHandler
 {
     private $pdo, $driver;
@@ -13,30 +10,40 @@ class DBSessionHandler extends SessionHandler
     public function __construct(bool $encrypt, ?array $flags = [])
     {
         parent::__construct($encrypt, $flags);
-        $this->driver = $flags['driver'];
-
+        $this->driver = $flags['driver'] ?? '';
     }
 
     public function open(string $path, string $id) : bool
     {
-        if ($this->pdo = DB::getConnection($this->driver)) return true;
-        return false;
+        $this->pdo = DB::connection($this->driver);
+        return ($this->pdo !== null);
     }
 
+    #[\ReturnTypeWillChange]
     public function read(string $id): string|false
     {
-        return $this->pdo->query("SELECT `data` FROM $this->table WHERE id = '$id'")->fetch(\PDO::FETCH_NUM)[0] ?? '';
+        $stmt = $this->pdo->prepare("SELECT `data` FROM {$this->table} WHERE id = :id");
+        $stmt->execute([':id' => $id]);
+        $result = $stmt->fetch(\PDO::FETCH_NUM);
+
+        return $this->decrypt($result[0] ?? '');
     }
 
     public function write(string $id, string $data): bool
     {
         $access = time();
-        return !!$this->pdo->query("REPLACE INTO $this->table (`id`, `access`, `data`) VALUES ('$id', '$access', '$data')");
+        $stmt = $this->pdo->prepare("REPLACE INTO {$this->table} (`id`, `access`, `data`) VALUES (:id, :access, :data)");
+        return $stmt->execute([
+            ':id' => $id, 
+            ':access' => $access, 
+            ':data' => $this->encrypt($data)
+        ]);
     }
 
     public function destroy(string $id): bool
     {
-        return !!$this->pdo->query("DELETE FROM $this->table WHERE id = '$id'");
+        $stmt = $this->pdo->prepare("DELETE FROM {$this->table} WHERE id = :id");
+        return $stmt->execute([':id' => $id]);
     }
 
     public function close(): bool
@@ -45,9 +52,12 @@ class DBSessionHandler extends SessionHandler
         return true;
     }
 
+    #[\ReturnTypeWillChange]
     public function gc(int $max_lifetime): int|false
     {
-        return $this->pdo->query("DELETE FROM $this->table WHERE `access` < " . (time() - $max_lifetime))->rowCount();
+        $stmt = $this->pdo->prepare("DELETE FROM {$this->table} WHERE `access` < :time");
+        $stmt->execute([':time' => time() - $max_lifetime]);
+        return $stmt->rowCount();
     }
 
     #[\ReturnTypeWillChange]
@@ -58,7 +68,21 @@ class DBSessionHandler extends SessionHandler
 
     public function validate_sid(string $id)
     {
-        return $this->pdo->query("SELECT `data` FROM $this->table WHERE id = '$id'")->rowCount();
+        $maxLifetime = (int) ini_get('session.gc_maxlifetime');
+
+        $stmt = $this->pdo->prepare("
+            SELECT 1 
+            FROM {$this->table} 
+            WHERE id = :id 
+            AND access > :time_limit
+        ");
+
+        $stmt->execute([
+            ':id' => $id, 
+            ':time_limit' => time() - $maxLifetime
+        ]);
+        
+        return $stmt->fetch() !== false;
     }
 
     public function __destruct()
