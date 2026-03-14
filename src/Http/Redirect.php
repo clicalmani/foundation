@@ -103,15 +103,23 @@ class Redirect implements RedirectInterface
 
     public function __toString()
     {
-        if ($this->message_name) $this->uri .= (strpos($this->uri, '?') === false ? '?' : '&') . $this->message_name . '=' . $this->message;
+        $uri = $this->uri;
+
+        if (!str_starts_with($uri, '/') && !str_starts_with($uri, 'http')) {
+            $uri = '/' . $uri;
+        }
+
+        if ($this->message_name) $this->uri .= (strpos($uri, '?') === false ? '?' : '&') . $this->message_name . '=' . $this->message;
         
         if (Request::current()?->hasHeader('X-Inertia')) {
-            return Inertia::location($this->uri);
+            return Inertia::location($uri);
         }
         
         (new Response)->withBody(new NonBufferedBody)
             ->status($this->status)
-            ->header('Location', $this->uri === '' ? '/': $this->uri)
+            ->header('Location', $this->uri === '' ? '/': $uri)
             ->send();
+
+        return '';
     }
 }

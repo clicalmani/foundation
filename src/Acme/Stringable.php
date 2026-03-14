@@ -613,6 +613,36 @@ class Stringable implements \Stringable
         return stripcslashes($escaped);
     }
 
+    /**
+     * Get the singular form of a word
+     * 
+     * @param string $word
+     * @return string Singular form of the word
+     */
+    public function singular(string $word): string
+    {
+        // Ex: 'stories' -> 'story' (ies -> y)
+        if (preg_match('/ies$/', $word)) {
+            return substr($word, 0, -3) . 'y';
+        }
+
+        // Ex: 'photos' -> 'photo' (s -> empty)
+        if (preg_match('/([^s])s$/', $word)) {
+            return substr($word, 0, -1);
+        }
+
+        // 'boxes' -> 'box'
+        if (preg_match('/xes$/', $word)) {
+            return substr($word, 0, -2);
+        }
+        // 'wives' -> 'wife'
+        if (preg_match('/ves$/', $word)) {
+            return substr($word, 0, -3) . 'fe';
+        }
+
+        return $word;
+    }
+
     public function __toString(): string
     {
         return '';
