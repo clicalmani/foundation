@@ -4,6 +4,8 @@ namespace Clicalmani\Foundation\Http\Controllers;
 use Clicalmani\Database\Factory\Models\Elegant;
 use Clicalmani\Foundation\Exceptions\ModelNotFoundException;
 use Clicalmani\Foundation\Http\Request;
+use Clicalmani\Foundation\Support\Facades\Str;
+use Clicalmani\Routing\Memory;
 use Clicalmani\Validation\AsValidator;
 
 class InjectResource extends InjectionLocator
@@ -38,8 +40,21 @@ class InjectResource extends InjectionLocator
 	 */
 	private function bindResources() : array
     {
+		/** @var \Clicalmani\Routing\Route */
+		$route = Memory::currentRoute();
+
+		if ( ! $route->isResourceful() ) {
+			throw new \Exception("Route " . $route->uri . " is not resourceful. Cannot inject resource.");
+		}
+
+		/** @var ?string */
+		$main = $route->main_resource;
+		/** @var ?string */
+		$nested = $route->nested_resource;
+
 		$resource = $this->reflector->getResource()['name'];
 		$nested_resource = @$this->reflector->getNestedResource()['name'];
+		/** @var \Clicalmani\Foundation\Http\Request */
 		$request = Request::current();
 		
 		if ($this->reflector instanceof MethodReflector) {
@@ -53,7 +68,7 @@ class InjectResource extends InjectionLocator
 		$nested_model = null;
 		
 		// Check if resource is present
-		if ( NULL !== $id = $request->id AND in_array($this->reflector->getName(), ['create', 'show', 'edit', 'update', 'destroy']) ) {
+		if ( NULL !== $id = $request->input(Str::singularize($main)) AND in_array($this->reflector->getName(), ['create', 'show', 'edit', 'update', 'destroy']) ) {
 			
 			/**
 			 * Model record key value
@@ -67,7 +82,7 @@ class InjectResource extends InjectionLocator
 
 				if ($scoped = $this->route->scoped()) {
 					foreach ($scoped as $skey => $scope) {
-						$key_class = "App\\Models\\" . collection(explode('_', $skey))->map(fn(string $part) => ucfirst($part))->join('');
+						$key_class = "App\\Models\\" . Str::classify($skey);
 
 						if ($key_class === $resource AND $model = $resource::where("$scope = ?", [$key_value])->first()) {
 							break;
@@ -91,7 +106,7 @@ class InjectResource extends InjectionLocator
 		}
 
 		// Check if nested resource is present
-		if ( NULL !== $nid = $request->nid AND $nested_resource ) {
+		if ( NULL !== $nid = $request->input(Str::singularize($nested)) AND $nested_resource ) {
 			/** 
 			 * Nested model key value
 			 * 
@@ -104,7 +119,7 @@ class InjectResource extends InjectionLocator
 
 				if ($scoped = $this->route->scoped()) {
 					foreach ($scoped as $skey => $scope) {
-						$nested_key_class = "App\\Models\\" . collection(explode('_', $skey))->map(fn(string $part) => ucfirst($part))->join('');
+						$nested_key_class = "App\\Models\\" . Str::classify($skey);
 
 						if ($nested_key_class === $nested_resource AND $nested_model = $nested_resource::where("$scope = ?", [$key_value])->first()) {
 							break;

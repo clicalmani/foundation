@@ -10,12 +10,13 @@ use Clicalmani\Foundation\Support\Facades\Facade;
  * @author @Clicalmani\Foundation
  * 
  * @method static string slug(mixed $value, ?string $fallback_value = '' )
- * @method static string removeAccents(string $string, ?string $locale = '' )
- * @method static bool seemsUtf8(string $str)
- * @method static void mbstringBinarySafeEncoding(?bool $reset = false)
- * @method static void resetMbstringEncoding()
- * @method static string escape(string $str, ?array $exclude = [' '])
- * @method static string unescape(string $escaped)
+ * @method static string singularize(string $word)
+ * @method static string pluralize(string $word)
+ * @method static string urlize(string $word)
+ * @method static string tableize(string $word)
+ * @method static string classify(string $word)
+ * @method static string camelize(string $word)
+ * @method static string capitalize(string $word)
  */
 abstract class Str extends Facade
 {
