@@ -283,6 +283,17 @@ class Application
     }
 
     /**
+     * Check if the application is in a given environment
+     * 
+     * @param string $env
+     * @return bool
+     */
+    public function environment(string $env): bool
+    {
+        return $this->config('app.env') === $env;
+    }
+
+    /**
      * Get the debug mode status
      * 
      * @return bool
