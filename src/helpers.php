@@ -175,7 +175,7 @@ if ( ! function_exists( 'env' ) ) {
      * @return mixed
      */
     function env(string $key, ?string $default = '') : mixed {
-        return @$_ENV[$key] ?? $default;
+        return isset($_ENV[$key]) ? $_ENV[$key]: $default;
     }
 }
 
@@ -265,7 +265,7 @@ if ( ! function_exists('request') ) {
         $request = \Clicalmani\Foundation\Http\Request::current();
 
         if ('' === $param) {
-            return $request->all();
+            return $request ? $request->all(): $_REQUEST;
         }
 
         if ( $request ) {
@@ -831,5 +831,11 @@ if (!function_exists('auth')) {
 if ( !function_exists('inertia') ) {
     function inertia(string $component, array $props = []) {
         return \Inertia\Inertia::render($component, $props);
+    }
+}
+
+if ( !function_exists('cookie') ) {
+    function cookie(?string $name = null, ?string $value = null, ?int $expiry = 0, ?string $path = '/'): \Clicalmani\Cookie\Cookie {
+        return new \Clicalmani\Cookie\Cookie($name, $value, $expiry, $path);
     }
 }

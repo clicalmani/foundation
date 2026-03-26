@@ -36,7 +36,8 @@ abstract class ServiceProvider
      */
     public static function getProvidedMiddleware(string $gateway, $name) : mixed
     {
-        return @ Config::http($gateway)[$name];
+        return config("http.$gateway.$name");
+        // return @ Config::http($gateway)[$name];
     }
 
     public static function provideServices(?array $providers = [])

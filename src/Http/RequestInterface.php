@@ -397,4 +397,15 @@ interface RequestInterface extends \Psr\Http\Message\ServerRequestInterface
      * @return ?string
      */
     public function header(string $name, ?string $default = null) : ?string;
+
+    /**
+     * Make the request instance with the given parameters. This method is useful for creating a new request instance with modified parameters.
+     * 
+     * @param array $params The parameters to create the new request instance with.
+     * @deprecated
+     * @since 2.7.4
+     * @see extend() method
+     * @return array
+     */
+    public function make(array $params = []) : void;
 }

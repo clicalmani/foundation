@@ -36,6 +36,14 @@ interface RedirectInterface
     public function withSuccess(string $message): RedirectInterface;
 
     /**
+     * Flash input data to the session for the next request.
+     * 
+     * @param array $input
+     * @return \Clicalmani\Foundation\Http\RedirectInterface
+     */
+    public function withInput(array $input): RedirectInterface;
+
+    /**
      * Set the HTTP status code for the redirect.
      * 
      * @param int $code

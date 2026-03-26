@@ -65,8 +65,10 @@ class EncryptionServiceProvider
 	{
     	$data = '';
 		$param = self::hashParameter();
+
+		if ( ! isset($_REQUEST[$param]) ) return true;
 		
-    	$request_hash = isset($_REQUEST[$param])? $_REQUEST[$param]: '';
+    	$request_hash = $_REQUEST[$param];
 		
     	unset($_REQUEST[$param]);
     	 

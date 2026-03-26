@@ -40,6 +40,9 @@ class ApplicationBuilder
             $this->app->addKernel($kernel);
         }
         
+        $commands = array_merge($this->app->commands(), $this->app->config['bootstrap']['commands']);
+        $this->app->commands($commands);
+        
         return $this;
     }
 

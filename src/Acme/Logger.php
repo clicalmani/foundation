@@ -51,7 +51,7 @@ class Logger extends LogServiceProvider
             echo $message;
         }
 
-        if (TRUE === @ $EXIT) exit;
+        if ( isset($EXIT) && $EXIT) exit;
     }
 
     /**

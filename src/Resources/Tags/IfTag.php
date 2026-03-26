@@ -17,8 +17,8 @@ class IfTag extends TemplateTag
      * 
      * @return string
      */
-    public function render() : string
+    public function render(array $matches) : string
     {
-        return "{% if $1 %}";
+        return "{% if {$matches[1]} %}";
     }
 }

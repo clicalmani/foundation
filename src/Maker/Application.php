@@ -39,7 +39,7 @@ class Application
     /**
      * Application configuration
      * 
-     * @var \Clicalmani\Foundation\Maker\Logic\Config
+     * @var \Clicalmani\Foundation\Acme\Configure
      */
     protected $config;
 
@@ -106,7 +106,7 @@ class Application
             'Ok',
             StatusCodeInterface::STATUS_OK,
         ))->withBody(new NonBufferedBody);
-
+        
         $this->commands = \Clicalmani\Console\Kernel::$kernel;
     }
 
@@ -136,14 +136,14 @@ class Application
 
     public function handleRequest()
     {
-        $this->db_config = require_once config_path( '/database.php' );
+        $this->config->set('database', require_once config_path( '/database.php' ));
         $this->boot();
         return \Clicalmani\Foundation\Support\Facades\RequestController::render();
     }
 
     public function handleCommands()
     {
-        $this->db_config = require_once config_path( '/database.php' );
+        $this->config->set('database', require_once config_path( '/database.php' ));
         $this->console->make();
         $this->boot();
         $this->console->run();
@@ -386,6 +386,16 @@ class Application
         return $this->commands;
     }
 
+    /**
+     * Add new console command
+     * 
+     * @param string $new_command
+     */
+    public function addCommand(string $new_command): void
+    {
+        $this->commands[] = $new_command;
+    }
+
     public function initServices(DefaultsConfigurator $services)
     {
         $this->services = $services;
@@ -431,11 +441,11 @@ class Application
         return match ($name) {
             'config' => $this->config,
             'console' => $this->console,
-            'database' => $this->db_config,
+            // 'database' => $this->db_config,
             'filesystem' => $this->filesystem,
             'response' => $this->response,
             'container' => $this->container,
-            default => null
+            default => $this->config->get($name)
         };
     }
 
@@ -444,8 +454,9 @@ class Application
         return match ($name) {
             'config' => $this->config = $value,
             'console' => $this->console = $value,
-            'database' => $this->db_config = $value,
-            'response' => $this->response = $value
+            // 'database' => $this->db_config = $value,
+            'response' => $this->response = $value,
+            default => $this->config->set($name, $value)
         };
     }
 

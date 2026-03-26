@@ -50,6 +50,13 @@ class Session implements SessionInterface
     {
         $_SESSION = Arr::forget(isset($_SESSION) ? $_SESSION: [], $name ?: $this->name);
     }
+    
+    public function flush(array $data) : void
+    {
+        foreach ($data as $key => $value) {
+            $this->set($key, $value);
+        }
+    }
 
     public function destroy(): void
     {

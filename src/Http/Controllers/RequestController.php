@@ -111,13 +111,15 @@ class RequestController
 		if ($route = (new $builder)->build()) {
 			
 			$this->route = $route;
+			$request->extend($_REQUEST); 
 			
 			// Do Redirect
-			if ($route->redirect) $this->redirect();
+			if ($route->isDirty()) $this->redirect();
 
 			$this->action = $this->route->action;
 			
 			Memory::currentRoute($route);
+			Request::current($request);
 			
 			if ( $response_code = $this->route->isAuthorized($request) ) {
 				$this->handleResponseCode($response_code);

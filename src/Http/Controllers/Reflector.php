@@ -275,6 +275,7 @@ class Reflector
             foreach ($mailers as $name => $mailer) {
                 if ($container->has("$name.mailer")) {
 
+                    /** @var ?\Clicalmani\Foundation\Mail\MailerInterface */
                     $instance = $container->get("$name.mailer");
 
                     if ($instance instanceof $class) {

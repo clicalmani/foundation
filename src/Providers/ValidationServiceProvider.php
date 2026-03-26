@@ -1,9 +1,6 @@
 <?php
 namespace Clicalmani\Foundation\Providers;
 
-use Clicalmani\Foundation\Collection\Collection;
-use Clicalmani\Foundation\Support\Facades\Config;
-
 class ValidationServiceProvider extends ServiceProvider
 {
     /**
@@ -11,7 +8,7 @@ class ValidationServiceProvider extends ServiceProvider
      * 
      * @var array
      */
-    protected static $validators = [];
+    protected static $rules = [];
 
 	/**
 	 * Bootstrap input validators
@@ -29,7 +26,7 @@ class ValidationServiceProvider extends ServiceProvider
             fn(string $validator) => !$arguments->has($validator::getArgument())
         );
 
-        self::$validators = $rules->toArray();
+        self::$rules = $rules->toArray();
 	}
 
     /**
@@ -51,7 +48,7 @@ class ValidationServiceProvider extends ServiceProvider
      */
     public static function getValidator(string $argument) : ?string
     {
-        return collection(self::$validators)
+        return collection(self::$rules)
                 ->find(function(string $class) use($argument) {
                     return $argument === $class::getArgument();
                 });
@@ -64,6 +61,16 @@ class ValidationServiceProvider extends ServiceProvider
      */
     public static function getValidators() : array
     {
-        return self::$validators;
+        return self::$rules;
+    }
+
+    /**
+     * Adds new validation rule.
+     * 
+     * @param string $rule
+     */
+    public static function addRule(string $rule): void
+    {
+        self::$rules[] = $rule;
     }
 }

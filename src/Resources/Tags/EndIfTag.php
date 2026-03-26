@@ -17,7 +17,7 @@ class EndIfTag extends TemplateTag
      * 
      * @return string
      */
-    public function render() : string
+    public function render(array $matches) : string
     {
         return "{% endif %}";
     }

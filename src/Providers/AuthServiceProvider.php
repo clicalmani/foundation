@@ -10,6 +10,6 @@ abstract class AuthServiceProvider extends ServiceProvider
 	 */
     public static function userAuthenticator() : mixed
 	{
-		return \Clicalmani\Foundation\Support\Facades\Config::bootstrap('auth')['user'];
+		return config('bootstrap.auth.user');
 	}
 }

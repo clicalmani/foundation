@@ -42,6 +42,12 @@ class Redirect implements RedirectInterface
     {
         return $this->with('success', $message);
     }
+    
+    public function withInput(array $input): RedirectInterface
+    {
+        session()->flush($input);
+        return $this;
+    }
 
     public function status(int $code): RedirectInterface
     {

@@ -19,6 +19,7 @@ class InjectMailer extends InjectionLocator
             foreach ($mailers as $name => $mailer) {
                 if ($this->container->has("$name.mailer")) {
 
+                    /** @var ?\Clicalmani\Foundation\Mail\MailerInterface */
                     $instance = $this->container->get("$name.mailer");
 
                     if ($instance instanceof $this->class) {

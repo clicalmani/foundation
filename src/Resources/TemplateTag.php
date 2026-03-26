@@ -17,11 +17,11 @@ abstract class TemplateTag
      * 
      * @return string
      */
-    abstract public function render() : string;
+    abstract public function render(array $matches) : string;
 
     public function bind(string $content) : string
     {
-        return preg_replace("/$this->tag/", $this->render(), $content);
+        return preg_replace_callback('/' . $this->tag . '/', [$this, 'render'], $content);
     }
 
     /**

@@ -32,7 +32,7 @@ class EnvServiceProvider extends ServiceProvider
         )->safeLoad();
         
         if ( isConsoleMode() ) {
-            app()->database = require_once config_path('/database.php');
+            app()->config->set('database', require_once config_path('/database.php'));
         }
     }
 }

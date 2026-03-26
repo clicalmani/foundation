@@ -17,7 +17,7 @@ class CSRFTokenField extends TemplateTag
      * 
      * @return string
      */
-    public function render() : string
+    public function render(array $matches) : string
     {
         return "<input type='hidden' name='csrf_token' value='" . csrf_token() . "'>";
     }

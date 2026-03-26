@@ -51,7 +51,7 @@ class InjectRequest extends InjectionLocator
 		}
 
 		if (method_exists($request, 'prepareForValidation')) {
-			$request->prepareForValidation();                    // Call prepareForValidation method
+			$request->prepareForValidation(); // Call prepareForValidation method
 		}
 		
 		if (method_exists($request, 'signatures')) {

@@ -267,6 +267,23 @@ class RouteServiceProvider extends ServiceProvider
         static::$route_settings = require_once config_path('/routing.php');
         static::$cors_settings = require_once config_path('/cors.php');
 
+        /**
+         * |-------------------------------------------------------------------
+         * |                ***** Route Configuration *****
+         * |-------------------------------------------------------------------
+         * Route configuration is set here to be used by the routing package and the route builder.
+         */
+        $provider = new \App\Providers\RouteServiceProvider;
+        app()->config->set('route', array_merge(static::$route_settings ?? [], [
+            'api_prefix' => $provider->api_prefix,
+            'parameter_prefix' => $provider->parameter_prefix,
+            'api_handler' => $provider->web_handler,
+            'web_handler' => $provider->web_handler,
+            'default_builder' => $provider->getDefaultBuilder(),
+            'builders' => $provider->getBuilders(),
+            'cors' => static::$cors_settings
+        ]));
+
         require_once dirname(__DIR__, 3) . '/routing/src/functions.php';
         
         Memory::setRoutes(
