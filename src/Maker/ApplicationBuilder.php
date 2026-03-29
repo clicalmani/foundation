@@ -1,10 +1,6 @@
 <?php
 namespace Clicalmani\Foundation\Maker;
 
-use Clicalmani\Foundation\Acme\TransportInterface;
-use Clicalmani\Foundation\Http\Middlewares\Web;
-use Symfony\Component\Mailer\Transport;
-
 class ApplicationBuilder
 {
     private $kernels = [
@@ -54,7 +50,7 @@ class ApplicationBuilder
     public function withMiddleware(\Closure $callback) : static
     {
         \Closure::bind($callback, null);
-        $callback(new Web);
+        $callback(new \Clicalmani\Foundation\Http\Middlewares\Web);
         return $this;
     }
 

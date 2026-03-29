@@ -141,14 +141,14 @@ if ( ! function_exists( 'view' ) ) {
     }
 }
 
-if ( ! function_exists( 'client_uri' ) ) {
+if ( ! function_exists( 'client_url' ) ) {
 
     /**
-     * Returns the current route
+     * Returns the client url
      * 
      * @return string
      */
-    function client_uri() : string {
+    function client_url() : string {
         return \Clicalmani\Foundation\Support\Facades\Route::uri();
     }
 }

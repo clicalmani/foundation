@@ -128,7 +128,7 @@ class RequestController
 			return $this->action;
 		}
 		
-		throw new RouteNotFoundException( client_uri() );
+		throw new RouteNotFoundException( client_url() );
     }
 	
 	/**
@@ -205,6 +205,9 @@ class RequestController
 			return $reflector(...$args);
 		} catch (ModelNotFoundException $e) {
 			return $this->handleMissingResource($e->getMessage());
+		} catch (\Throwable $e) {
+			(new \Clicalmani\Foundation\Resources\ErrorRenderer)->render($e);
+			exit;
 		}
 	}
 
