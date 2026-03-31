@@ -206,7 +206,10 @@ class RequestController
 		} catch (ModelNotFoundException $e) {
 			return $this->handleMissingResource($e->getMessage());
 		} catch (\Throwable $e) {
-			(new \Clicalmani\Foundation\Resources\ErrorRenderer)->render($e);
+			if ( ! app()->environment('production') ) {
+				(new \Clicalmani\Foundation\Resources\ErrorRenderer)->render($e);
+			}
+
 			exit;
 		}
 	}

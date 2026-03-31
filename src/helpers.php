@@ -662,10 +662,10 @@ if ( ! function_exists('verify_token') ) {
     }
 }
 
-if ( ! function_exists('console_log') ) {
-    function console_log(mixed ...$args) 
+if ( ! function_exists('logger') ) {
+    function logger() 
     {
-        \Clicalmani\Foundation\Support\Facades\Log::debug( ...$args );
+        return new \Clicalmani\Foundation\Acme\Logger;
     }
 }
 

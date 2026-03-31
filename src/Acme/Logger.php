@@ -16,6 +16,8 @@ class Logger extends LogServiceProvider
      */
     public function error(string $error_message, int $error_level = E_ERROR, string $file = 'Unknow', ?int $line = null) : void
     {
+        $EXIT = false;
+
         switch ($error_level) {
             case E_NOTICE: 
             case E_USER_NOTICE: 
@@ -47,7 +49,7 @@ class Logger extends LogServiceProvider
         
         if (FALSE === static::$is_debug_mode) error_log($message, 3, $this->maybeCreateLog());
         else {
-            if (TRUE === @ $EXIT) throw new \Exception($message);
+            if (TRUE === $EXIT) throw new \Exception($message);
             echo $message;
         }
 
