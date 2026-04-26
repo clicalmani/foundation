@@ -13,7 +13,7 @@ trait StatusErrors
         $this->sendStatus(401);
     }
 
-    public function forbiden()
+    public function forbidden()
     {
         $this->sendStatus(403);
     }

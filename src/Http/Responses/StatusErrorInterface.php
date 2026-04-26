@@ -18,11 +18,11 @@ interface StatusErrorInterface
     public function unauthorized();
 
     /**
-     * 403 Forbiden redirect
+     * 403 Forbidden redirect
      * 
      * @return never
      */
-    public function forbiden();
+    public function forbidden();
 
     /**
      * 500 Internal server error

@@ -33,12 +33,12 @@ class Redirect implements RedirectInterface
         return $this;
     }
 
-    public function withError(string $message): RedirectInterface
+    public function withError(string $message = ''): RedirectInterface
     {
         return $this->with('error', $message);
     }
 
-    public function withSuccess(string $message): RedirectInterface
+    public function withSuccess(string $message = ''): RedirectInterface
     {
         return $this->with('success', $message);
     }

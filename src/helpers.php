@@ -260,20 +260,8 @@ if ( ! function_exists('request') ) {
      * @param ?string $param
      * @return mixed
      */
-    function request(?string $param = '', ?string $value = null) : mixed {
-
-        $request = \Clicalmani\Foundation\Http\Request::current();
-
-        if ('' === $param) {
-            return $request ? $request->all(): $_REQUEST;
-        }
-
-        if ( $request ) {
-            if ($value) @$request->{$param} = $value;
-            else return @$request->{$param};
-        }
-
-        return null;
+    function request(): ?\Clicalmani\Foundation\Http\RequestInterface {
+        return \Clicalmani\Foundation\Http\Request::current();
     }
 }
 
@@ -364,7 +352,7 @@ if ( ! function_exists('sanitize_attribute') ) {
      * @return mixed
      */
     function sanitize_attribute($attr) : mixed {
-        return preg_replace('/[^0-9a-z-_]+/', '', \Clicalmani\Foundation\Support\Facades\Str::slug($attr));
+        return preg_replace('/[^0-9a-z-_]+/', '', $attr);
     }
 }
 
@@ -837,5 +825,24 @@ if ( !function_exists('inertia') ) {
 if ( !function_exists('cookie') ) {
     function cookie(?string $name = null, ?string $value = null, ?int $expiry = 0, ?string $path = '/'): \Clicalmani\Cookie\Cookie {
         return new \Clicalmani\Cookie\Cookie($name, $value, $expiry, $path);
+    }
+}
+
+if ( ! function_exists('mailer') ) {
+    function mailer(string $name) {
+        return \Clicalmani\Foundation\Acme\Container::getInstance()->get($name);
+    }
+}
+
+if ( ! function_exists('class_basename') ) {
+    function class_basename(object|string $class) {
+        $class = is_object($class) ? get_class($class) : $class;
+        $lastSeparator = strrpos($class, '\\');
+
+        if ($lastSeparator === false) {
+            return $class;
+        }
+        
+        return substr($class, $lastSeparator + 1);
     }
 }

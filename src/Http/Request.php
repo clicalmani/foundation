@@ -235,7 +235,7 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
 
     public function request(?string $param = null) : mixed
     {
-        return isset($param) ? request($param): request();
+        return isset($param) ? $this->input($param): request();
     }
 
     public function where(?array $exclude = []) : array
@@ -244,11 +244,11 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
         $filters = [];
 
         if ( request() ) {
-            $filters = collection()->exchange(array_keys(request()))
+            $filters = collection()->exchange(array_keys(request()->all()))
                             ->filter(function($param) use($exclude) {
                                 return ! in_array($param, $exclude);
                             })->map(function($param) {
-                                return is_string(request($param)) ? sanitize_attribute($param) . '="' . request($param) . '"': request($param);
+                                return is_string(request()->input($param)) ? sanitize_attribute($param) . '="' . request()->input($param) . '"': request()->input($param);
                             })->toArray();
         }
         
@@ -341,7 +341,8 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
 
     public function query(string $name) : mixed
     {
-        return $_GET[$name] ?? null;
+        if ( isset($_GET[$name]) ) return $this->{$name};
+        return null;
     }
 
     public function json() : Collection

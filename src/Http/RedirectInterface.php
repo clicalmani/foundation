@@ -25,7 +25,7 @@ interface RedirectInterface
      * @param string $message
      * @return \Clicalmani\Foundation\Http\RedirectInterface
      */
-    public function withError(string $message): RedirectInterface;
+    public function withError(string $message = ''): RedirectInterface;
 
     /**
      * Flash a success message to the session.
@@ -33,7 +33,7 @@ interface RedirectInterface
      * @param string $message
      * @return \Clicalmani\Foundation\Http\RedirectInterface
      */
-    public function withSuccess(string $message): RedirectInterface;
+    public function withSuccess(string $message = ''): RedirectInterface;
 
     /**
      * Flash input data to the session for the next request.

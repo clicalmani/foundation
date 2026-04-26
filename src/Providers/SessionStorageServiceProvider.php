@@ -128,7 +128,7 @@ abstract class SessionStorageServiceProvider extends ServiceProvider
             'session.cookie_httponly' => (int)static::$cookie['http_only'],
             'session.serialize_handler' => 'php',
             'session.gc_probability' => static::$lotery[0],
-            'session.gc_divisor    ' => static::$lotery[1],
+            'session.gc_divisor' => static::$lotery[1],
             'session.gc_maxlifetime' => static::$max_lifetime,
             'session.cache_limiter' => 'nocache',
             'session.use_strict_mode' => 1
@@ -154,8 +154,14 @@ abstract class SessionStorageServiceProvider extends ServiceProvider
                 register_shutdown_function('session_write_close');
                 session_start();
                 
-                $_SESSION['6o3w8hiunfqlms91kb5t7d2yvrapzejxg04c__IDLE'] = @$_SESSION['6o3w8hiunfqlms91kb5t7d2yvrapzejxg04c__IDLE'] ?? time();
-                $_SESSION[self::__DEFAULT_KEYS['LAST_ACTIVITY']] = @$_SESSION[self::__DEFAULT_KEYS['LAST_ACTIVITY']] ?? time();
+                // 1. Initialization on first startup
+                if ( ! isset($_SESSION[self::__DEFAULT_KEYS['IDLE']])) {
+                    $_SESSION[self::__DEFAULT_KEYS['IDLE']] = time();
+                }
+                if ( ! isset($_SESSION[self::__DEFAULT_KEYS['LAST_ACTIVITY']])) {
+                    $_SESSION[self::__DEFAULT_KEYS['LAST_ACTIVITY']] = time();
+                }
+
                 setcookie(
                     static::$cookie['name'],
                     session_id(),
@@ -166,17 +172,31 @@ abstract class SessionStorageServiceProvider extends ServiceProvider
                     static::$cookie['http_only']
                 );
                 
-                if (isset($_SESSION[self::__DEFAULT_KEYS['LAST_ACTIVITY']]) && (time() - $_SESSION[self::__DEFAULT_KEYS['LAST_ACTIVITY']] > static::$max_lifetime)) {
-                    // last request was more than $lifetime seconds ago
-                    session_unset();     // unset $_SESSION variable for the run-time 
-                    session_destroy();   // destroy session data in storage
+                // Inactivity is calculated only once to avoid multiple system calls
+                $inactive_time = time() - $_SESSION[self::__DEFAULT_KEYS['LAST_ACTIVITY']];
+
+                // 2. MAX LIFETIME Verification (Maximum Wait Time / High Inactivity)
+                if ($inactive_time > static::$max_lifetime) {
+                    // The user has been away for too long, we destroy everything
+                    session_unset();
+                    session_destroy();
+                    
+                    // VERY IMPORTANT: We stop the script here! 
+                    // Otherwise, the code below will attempt to work on a destroyed session.
+                    return; 
                 }
                 
-                if (isset($_SESSION[self::__DEFAULT_KEYS['IDLE']]) && (time() - $_SESSION[self::__DEFAULT_KEYS['IDLE']] > static::$lifetime)) {
-                    // session started more than $max_lifetime seconds ago
-                    session_regenerate_id(true);  // change session ID for the current session and invalidate old session ID
-                    $_SESSION[self::__DEFAULT_KEYS['IDLE']] = time();  // update creation time
+                // 3. LIFETIME check (Light inactivity -> ID regeneration)
+                if ($inactive_time > static::$lifetime) {
+                    // The user has been inactive for 'lifetime' seconds; the ID is regenerated for security reasons.
+                    session_regenerate_id(true);
                 }
+                
+                // 4. ACTIVITY UPDATE
+                // If we arrive here, it means the user has not exceeded max_lifetime.
+                // The counter is reset to 0 for the next request.
+                $_SESSION[self::__DEFAULT_KEYS['LAST_ACTIVITY']] = time();
+                $_SESSION[self::__DEFAULT_KEYS['IDLE']] = time();
             }
         }
     }
