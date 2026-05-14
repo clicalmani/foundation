@@ -179,7 +179,7 @@ class RequestController
 				$args[$i] = array_shift($route_parameters);
 				continue;
 			}
-
+			
 			foreach (Reflector::listTypes($param) as $listedType) {
 
 				try {

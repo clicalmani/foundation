@@ -9,11 +9,10 @@ use Clicalmani\Foundation\Support\Facades\Config;
  * @package Clicalmani\Foundation
  * @author @Clicalmani\Foundation
  */
-abstract class ServiceProvider
+abstract class ServiceProvider implements ServiceProviderInterface
 {
     public function __construct()
-    {
-    }
+    {}
 
     /**
      * (non-PHPDoc)

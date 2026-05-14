@@ -1,6 +1,9 @@
 <?php
 namespace Clicalmani\Foundation\Maker;
 
+use Symfony\Component\DependencyInjection\Loader\Configurator\DefaultsConfigurator;
+use Symfony\Component\DependencyInjection\Loader\Configurator\ServiceConfigurator;
+
 class ApplicationBuilder
 {
     private $kernels = [
@@ -14,8 +17,18 @@ class ApplicationBuilder
     {
         \Clicalmani\Foundation\Support\Helper::include();
         $this->app->console = new \Clicalmani\Console\Application($this->app);
+
+        // Storage service
+        $this->app->register(
+            new \Clicalmani\Foundation\Providers\StorageServiceProvider
+        );
     }
 
+    /**
+     * Runs the application
+     * 
+     * @return Application
+     */
     public function run()
     {
         return $this->app;
@@ -54,10 +67,85 @@ class ApplicationBuilder
         return $this;
     }
 
+    /**
+     * Adds a service to the application
+     * 
+     * @return static
+     */
     public function withService(\Closure $callback) : static
     {
         \Closure::bind($callback, null);
         $callback($this->app);
+        return $this;
+    }
+
+    /**
+     * Adds mailer services to the application
+     * 
+     * @return static
+     */
+    public function withMailer()
+    {
+        $this->app->addService('smtp.mailer.transport', [\Clicalmani\Foundation\Mail\MailerTransport::class]);
+            $this->app->addService(
+                'smtp.mailer', 
+                [
+                    \Clicalmani\Foundation\Mail\Mailer::class,
+                    fn(ServiceConfigurator|DefaultsConfigurator $config) => 
+                        $config->args([
+                            $this->app->dependency('service', 'smtp.mailer.transport')
+                        ])
+                ]);
+        return $this;
+    }
+
+    /**
+     * Adds inertia services to the application
+     * 
+     * @return static
+     */
+    public function withInertia()
+    {
+        $middleware = new \Clicalmani\Foundation\Http\Middlewares\Web;
+        $this->app->addService('inertia', [\Inertia\Response::class]);
+        $middleware->web(append: [\Inertia\Middleware::class]);
+        return $this;
+    }
+
+    /**
+     * Adds messenger services to the application
+     * 
+     * @return static
+     */
+    public function withMessenger(?string $transport = "elegant://default", ?string $handlersPath = "app/Handlers", ?string $namespace = "\\App\\Handlers\\")
+    {
+        $messengerService = new \Clicalmani\Foundation\Providers\MessengerServiceProvider;
+        $messengerService->setTransport($transport);
+        $messengerService->setHandlersPath($handlersPath);
+        $messengerService->setNamespace($namespace);
+        $this->app->register($messengerService);
+        return $this;
+    }
+
+    public function withScheduler(?string $tasksPath = 'app/Tasks', ?string $namespace = 'App\\Tasks', ?bool $statefull = false)
+    {
+        $scheduleService = new \Clicalmani\Foundation\Providers\ScheduleServiceProvider;
+        $scheduleService->setPaths($tasksPath);
+        $scheduleService->setNamespaces($namespace);
+        $scheduleService->setStatefull($statefull);
+        $this->app->register($scheduleService);
+        return $this;
+    }
+
+    /**
+     * Adds cache services to the application
+     * 
+     * @return static
+     */
+    public function withCache(): static
+    {
+        $cacheService = new \Clicalmani\Foundation\Providers\CacheServiceProvider;
+        $this->app->register($cacheService);
         return $this;
     }
 }

@@ -442,11 +442,12 @@ if ( ! function_exists('instance') ) {
     /**
      * Class instance creator
      * 
-     * @param string $class
+     * @template T
+     * @param class-string<T> $class
      * @param ?callable $callback A callback function that receive an instance of the class as it's first argument.
-     * @return mixed $class Object
+     * @return T
      */
-    function instance(string $class, ?callable $callback = null, mixed ...$args)
+    function instance(string $class, ?callable $callback = null, mixed ...$args): mixed
     {
         $instance = new $class( ...$args );
         if ($callback) $callback($instance);
@@ -844,5 +845,59 @@ if ( ! function_exists('class_basename') ) {
         }
         
         return substr($class, $lastSeparator + 1);
+    }
+}
+
+if ( ! function_exists('container') ) {
+    /**
+     * Application container
+     * 
+     * @return \Clicalmani\Foundation\Acme\Container
+     */
+    function container()
+    {
+        return \Clicalmani\Foundation\Acme\Container::getInstance();
+    }
+}
+
+if (! function_exists('cache')) {
+    /**
+     * Access the Tonka Cache System
+     * 
+     * @param string|null $key
+     * @param mixed $default
+     * @return mixed|\Symfony\Component\Cache\Adapter\AdapterInterface
+     */
+    function cache(?string $key = null, mixed $default = null)
+    {
+        $cache = container()->get('cache.app');
+
+        // Si aucune clé n'est fournie, on retourne l'instance complète
+        if (null === $key) {
+            return $cache;
+        }
+
+        // Utilisation simplifiée (type PSR-16)
+        $item = $cache->getItem($key);
+        if (!$item->isHit()) {
+            return $default;
+        }
+
+        return $item->get();
+    }
+}
+
+if (! function_exists('storage')) {
+    /**
+     * Access the Tonka Filesystem
+     * 
+     * @return \Symfony\Component\Filesystem\Filesystem
+     */
+    function storage(?string $disk = null)
+    {
+        /** @var \Clicalmani\Foundation\Filesystem\StorageManager $manager */
+        $manager = container()->get('storage.manager');
+        
+        return $manager->disk($disk);
     }
 }

@@ -228,11 +228,16 @@ class UploadedFile implements \Psr\Http\Message\UploadedFileInterface
             throw new \RuntimeException('Cannot retrieve stream due to upload error');
         }
 
+        storage()->mkdir($targetPath);
+
         if ($this->sapi) {
             if (FALSE === move_uploaded_file($this->getFile()->tmp_name, $targetPath)) {
                 throw new \RuntimeException('Error moving uploaded file');
             }
         } else {
+
+            storage()->rename($this->getFile()->tmp_name, $targetPath);
+
             if (FALSE === rename($this->getFile()->tmp_name, $targetPath)) {
                 throw new \RuntimeException('Error moving uploaded file');
             }
@@ -251,8 +256,7 @@ class UploadedFile implements \Psr\Http\Message\UploadedFileInterface
     public function move(?string $dir = null, string|array $name = null)  : bool
     {
         if (!$dir) {
-            if (FALSE === file_exists(storage_path('/public'))) 
-                mkdir(storage_path('/public'));
+            storage()->mkdir(storage_path('/public'));
             $dir = storage_path('/public');
         }
 
@@ -304,6 +308,8 @@ class UploadedFile implements \Psr\Http\Message\UploadedFileInterface
 
     private function moveFile(string $from, string $to, ?bool $is_builtin = true) : bool
     {
+        storage()->mkdir($from);
+        
         if ($is_builtin) return !!move_uploaded_file($from, $to);
         
         return !!rename($from, $to);
@@ -318,14 +324,5 @@ class UploadedFile implements \Psr\Http\Message\UploadedFileInterface
     public function store(string|array $name) : bool
     {
         return $this->move(null, $name);
-    }
-
-    public function __get($name)
-    {
-        return match ($name) {
-            'storage' => new \Clicalmani\Foundation\Maker\Logic\Storage(
-                new \Clicalmani\Foundation\Filesystem\FilesystemManager( app() )
-            )
-        };
     }
 }

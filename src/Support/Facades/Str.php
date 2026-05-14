@@ -17,6 +17,8 @@ use Clicalmani\Foundation\Support\Facades\Facade;
  * @method static string classify(string $word)
  * @method static string camelize(string $word)
  * @method static string capitalize(string $word)
+ * @method static bool isSingular(string $word)
+ * @method static bool isPlural(string $word)
  */
 abstract class Str extends Facade
 {

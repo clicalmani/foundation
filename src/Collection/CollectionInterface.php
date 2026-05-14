@@ -74,11 +74,11 @@ interface CollectionInterface
     /**
      * Filter elements
      * 
-     * @param callable $closure A callback function which receive element value as its first argument and 
+     * @param ?callable $closure A callback function which receive element value as its first argument and 
      * element index as its second argument.
      * @return self
      */
-    public function filter(callable $closure) : self;
+    public function filter(?callable $closure = null) : self;
 
     /**
      * Merges provided elements to the existing ones.
@@ -197,9 +197,9 @@ interface CollectionInterface
      * Pluck a specific key from each element in the collection
      * 
      * @param string $key
-     * @return \Clicalmani\Foundation\Collection\Map
+     * @return self
      */
-    public function pluck(string $key) : Map;
+    public function pluck(string $key): self;
 
     /**
      * Get the number of public properties in the ArrayObject

@@ -15,7 +15,8 @@ class DBSessionHandler extends SessionHandler
 
     public function open(string $path, string $id) : bool
     {
-        $this->pdo = DB::connection($this->driver);
+        DB::connection($this->driver);
+        $this->pdo = DB::getPdo();
         return ($this->pdo !== null);
     }
 

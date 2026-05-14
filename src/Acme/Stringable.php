@@ -16,11 +16,11 @@ class Stringable implements \Stringable
     /**
      * Create a slug
      * 
-     * @param string $value
+     * @param mixed $value
      * @param ?string $fallback_value
      * @return string
      */
-    public function slug(mixed $value, ?string $fallback_value = null) : string 
+    public function slug(mixed $value, ?string $fallback_value = '') : string 
     {
         if ( ! isset($value) ) return $fallback_value;
 
@@ -66,6 +66,16 @@ class Stringable implements \Stringable
     public function capitalize(string $word): string
     {
         return $this->inflector->capitalize($word);
+    }
+
+    public function isSingular(string $word): bool
+    {
+        return $this->singularize($word) === $word;
+    }
+
+    public function isPlural(string $word): bool
+    {
+        return $this->pluralize($word) === $word;
     }
 
     public function __toString(): string

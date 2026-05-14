@@ -75,9 +75,10 @@ class Collection extends SPLCollection implements CollectionInterface
         return $this;
     }
 
-    public function filter(callable $closure) : \Clicalmani\Foundation\Collection\CollectionInterface
+    public function filter(?callable $closure = null) : \Clicalmani\Foundation\Collection\CollectionInterface
     {
-        // return $this->exchange(array_values(array_filter($this->toArray(), $closure)));
+        if (null === $closure) return $this->exchange(array_filter($this->toArray(), fn($value) => !!$value));
+
         $new = [];
         foreach ($this as $key => $value)
         {
@@ -218,17 +219,15 @@ class Collection extends SPLCollection implements CollectionInterface
         return new Map;
     }
 
-    public function pluck(string $key) : Map
+    public function pluck(string $key): self
     {
-        $map = new Map;
+        $map = collect();
 
         foreach ($this as $index => $item) {
             if (is_array($item) && isset($item[$key])) {
-                $map[$item[$key]] = $item;
+                $map->add($item[$key]);
             } elseif (is_object($item) && isset($item->{$key})) {
-                $map[$item->{$key}] = $item;
-            } else {
-                if ($index !== $key) $map[$index] = $item;
+                $map->add($item->{$key});
             }
         }
 

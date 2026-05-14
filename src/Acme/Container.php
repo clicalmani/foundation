@@ -3,9 +3,10 @@ namespace Clicalmani\Foundation\Acme;
 
 use Clicalmani\Foundation\Exceptions\ContainerDepencyException;
 use Clicalmani\Foundation\Maker\Application;
+use Psr\Container\ContainerInterface;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ServiceConfigurator;
 
-class Container extends Application
+class Container extends Application implements ContainerInterface
 {
     /**
      * An array of the types that have been resolved.
@@ -96,7 +97,7 @@ class Container extends Application
         self::$injected_interfaces = $interfaces;
     }
 
-    public function has(string $id)
+    public function has(string $id): bool
     {
         return $this->builder()->has($id);
     }
@@ -109,5 +110,5 @@ class Container extends Application
 
 function reference(string $class) : string
 {
-    return \Clicalmani\Foundation\Support\Facades\Str::slug(str_replace('\\', '.', $class));
+    return slugify(str_replace('\\', '.', $class));
 }

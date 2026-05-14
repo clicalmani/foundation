@@ -1,6 +1,7 @@
 <?php
 namespace Clicalmani\Foundation\Maker;
 
+use Clicalmani\Foundation\Acme\Container;
 use Clicalmani\Foundation\Http\Request;
 use Clicalmani\Foundation\Http\Response;
 use Clicalmani\Foundation\Support\Facades\Arr;
@@ -354,8 +355,11 @@ class Application
     {
         $this->addKernel(\App\Http\Kernel::class);
         \Clicalmani\Foundation\Providers\ServiceProvider::provideServices($this->config['app']['providers']);
-        // File system
-        $this->filesystem = new \Clicalmani\Foundation\Filesystem\FilesystemManager($this);
+    }
+
+    public function booted(): bool
+    {
+        return !!$this->container;
     }
 
     /**
@@ -432,6 +436,12 @@ class Application
         ];
     }
 
+    public function register(\Clicalmani\Foundation\Providers\ServiceProviderInterface $service)
+    {
+        $service->boot();
+        $service->register();
+    }
+
     public function getServices()
     {
         return $this->services;
@@ -452,7 +462,6 @@ class Application
         return match ($name) {
             'config' => $this->config,
             'console' => $this->console,
-            // 'database' => $this->db_config,
             'filesystem' => $this->filesystem,
             'response' => $this->response,
             'container' => $this->container,
@@ -465,7 +474,6 @@ class Application
         return match ($name) {
             'config' => $this->config = $value,
             'console' => $this->console = $value,
-            // 'database' => $this->db_config = $value,
             'response' => $this->response = $value,
             default => $this->config->set($name, $value)
         };
@@ -527,9 +535,11 @@ class Application
          * |----------------------------------------------------------
          * | Namespace Services
          * |----------------------------------------------------------
+         * Namespace services are services that are automatically injected when a class with a specific suffix is resolved.
          */
         '*.request' => ['class' => \Clicalmani\Foundation\Http\Controllers\InjectRequest::class],
         '*.resource' => ['class' => \Clicalmani\Foundation\Http\Controllers\InjectResource::class],
-        '*.mailer' => ['class' => \Clicalmani\Foundation\Mail\InjectMailer::class]
+        '*.mailer' => ['class' => \Clicalmani\Foundation\Mail\InjectMailer::class],
+        '*.messenger' => ['class' => \Clicalmani\Foundation\Messenger\Inject::class, 'config' => \Clicalmani\Foundation\Providers\Config\MessengerConfig::class]
     ];
 }
