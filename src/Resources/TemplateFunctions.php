@@ -51,4 +51,24 @@ class TemplateFunctions
     {
         return @$_SESSION['__componentData'] ?? '';
     }
+
+    /**
+     * Remplace les expressions de type {{ VARIABLE }} par les valeurs fournies.
+     *
+     * @param string $content Le texte brut contenant les balises
+     * @param array $data Le tableau associatif [ 'CLE' => 'Valeur' ]
+     * @return string
+     */
+    public static function parse_template(string $content, array $data): string
+    {
+        $builtPlaceholders = [];
+        
+        foreach ($data as $key => $value) {
+            // On s'assure que la clé se transforme en {{ TOUT_EN_MAJUSCULE }} ou respecte la casse
+            $builtPlaceholders['{{ ' . trim($key) . ' }}'] = $value;
+        }
+        
+        // strtr est extrêmement rapide et gère toutes les substitutions en une seule passe
+        return strtr($content, $builtPlaceholders);
+    }
 }

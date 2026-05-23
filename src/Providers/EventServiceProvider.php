@@ -1,69 +1,56 @@
 <?php
 namespace Clicalmani\Foundation\Providers;
 
+use Symfony\Component\DependencyInjection\Loader\Configurator\DefaultsConfigurator;
+use Symfony\Component\DependencyInjection\Loader\Configurator\ServiceConfigurator;
+use Override;
+
 /**
  * EventServiceProvider class
  * 
  * @package Clicalmani\Foundation/flesco 
  * @author @Clicalmani\Foundation
  */
-abstract class EventServiceProvider extends ServiceProvider
+class EventServiceProvider implements ServiceProviderInterface
 {
-    private static $events = [];
+    protected string $path = 'app/Listeners';
+    protected string $namespace = '\\App\\Listeners';
 
-    /**
-     * Create a custom event
-     * 
-     * @param string $event Event name
-     * @return void
-     */
-    protected function createEvent(string $event) : void
+    #[Override]
+    public function register(): void
     {
-        static::$events[$event] = [];
+        app()->addService('events', [
+            \Symfony\Component\EventDispatcher\EventDispatcher::class,
+            static function(ServiceConfigurator|DefaultsConfigurator $config) {
+                //
+            }
+        ]);
+
+        app()->addService('events.discovery', [
+            \Clicalmani\Foundation\Events\ListenerDiscovery::class,
+            function(ServiceConfigurator|DefaultsConfigurator $config) {
+                $config->args([
+                    $this->path,
+                    $this->namespace,
+                    app()->dependency('service', 'events')
+                ])->call('discover');
+            }
+        ]);
     }
 
-    /**
-     * Create multiple custom events
-     * 
-     * @param string[] $events Events names
-     * @return void
-     */
-    protected function createEvents(array $events) : void
+    #[Override]
+    public function boot(): void
     {
-        foreach($events as $event) static::$events[$event] = [];
+        // ...
     }
 
-    /**
-     * Add event listener
-     * 
-     * @param string $event Event name
-     * @param callable|string $listener Event listener
-     * @return void
-     */
-    protected function addListener(string $event, callable|string $listener) : void
+    public function setPath(string $path): void
     {
-        static::$events[$event][] = $listener;
+        $this->path = $path;
     }
 
-    /**
-     * Add event listeners
-     * 
-     * @param string $event Event name
-     * @param array $listeners Event listeners
-     * @return void
-     */
-    protected function addListeners(string $event, array $listeners = []) : void
+    public function setNamespace(string $namespace): void
     {
-        foreach ($listeners as $listener) $this->addListener($event, $listener);
-    }
-
-    /**
-     * Return custom events
-     * 
-     * @return array<string, mixed>
-     */
-    public static function getEvents() : array
-    {
-        return static::$events;
+        $this->namespace = $namespace;
     }
 }

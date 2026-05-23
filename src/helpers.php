@@ -831,7 +831,7 @@ if ( !function_exists('cookie') ) {
 
 if ( ! function_exists('mailer') ) {
     function mailer(string $name) {
-        return \Clicalmani\Foundation\Acme\Container::getInstance()->get($name);
+        return \Clicalmani\Foundation\Acme\Container::getInstance()->get("{$name}.mailer");
     }
 }
 
@@ -899,5 +899,15 @@ if (! function_exists('storage')) {
         $manager = container()->get('storage.manager');
         
         return $manager->disk($disk);
+    }
+}
+
+if (! function_exists('event')) {
+    /**
+     * Dispatch un événement système ou applicatif
+     */
+    function event(object $event): object
+    {
+        return container()->get('events.discovery')->dispatch($event);
     }
 }

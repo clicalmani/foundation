@@ -16,5 +16,7 @@ class Inject extends InjectionLocator
         if (is_subclass_of($this->class, MessageBusInterface::class) || $this->class === MessageBusInterface::class) {
             return $this->bus;
         }
+
+        return null;
     }
 }

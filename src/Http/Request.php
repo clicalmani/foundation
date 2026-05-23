@@ -157,8 +157,6 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
     {
         $token = null;
         
-        if ($this->hasHeader('X-Inertia')) return true;
-        
         if ($this->hasHeader('X-CSRF-Token')) {
             $token = $this->header('X-CSRF-Token');
         } else $token = $this->{'csrf_token'};

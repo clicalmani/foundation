@@ -148,4 +148,18 @@ class ApplicationBuilder
         $this->app->register($cacheService);
         return $this;
     }
+
+    /**
+     * Adds event services to the application
+     * 
+     * @return static
+     */
+    public function withEvents(string $listenersPath = 'app/Listeners', string $namespace = '\\App\\Listeners'): static
+    {
+        $eventService = new \Clicalmani\Foundation\Providers\EventServiceProvider; 
+        $eventService->setPath($listenersPath);
+        $eventService->setNamespace($namespace);
+        $this->app->register($eventService);
+        return $this;
+    }
 }

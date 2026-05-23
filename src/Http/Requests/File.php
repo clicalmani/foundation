@@ -3,6 +3,7 @@ namespace Clicalmani\Foundation\Http\Requests;
 
 use Clicalmani\Foundation\Support\Facades\Storage;
 use Clicalmani\Psr\Stream;
+use Override;
 use Psr\Http\Message\StreamInterface;
 
 class File implements FileInterface
@@ -100,5 +101,11 @@ class File implements FileInterface
     public function isValid() : bool
     {
         return $this->error === UPLOAD_ERR_OK;
+    }
+
+    #[Override]
+    public function store(string $filename, ?string $disk = null): string
+    {
+        throw new \Exception('Not implemented');
     }
 }

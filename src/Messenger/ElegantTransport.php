@@ -27,7 +27,7 @@ class ElegantTransport implements TransportInterface
         $record = $this->model::where('delivered_at IS NULL')
                     ->andWhere('available_at <= NOW()')
                     ->first();
-
+        
         if (null === $record) {
             return [];
         }
@@ -89,22 +89,22 @@ class ElegantTransport implements TransportInterface
     public function reject(Envelope $envelope): void 
     {
         $stamp = $envelope->last(ElegantTransportStamp::class);
-
+        
         if (null === $stamp) {
             return;
         }
 
-        $record = $this->model::find($stamp->id);
-
+        $record = $this->model::find($stamp->getId());
+        
         if (null === $record) {
             return;
         }
 
         // Logique de rejet : on réessaie plus tard
         // (Nécessite d'avoir une colonne 'retries' dans votre table)
-        $retries = ($record->retries ?? 0) + 1;
+        $retries = ($record->retries ?: 0) + 1;
         $maxRetries = $this->options['retries'] ?? 3;
-
+        
         if ($retries >= $maxRetries) {
             // Trop de tentatives, on abandonne et on supprime pour ne pas bloquer la file
             $record->delete();
