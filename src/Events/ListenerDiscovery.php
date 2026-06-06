@@ -14,15 +14,26 @@ class ListenerDiscovery
 
     public function discover(): void
     {
-        $filter = new RecursiveFilter(
-            new \RecursiveDirectoryIterator($this->path, \RecursiveDirectoryIterator::SKIP_DOTS)
-        );
-        $filter->setPattern("\\.php$");
+        $directory = new \RecursiveDirectoryIterator($this->path, \RecursiveDirectoryIterator::SKIP_DOTS);
+        $filter = new \RecursiveCallbackFilterIterator($directory, function ($current, $key, $iterator) {
+            if ($iterator->hasChildren()) {
+                return true;
+            }
+            return $current->isFile() && preg_match('/\.php$/', $current->getFilename());
+        });
 
+        $rootPath = rtrim(realpath($this->path), DIRECTORY_SEPARATOR);
+        $baseNamespace = rtrim($this->namespace, '\\');
+
+        /** @var \SplFileInfo $file */
         foreach (new \RecursiveIteratorIterator($filter) as $file) {
-
+            $currentSubDir = dirname($file->getRealPath());
+            $relativeSubDir = str_replace($rootPath, '', $currentSubDir);
+            $subNamespace = str_replace(DIRECTORY_SEPARATOR, '\\', $relativeSubDir);
             $classNameOnly = $file->getBasename('.php');
-            $className = rtrim($this->namespace, '\\') . '\\' . $classNameOnly;
+            
+            $className = $baseNamespace . $subNamespace . '\\' . $classNameOnly;
+            $className = str_replace('\\\\', '\\', $className); // Sécurité anti-double slash
             
             if (class_exists($className)) {
                 $reflection = new ReflectionClass($className);

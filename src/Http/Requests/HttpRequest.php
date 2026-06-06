@@ -65,7 +65,7 @@ abstract class HttpRequest extends \Clicalmani\Psr\Request
         
         if (in_array($this->method, ['put', 'patch'])) {
 
-            parse_str(urldecode($input), $stream);
+            parse_str($input, $stream);
             
             if ($stream_boundary = $this->getStreamBoundary()) {
 

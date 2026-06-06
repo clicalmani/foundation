@@ -9,15 +9,30 @@ class TaskDiscovery
     {
         $schedule = new Schedule();
         
-        // On récupère tous les fichiers PHP du dossier
-        $files = glob($path . '/*.php');
+        $directory = new \RecursiveDirectoryIterator($path, \RecursiveDirectoryIterator::SKIP_DOTS);
+        $filter = new \RecursiveCallbackFilterIterator($directory, function ($current, $key, $iterator) {
+            if ($iterator->hasChildren()) {
+                return true;
+            }
+            return $current->isFile() && preg_match('/\.php$/', $current->getFilename());
+        });
 
-        foreach ($files as $file) {
-            $class = $namespace . '\\' . basename($file, '.php');
+        $rootPath = rtrim(realpath($path), DIRECTORY_SEPARATOR);
+        $baseNamespace = rtrim($namespace, '\\');
+
+        /** @var \SplFileInfo $file */
+        foreach (new \RecursiveIteratorIterator($filter) as $file) {
+            $currentSubDir = dirname($file->getRealPath());
+            $relativeSubDir = str_replace($rootPath, '', $currentSubDir);
+            $subNamespace = str_replace(DIRECTORY_SEPARATOR, '\\', $relativeSubDir);
+            $classNameOnly = $file->getBasename('.php');
+            
+            $className = $baseNamespace . $subNamespace . '\\' . $classNameOnly;
+            $className = str_replace('\\\\', '\\', $className); // Sécurité anti-double slash
 
             // Si la classe existe et implémente notre interface
-            if (class_exists($class) && is_subclass_of($class, ScheduledTaskInterface::class)) {
-                $schedule->add($class::schedule());
+            if (class_exists($className) && is_subclass_of($className, ScheduledTaskInterface::class)) {
+                $schedule->add($className::schedule());
             }
         }
 
