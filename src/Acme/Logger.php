@@ -9,12 +9,72 @@ class Logger extends LogServiceProvider
      * Log custom error
      * 
      * @param string $error_message
+     * @param array $trace 
      * @param int $error_level PHP error level
      * @param string $file Error file name
      * @param ?int $line Error line
      * @return void
      */
-    public function error(string $error_message, int $error_level = E_ERROR, string $file = 'Unknow', ?int $line = null) : void
+    public function error(string $error_message, array $trace = [], int $error_level = E_ERROR, string $file = 'Unknow', ?int $line = null) : void
+    {
+        $this->__error($this->stringify($error_message, $trace), $error_level, $file, $line);
+    }
+
+    /**
+     * Log custom warning
+     * 
+     * @param string $warning_message
+     * @param string $file Error file name
+     * @param ?int $line Error line
+     * @return void
+     */
+    public function warning(string $warning_message, array $trace = [], string $file = 'Unknow', ?int $line = null) : void
+    {
+        $this->__error($this->stringify($warning_message, $trace), E_WARNING, $file, $line);
+    }
+
+    /**
+     * Log custom notice
+     * 
+     * @param string $notice_message
+     * @param string $file Error file name
+     * @param ?int $line Error line
+     * @return void
+     */
+    public function notice(string $notice_message, array $trace = [], string $file = 'Unknow', ?int $line = null)
+    {
+        $this->__error($this->stringify($notice_message, $trace), E_NOTICE, $file, $line);
+    }
+
+    /**
+     * Log debug message
+     * 
+     * @param mixed $debug_message
+     * @param string $file Error file name
+     * @param ?int $line Error line
+     * @return void
+     */
+    public function debug(mixed $debug_message, string $file = 'Unknow', ?int $line = null)
+    {
+        if (FALSE == is_string($debug_message)) $debug_message = json_encode($debug_message);
+        $this->notice($debug_message, [], $file, $line);
+    }
+
+    /**
+     * Log info message
+     * 
+     * @param string $info_message
+     * @param array $trace
+     * @param string $file Error file name
+     * @param ?int $line Error line
+     * @return void
+     */
+    public function info(string $info_message, array $trace = [], string $file = 'Unknow', ?int $line = null)
+    {
+        $this->notice($info_message, $trace, $file, $line);
+    }
+
+    private function __error(string $error_message, int $error_level = E_ERROR, string $file = 'Unknow', ?int $line = null) : void
     {
         $EXIT = false;
 
@@ -55,59 +115,6 @@ class Logger extends LogServiceProvider
 
         if ( isset($EXIT) && $EXIT) exit;
     }
-
-    /**
-     * Log custom warning
-     * 
-     * @param string $warning_message
-     * @param string $file Error file name
-     * @param ?int $line Error line
-     * @return void
-     */
-    public function warning(string $warning_message, string $file = 'Unknow', ?int $line = null) : void
-    {
-        $this->error($warning_message, E_WARNING, $file, $line);
-    }
-
-    /**
-     * Log custom notice
-     * 
-     * @param string $notice_message
-     * @param string $file Error file name
-     * @param ?int $line Error line
-     * @return void
-     */
-    public function notice(string $notice_message, string $file = 'Unknow', ?int $line = null)
-    {
-        $this->error($notice_message, E_NOTICE, $file, $line);
-    }
-
-    /**
-     * Log debug message
-     * 
-     * @param mixed $debug_message
-     * @param string $file Error file name
-     * @param ?int $line Error line
-     * @return void
-     */
-    public function debug(mixed $debug_message, string $file = 'Unknow', ?int $line = null)
-    {
-        if (FALSE == is_string($debug_message)) $debug_message = json_encode($debug_message);
-        $this->notice($debug_message, $file, $line);
-    }
-
-    /**
-     * Log info message
-     * 
-     * @param string $info_message
-     * @param string $file Error file name
-     * @param ?int $line Error line
-     * @return void
-     */
-    public function info(string $info_message, string $file = 'Unknow', ?int $line = null)
-    {
-        $this->notice($info_message, $file, $line);
-    }
     
     /**
      * May create error log file
@@ -121,5 +128,10 @@ class Logger extends LogServiceProvider
         }
 
         return storage_path('/errors/' . static::ERROR_LOG);
+    }
+
+    private function stringify(mixed ...$args)
+    {
+        return sprintf("%s, %s", $args[0] ?? '', json_encode($args[1] ?? []));
     }
 }

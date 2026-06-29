@@ -299,7 +299,7 @@ if ( ! function_exists('response') ) {
         }
 
         if (200 !== $status) {
-            $response->setStatus($status);
+            $response->status($status);
         }
 
         return $response;
@@ -549,11 +549,13 @@ if ( ! function_exists('token') ) {
      * Generate a token
      * 
      * @param mixed $jti
+     * @param ?int $seconds Expiration time clain in seconds
      * @return string
      */
-    function token(mixed $jti) : string {
+    function token(mixed $jti, ?int $seconds = null) : string {
         $auth = new \Clicalmani\Foundation\Auth\AuthServiceProvider;
-        $auth->setJti( $jti );
+        $auth->setJti($jti);
+        if ($seconds) $auth->setExpiration($seconds);
         return $auth->generateToken();
     }
 }
@@ -813,7 +815,7 @@ function session(?string $name = null, mixed $value = null) {
 if (!function_exists('auth')) {
     function auth()
     {
-        return \Clicalmani\Foundation\Http\Request::current()->user();
+        return \Clicalmani\Foundation\Http\Request::current()?->user() ?? null;
     }
 }
 
@@ -897,7 +899,6 @@ if (! function_exists('storage')) {
     {
         /** @var \Clicalmani\Foundation\Filesystem\StorageManager $manager */
         $manager = container()->get('storage.manager');
-        
         return $manager->disk($disk);
     }
 }

@@ -8,5 +8,5 @@ interface ScheduledTaskInterface
     /**
      * Définit la fréquence et le message à envoyer
      */
-    public static function schedule(): RecurringMessage;
+    public static function schedule(): \Symfony\Component\Scheduler\RecurringMessage;
 }

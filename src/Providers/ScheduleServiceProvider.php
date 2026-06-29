@@ -26,14 +26,14 @@ class ScheduleServiceProvider implements ServiceProviderInterface
                     \Clicalmani\Foundation\Scheduler\TaskDiscovery::class, 
                     'buildSchedule'
                 ])->args([
-                    app()->rootPath() . '/' . $this->tasksPath, // Chemin vers les tâches
-                    $this->namespace                            // Namespace associé
+                    app()->rootPath() . '/' . $this->tasksPath, // Path to tasks directory
+                    $this->namespace                            // Associated namespace
                 ]);
                 
                 if ($this->statefull) {
-                    // On injecte le cache comme état (Checkpoint)
+                    // Inject the cache adapter to preserve state (Checkpoint)
                     $config->call('stateful', [
-                        $app->dependency('service', 'cache.app')
+                        app()->dependency('service', 'cache.app')
                     ]);
                 }
             }

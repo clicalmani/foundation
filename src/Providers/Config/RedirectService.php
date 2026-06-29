@@ -28,7 +28,7 @@ final class RedirectService extends RouteService
             }
             
             if (!\Clicalmani\Foundation\Support\Facades\Route::isApi() && $this->route->isGettable()) {
-                session()->storeBackTrace($this->route->uri());
+                session()->storeBackTrace(client_url());
             }
         }
     }

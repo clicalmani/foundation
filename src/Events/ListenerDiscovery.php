@@ -52,6 +52,7 @@ class ListenerDiscovery
                     
                     if (!$event && $reflection->hasMethod($method)) {
                         $parameters = $reflection->getMethod($method)->getParameters();
+                        
                         if (isset($parameters[0]) && $parameters[0]->getType()) {
                             $event = $parameters[0]->getType()->getName();
                         }

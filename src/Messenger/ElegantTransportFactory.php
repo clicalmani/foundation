@@ -12,6 +12,11 @@ class ElegantTransportFactory implements TransportFactoryInterface
         $serializer = $serializer ?? new \Symfony\Component\Messenger\Transport\Serialization\PhpSerializer();
         $model = \App\Models\MessengerMessage::class;
         
+        if (isset($options['table_name']) && $options['table_name'] == 'failed_messages') {
+            $model = \App\Models\FailedMessage::class;
+            return new FailedTransport($model, $serializer, $options);
+        }
+        
         return new ElegantTransport($model, $serializer, $options);
     }
 

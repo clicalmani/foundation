@@ -3,6 +3,8 @@ namespace Clicalmani\Foundation\Acme;
 
 class Stringable implements \Stringable
 {
+    use Uuid;
+    
     /**
      * @var \Doctrine\Inflector\Inflector
      */
@@ -23,8 +25,7 @@ class Stringable implements \Stringable
     public function slug(mixed $value, ?string $fallback_value = '') : string 
     {
         if ( ! isset($value) ) return $fallback_value;
-
-        return str_replace('_', '-', $this->inflector->tableize($value));
+        return $this->inflector->urlize($value);
     }
 
     /**

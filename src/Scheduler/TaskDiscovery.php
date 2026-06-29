@@ -7,7 +7,7 @@ class TaskDiscovery
 {
     public static function buildSchedule(string $path, string $namespace): Schedule
     {
-        $schedule = new Schedule();
+        $schedule = new Schedule;
         
         $directory = new \RecursiveDirectoryIterator($path, \RecursiveDirectoryIterator::SKIP_DOTS);
         $filter = new \RecursiveCallbackFilterIterator($directory, function ($current, $key, $iterator) {
@@ -28,12 +28,9 @@ class TaskDiscovery
             $classNameOnly = $file->getBasename('.php');
             
             $className = $baseNamespace . $subNamespace . '\\' . $classNameOnly;
-            $className = str_replace('\\\\', '\\', $className); // Sécurité anti-double slash
-
-            // Si la classe existe et implémente notre interface
-            if (class_exists($className) && is_subclass_of($className, ScheduledTaskInterface::class)) {
-                $schedule->add($className::schedule());
-            }
+            $className = str_replace('\\\\', '\\', $className); // Safeguard against double backslashes
+            
+            $schedule->add($className::schedule());
         }
 
         return $schedule;

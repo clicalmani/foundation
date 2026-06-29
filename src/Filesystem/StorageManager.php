@@ -23,6 +23,12 @@ class StorageManager
         return $this->disks[$name];
     }
 
+    public function getConfig(?string $disk = null): array
+    {
+        if ($disk === null) return $this->config;
+        return $this->config['disks'][$disk];
+    }
+
     protected function resolve(string $name): Filesystem
     {
         $config = $this->config['disks'][$name];

@@ -10,6 +10,8 @@ use Symfony\Component\DependencyInjection\Loader\Configurator\ServiceConfigurato
 use Symfony\Component\DependencyInjection\Reference;
 use Override;
 
+use function Symfony\Component\DependencyInjection\Loader\Configurator\service;
+
 class MessengerServiceProvider implements ServiceProviderInterface
 {
     protected ?string $handlersPath = "app/Handlers";
@@ -19,11 +21,11 @@ class MessengerServiceProvider implements ServiceProviderInterface
     #[Override]
     public function register(): void
     {
-        // On charge la config directement dans le register pour éviter les effets de bord
+        // Load the config directly within register() to prevent side effects
         $this->config = require config_path('/messenger.php');
 
         $handlersMapping = $this->discoverHandlers();
-
+        
         /**
          * Elegant Transport
          */
@@ -44,6 +46,41 @@ class MessengerServiceProvider implements ServiceProviderInterface
                 ])->args([
                     $this->config['default'],
                     $this->config
+                ]);
+            }
+        ]);
+
+        app()->addService('messenger.transport.sync', [
+            \Symfony\Component\Messenger\Transport\Sync\SyncTransport::class,
+            static function(ServiceConfigurator|DefaultsConfigurator $config) {
+                $config->args([
+                    app()->dependency('service', 'messenger')
+                ]);
+            }
+        ]);
+
+        app()->addService('messenger.transport.failed', [
+            \Symfony\Component\Messenger\Transport\TransportInterface::class,
+            static function(ServiceConfigurator|DefaultsConfigurator $config) {
+                $config->factory([
+                    app()->dependency('service', 'messenger.transport_factory.elegant'), 
+                    'createTransport'
+                ])->args([
+                    'elegant://failed', // DSN pointing to the failed messages table
+                    ['table_name' => 'failed_messages'], // Transport-specific option
+                ]);
+            }
+        ]);
+
+        /**
+         * Failure transport locator
+         * Maps which transport routes its failures where.
+         */
+        app()->addService('messenger.failure_transports', [
+            \Clicalmani\Foundation\Messenger\FailureTransportLocator::class,
+            function(ServiceConfigurator|DefaultsConfigurator $config) {
+                $config->args([
+                    $this->config['failure_transports'] ?? []
                 ]);
             }
         ]);
@@ -91,7 +128,6 @@ class MessengerServiceProvider implements ServiceProviderInterface
             \Symfony\Component\Messenger\MessageBus::class,
             static fn(ServiceConfigurator|DefaultsConfigurator $config) => $config->args([
                 [
-                    // CORRECTION : Send DOIT être avant Handle pour éviter le double traitement en async
                     app()->dependency('service', 'messenger.middleware.send_message'),
                     app()->dependency('service', 'messenger.middleware.handle_message'),
                 ]
@@ -128,7 +164,7 @@ class MessengerServiceProvider implements ServiceProviderInterface
         $handlersPath = root_path($this->handlersPath);
 
         if (!is_dir($handlersPath)) {
-            return []; // On ne crée pas le dossier à la volée
+            return []; // Do not create the directory on the fly
         }
 
         $filter = new RecursiveFilter(
@@ -137,7 +173,7 @@ class MessengerServiceProvider implements ServiceProviderInterface
         $filter->setPattern("\\.php$");
 
         foreach (new \RecursiveIteratorIterator($filter) as $file) {
-            // CORRECTION : Supporte les sous-dossiers (PSR-4)
+            // Supports subfolders (PSR-4 compliance)
             $relativePath = str_replace(
                 [root_path($this->handlersPath), '/', '.php'], 
                 ['', '\\', ''], 
@@ -152,7 +188,7 @@ class MessengerServiceProvider implements ServiceProviderInterface
                     $parameters = $method->getParameters();
                     
                     if (isset($parameters[0]) && $type = $parameters[0]->getType()) {
-                        // CORRECTION : Sécurise contre les Union Types (PHP 8+) et les types scalaires
+                        // Protects against Union Types (PHP 8+) and scalar types
                         if ($type instanceof \ReflectionNamedType && !$type->isBuiltin()) {
                             $messageClass = $type->getName();
                             app()->addService($class, [$class]);

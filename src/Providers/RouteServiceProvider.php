@@ -79,10 +79,11 @@ class RouteServiceProvider extends ServiceProvider
     public function routes(callable $callback)
     {
         Record::start('api');
-        
-        if ( Route::isApi() ) {
-            $this->setHeaders();
-        } else $this->storeCSRFToken();
+        $this->setHeaders();
+
+        if ( ! Route::isApi() ) {
+            $this->storeCSRFToken();
+        }
         
         $callback();
 
@@ -136,11 +137,9 @@ class RouteServiceProvider extends ServiceProvider
      */
     public function setHeaders()
     {
-        if ( isset($_SERVER['HTTP_ORIGIN']) ) {
-            header("Access-Control-Allow-Origin: " . static::$cors_settings['allowed_origin']);
-            header('Access-Control-Allow-Credentials: ' . static::$cors_settings['allow_credentials']);
-            header('Access-Control-Max-Age: ' . static::$cors_settings['max_age']);
-        }
+        header("Access-Control-Allow-Origin: " . static::$cors_settings['allowed_origin']);
+        header('Access-Control-Allow-Credentials: ' . static::$cors_settings['allow_credentials']);
+        header('Access-Control-Max-Age: ' . static::$cors_settings['max_age']);
     
         /**
          * |-------------------------------------------------------------------

@@ -71,4 +71,14 @@ class TemplateFunctions
         // strtr est extrêmement rapide et gère toutes les substitutions en une seule passe
         return strtr($content, $builtPlaceholders);
     }
+
+    public static function config(string $key, mixed $default = null)
+    {
+        return config($key, $default);
+    }
+
+    public static function date(string $date)
+    {
+        return date($date);
+    }
 }

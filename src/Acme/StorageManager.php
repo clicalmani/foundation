@@ -8,13 +8,13 @@ class StorageManager
 
     public function __construct()
     {
-        $this->manager = app()->filesystem;
-        $this->disk = $this->manager->getDefaultDriver();
+        $this->manager = container()->get('storage.manager');
+        $this->disk    = $this->manager->getConfig()['default'];
     }
 
-    public function move(string $source, string $destination, ?string $disk = null)
+    public function move(string $source, string $destination, ?string $disk = null): string
     {
-        $disk = $disk ?: $this->disk;
+        $disk   = $disk ?: $this->disk;
         $config = $this->manager->getConfig($disk);
         $destination = $config['root'] . DIRECTORY_SEPARATOR . $destination;
         $this->manager->drive($disk)->move($source, $destination, $config);
@@ -22,9 +22,9 @@ class StorageManager
         return $destination;
     }
 
-    public function store(string $source, string $filename, ?string $disk = null)
+    public function store(string $source, string $filename, ?string $disk = null): string
     {
-        $disk = $disk ?: $this->disk;
+        $disk   = $disk ?: $this->disk;
         $config = $this->manager->getConfig($disk);
         $destination = $config['root'] . DIRECTORY_SEPARATOR . $filename;
 
@@ -32,6 +32,8 @@ class StorageManager
             $source, 
             $destination
         );
+
+        return $destination;
     }
 
     /**

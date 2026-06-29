@@ -22,28 +22,31 @@ class AuthServiceProvider
      */
     public function __construct(private mixed $jti = null)
     {
-        $config = @ static::$config['tokens'];
-
+        if (!static::$config) $this->boot();
+        $config = static::$config['tokens'] ?? null;
+        
         /**
          * |--------------------------------------------------------
-         * | Service initialisation
+         * | Service initialization
          * |--------------------------------------------------------
          * 
-         * Called in ServiceProvider
+         * Initialized in ServiceProvider
          */
-        if (!$config) return;
-        
         $this->headers = (object) [
-            'alg' => $config['header']['algo'],
+            'alg' => $config['algo'],
             'typ' => $config['header']['type']
         ];
         $this->payload = [
-            'iss' => @$_ENV['APP_URL'] ?? '', // Issuer claim
+            'iss' => env('APP_URL', ''), // Issuer claim
             'iat' => time(),             // Issued at claim
             'jti' => $this->jti,         // JWT ID claim
-            'exp' => time() + $config['expire'] // Expiration time claim
+            'exp' => time() + ($config ? $config['expire']: 0) // Expiration time claim
         ];
-        $this->secret  = $_ENV['APP_KEY'] ?? '$2y$10$iuSS1cFgKgEV4yuHAZmH6.lilZyppcJAMmyLeviCxvWEaAmxXmIA2';
+
+        if (empty($_ENV['APP_KEY'])) {
+            throw new \RuntimeException('APP_KEY environment variable is not set.');
+        }
+        $this->secret = $_ENV['APP_KEY'];
     }
 
     /**
@@ -55,12 +58,27 @@ class AuthServiceProvider
     public function setJti(mixed $new_jti) : void
     {
         $this->jti = $new_jti;
-        
         $this->payload = [
-            'iss' => $_ENV['APP_URL'], // Issuer claim
+            'iss' => env('APP_URL', ''), // Issuer claim
             'iat' => time(),             // Issued at claim
             'jti' => $this->jti,         // JWT ID claim
             'exp' => time() + static::$config['tokens']['expire'] // Expiration time claim
+        ];
+    }
+
+    /**
+     * Set JWT expiration time claim
+     * 
+     * @param int $seconds
+     * @return void
+     */
+    public function setExpiration(int $seconds) : void
+    {
+        $this->payload = [
+            'iss' => env('APP_URL', ''), // Issuer claim
+            'iat' => time(),             // Issued at claim
+            'jti' => $this->jti,         // JWT ID claim
+            'exp' => time() + $seconds   // Expiration time claim
         ];
     }
 
@@ -104,7 +122,7 @@ class AuthServiceProvider
      * Verify token
      * 
      * @param string $token
-     * @return miexed Payload if success, false if failure.
+     * @return mixed Payload if success, false if failure.
      */
     public function verifyToken(string $token) : mixed
     {
@@ -127,18 +145,18 @@ class AuthServiceProvider
             )
         );
         $payload = json_decode(
-            base64_decode($parts[1])
+            base64_decode(str_pad(strtr($parts[1], '-_', '+/'), strlen($parts[1]) % 4, '=', STR_PAD_RIGHT))
         );
         
         if (JSON_ERROR_NONE !== json_last_error()) {
             return false;
         }
         
-        if ( $payload->exp > 0 AND ( $payload->exp - time() ) <= 0 ) { // token expired
+        if ( $payload->exp > 0 && $payload->exp <= time() ) { // token expired
             return false;
         }
         
-        if ( $signature !== $parts[2] ) { // Invalid signature
+        if (!hash_equals($signature, $parts[2])) { // Invalid signature
             return false;
         }
 
@@ -147,6 +165,8 @@ class AuthServiceProvider
 
     public function boot()
     {
-        static::$config = require dirname( __DIR__, 5) . '/config/auth.php';
+        if ( is_file(config_path('/auth.php')) ) {
+            static::$config = require config_path('/auth.php');
+        }
     }
 }

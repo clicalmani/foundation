@@ -161,7 +161,7 @@ abstract class HttpRequest extends \Clicalmani\Psr\Request
     public function file(string $name) : FileInterface|CollectionInterface|null
     {
         if ($this->hasFile($name)) {
-            $request_signatures = \Clicalmani\Foundation\Http\Request::current()->getSignatures();
+            $request_signatures = request()->getSignatures();
 
             $file = $this->uploadedFiles[$name];
             
@@ -183,16 +183,29 @@ abstract class HttpRequest extends \Clicalmani\Psr\Request
 
             $files = new Collection;
 
-            for ($i=0; $i < count($file['name']); $i++) {
-                $files->add(
-                    new File(
-                        $file['tmp_name'][$i],
-                        $file['name'][$i],
-                        $file['type'][$i],
-                        $file['size'][$i],
-                        $file['error'][$i]
-                    )
-                );
+            // On récupère la liste des clés internes (ex: [0], ou ["image"])
+            $keys = array_keys($file['name']);
+
+            foreach ($keys as $key) {
+                // Si la valeur est encore un tableau, on extrait les données proprement
+                $name     = is_array($file['name'][$key]) ? ($file['name'][$key]['image'] ?? current($file['name'][$key])) : $file['name'][$key];
+                $tmpName  = is_array($file['tmp_name'][$key]) ? ($file['tmp_name'][$key]['image'] ?? current($file['tmp_name'][$key])) : $file['tmp_name'][$key];
+                $type     = is_array($file['type'][$key]) ? ($file['type'][$key]['image'] ?? current($file['type'][$key])) : $file['type'][$key];
+                $size     = is_array($file['size'][$key]) ? ($file['size'][$key]['image'] ?? current($file['size'][$key])) : $file['size'][$key];
+                $error    = is_array($file['error'][$key]) ? ($file['error'][$key]['image'] ?? current($file['error'][$key])) : $file['error'][$key];
+
+                // On s'assure qu'on n'ajoute pas un fichier vide ou invalide
+                if ($tmpName) {
+                    $files->add(
+                        new File(
+                            $tmpName,
+                            $name,
+                            $type,
+                            $size,
+                            $error
+                        )
+                    );
+                }
             }
 
             return $files;

@@ -2,6 +2,7 @@
 
 namespace Clicalmani\Foundation\Messenger;
 
+use Clicalmani\Foundation\Messenger\Stamp\ElegantTransportStamp;
 use Symfony\Component\Messenger\Transport\TransportInterface;
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\Transport\Serialization\SerializerInterface;
@@ -19,29 +20,28 @@ class ElegantTransport implements TransportInterface
     }
 
     /**
-     * Récupère les messages depuis la base de données (pour le Worker)
+     * Retrieves messages from the database (for the Worker)
      */
     public function get(): iterable
     {
-        // On cherche un message non encore délivré et dont l'heure est passée
-        $record = $this->model::where('delivered_at IS NULL')
-                    ->andWhere('available_at <= NOW()')
+        // Look for an undelivered message whose availability time has passed
+        $record = $this->model::where('delivered_at IS NULL AND available_at <= NOW()')
                     ->first();
         
         if (null === $record) {
             return [];
         }
 
-        // On marque comme "en cours" pour éviter que d'autres workers ne le prennent
+        // Mark as "in progress" to prevent other workers from picking it up
         $record->update(['delivered_at' => now()]);
-
-        // On déserialize pour redonner une Envelope à Symfony
+        
+        // Deserialize to return an Envelope back to Symfony
         $envelope = $this->serializer->decode([
             'body'    => $record->body,
             'headers' => (array) $record->headers
         ]);
-
-        // ⚠️ IMPORTANT : On injecte l'ID dans l'Envelope pour le retrouver dans ack/reject
+        
+        // ⚠️ IMPORTANT: Inject the ID into the Envelope to find it back in ack/reject
         return [$envelope->with(
             new ElegantTransportStamp($record->id),
             new ReceivedStamp('messenger.transport.elegant')
@@ -49,34 +49,71 @@ class ElegantTransport implements TransportInterface
     }
 
     /**
-     * Envoie un message vers la base de données (pour le Dispatcher)
+     * Sends a message to the database (for the Dispatcher)
      */
     public function send(Envelope $envelope): Envelope
     {
         $encoded = $this->serializer->encode($envelope);
+
+        /** @var RedeliveryStamp|null $redelivery */
+        $redelivery = $envelope->last(\Symfony\Component\Messenger\Stamp\RedeliveryStamp::class);
+
+        /** @var ElegantTransportStamp|null $idStamp */
+        $idStamp = $envelope->last(ElegantTransportStamp::class);
         
+        if ($redelivery !== null && $idStamp !== null) {
+            // ── Retry: update the existing record ────────────────────────────────
+            // Do NOT create a new record — overwrite the body/headers with the new
+            // stamps (updated RedeliveryStamp) and reset delivered_at to null so
+            // that the worker can process it again.
+            $this->model::find($idStamp->getId())?->update([
+                'body'         => $encoded['body'],
+                'headers'      => json_encode($encoded['headers'] ?? []),
+                'delivered_at' => null,  // Puts the message back into the queue
+                'available_at' => now(), // Available immediately (or add a delay if desired)
+            ]);
+
+            return $envelope;
+        }
+
+        /** @var \Symfony\Component\Messenger\Stamp\DelayStamp|null $delayStamp */
+        $delayStamp = $envelope->last(\Symfony\Component\Messenger\Stamp\DelayStamp::class);
+
+        $availableAt = now(); 
+
+        if (isset($this->options['delay'])) {
+            $availableAt = now()->addSeconds($this->options['delay'] / 1000);
+        }
+
+        if ($delayStamp) {
+            $seconds = $delayStamp->getDelay() / 1000;
+            $availableAt = now()->addSeconds($seconds); 
+        }
+
+        // ── First dispatch: normal insertion ────────────────────────────────────
         $model = new $this->model;
-        $model->body = $encoded['body'];
-        $model->headers = $encoded['headers'] ?? [];
-        $model->queue_name = $this->options['queue_name'] ?? 'default';
-        $model->available_at = now();
-        $model->created_at = now();
-        $model->ignore();
+        $model->body         = $encoded['body'];
+        $model->headers      = json_encode($encoded['headers'] ?? []);
+        $model->queue_name   = $this->options['queue_name'] ?? 'default';
+        $model->created_at   = now();
+        $model->available_at = $availableAt;
         $model->save();
 
-        return $envelope;
+        return $envelope->with(
+            new ElegantTransportStamp($model->id)
+        );
     }
 
     /**
-     * Appelé quand le Worker a réussi à traiter le message SANS erreur
+     * Called when the Worker successfully processes the message WITHOUT errors
      */
     public function ack(Envelope $envelope): void 
     {
-        // On récupère notre Stamp contenant l'ID
+        // Retrieve our custom Stamp containing the ID
         $stamp = $envelope->last(ElegantTransportStamp::class);
-
+        
         if (null === $stamp) {
-            return; // On ne peut rien faire sans l'ID
+            return; // Cannot proceed without the ID
         } 
         
         if (false === $this->options['keep']) $this->model::find($stamp->getId())?->delete();
@@ -84,40 +121,27 @@ class ElegantTransport implements TransportInterface
     }
 
     /**
-     * Appelé quand le Worker échoue (Exception levée dans le Handler)
+     * Called when the Worker fails (Exception thrown in the Handler)
      */
-    public function reject(Envelope $envelope): void 
+    public function reject(Envelope $envelope): void
     {
+        // If RetryingStamp is present → retry in progress, send() has already
+        // updated the record — do nothing here
+        if ($envelope->last(\Clicalmani\Foundation\Messenger\Stamp\RetryingStamp::class)) {
+            return;
+        }
+
+        // Permanent failure (retries exhausted) or manual rejection — delete/archive
+        /** @var ElegantTransportStamp|null $stamp */
         $stamp = $envelope->last(ElegantTransportStamp::class);
-        
-        if (null === $stamp) {
-            return;
-        }
+        if (!$stamp) return;
 
-        $record = $this->model::find($stamp->getId());
-        
-        if (null === $record) {
-            return;
-        }
-
-        // Logique de rejet : on réessaie plus tard
-        // (Nécessite d'avoir une colonne 'retries' dans votre table)
-        $retries = ($record->retries ?: 0) + 1;
-        $maxRetries = $this->options['retries'] ?? 3;
-        
-        if ($retries >= $maxRetries) {
-            // Trop de tentatives, on abandonne et on supprime pour ne pas bloquer la file
-            $record->delete();
-            // TODO: Vous pourriez logger l'erreur ici ou l'envoyer dans une table "failed_jobs"
+        if (false === ($this->options['keep'] ?? false)) {
+            $this->model::find($stamp->getId())?->delete();
         } else {
-            // On remet le message dans la file pour un essai ultérieur
-            // Ex: 1ère erreur = réessaie dans 5min, 2ème = 10min, etc (Backoff exponentiel)
-            $delayMinutes = pow(2, $retries); // 2, 4, 8, 16 minutes...
-
-            $record->update([
-                'delivered_at' => null, // On le rend à nouveau disponible
-                'available_at' => now()->addMinutes($delayMinutes),
-                'retries'      => $retries
+            $this->model::find($stamp->getId())?->update([
+                'completed_at' => now(),
+                'delivered_at' => now(),
             ]);
         }
     }

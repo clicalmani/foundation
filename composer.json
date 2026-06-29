@@ -9,7 +9,11 @@
         "twig/twig": ">=3.0",
         "symfony/config": ">=7.3",
         "symfony/dependency-injection": ">=7.3",
-        "doctrine/inflector": "^2.1"
+        "doctrine/inflector": "^2.1",
+        "league/flysystem": "^3.33",
+        "symfony/event-dispatcher": "^7.4",
+        "symfony/filesystem": "^7.4",
+        "symfony/uid": "^7.4"
     },
     "license": "MIT",
     "autoload": {
