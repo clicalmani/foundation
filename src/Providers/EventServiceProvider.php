@@ -1,6 +1,9 @@
 <?php
 namespace Clicalmani\Foundation\Providers;
 
+use Broadcaster\BroadcastManager;
+use Broadcaster\Event\ShouldBroadcastInterface;
+use Broadcaster\SystemBroadcastListener;
 use Symfony\Component\DependencyInjection\Loader\Configurator\DefaultsConfigurator;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ServiceConfigurator;
 use Override;
@@ -19,10 +22,19 @@ class EventServiceProvider implements ServiceProviderInterface
     #[Override]
     public function register(): void
     {
-        app()->addService('events', [
-            \Symfony\Component\EventDispatcher\EventDispatcher::class,
+        app()->addService(SystemBroadcastListener::class, [
+            SystemBroadcastListener::class,
             static function(ServiceConfigurator|DefaultsConfigurator $config) {
-                //
+                // Configuration vide, c'est juste pour l'enregistrer
+            }
+        ]);
+
+        app()->addService('events', [
+            \Clicalmani\Foundation\Events\BroadcastAwareEventDispatcher::class,
+            static function(ServiceConfigurator|DefaultsConfigurator $config) {
+                $config->args([
+                    app()->dependency('service', SystemBroadcastListener::class)
+                ]);
             }
         ]);
 
@@ -30,7 +42,7 @@ class EventServiceProvider implements ServiceProviderInterface
             \Clicalmani\Foundation\Events\ListenerDiscovery::class,
             function(ServiceConfigurator|DefaultsConfigurator $config) {
                 $config->args([
-                    $this->path,
+                    app()->rootPath() . '/' . $this->path,
                     $this->namespace,
                     app()->dependency('service', 'events')
                 ])->call('discover');

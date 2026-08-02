@@ -17,6 +17,7 @@ class File implements FileInterface, \JsonSerializable
     protected bool $moved = false;
 
     private \Clicalmani\Foundation\Filesystem\StorageManager $manager;
+    private ?string $disk = null;
 
     public function __construct(
         string $file,
@@ -36,6 +37,7 @@ class File implements FileInterface, \JsonSerializable
 
         /** @var \Clicalmani\Foundation\Filesystem\StorageManager */
         $this->manager = container()->get('storage.manager');
+        $this->disk = $this->manager->getConfig()['default'] ?? null;
     }
 
     /**
@@ -160,14 +162,16 @@ class File implements FileInterface, \JsonSerializable
 
     public function store(?string $disk = null): string
     {
-        $disk   = $disk ?: $this->disk;
-        $config = $this->manager->getConfig($disk);
-        $destination = $config['root'] . DIRECTORY_SEPARATOR . $this->name;
-
+        $disk = $disk ?: $this->disk;
+        $name = slugify(pathinfo($this->name, PATHINFO_FILENAME));
+        $extension   = pathinfo($this->name, PATHINFO_EXTENSION);
+        $config      = $this->manager->getConfig($disk);
+        $destination = $config['root'] . DIRECTORY_SEPARATOR . $name . '.' . $extension;
+        
         $stream = fopen($this->file, 'r');
 
         try {
-            $this->manager->disk($disk)->writeStream($this->name, $stream);
+            $this->manager->disk($disk)->writeStream($name . '.' . $extension, $stream);
         } finally {
             if (is_resource($stream)) fclose($stream);
         }

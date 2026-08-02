@@ -893,7 +893,7 @@ if (! function_exists('storage')) {
     /**
      * Access the Tonka Filesystem
      * 
-     * @return \Symfony\Component\Filesystem\Filesystem
+     * @return \League\Flysystem\Filesystem
      */
     function storage(?string $disk = null)
     {

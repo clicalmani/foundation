@@ -49,8 +49,17 @@ class ApplicationBuilder
             $this->app->addKernel($kernel);
         }
         
-        $commands = array_merge($this->app->commands(), $this->app->config['bootstrap']['commands']);
-        $this->app->commands($commands);
+        $this->app->commands(
+            array_merge(
+                $this->app->commands(), 
+                $this->app->config['bootstrap']['commands']
+            )
+        );
+
+        // JWT Service
+        $this->app->register(
+            new \Clicalmani\Foundation\Providers\JwtServiceProvider
+        );
         
         return $this;
     }
@@ -160,6 +169,20 @@ class ApplicationBuilder
         $eventService->setPath($listenersPath);
         $eventService->setNamespace($namespace);
         $this->app->register($eventService);
+        return $this;
+    }
+
+    public function withEventBroadcasting(): static
+    {
+        if ( ! is_file(config_path('/broadcasting.php')) ) {
+            throw new \RuntimeException('Le fichier de configuration broadcasting.php est manquant. Veuillez créer le fichier de configuration broadcasting.php dans le répertoire config.');
+        }
+
+        if ( ! class_exists(\Broadcaster\BroadcastManager::class) ) {
+            throw new \RuntimeException('Le package Broadcaster n\'est pas installé. Veuillez installer le package Broadcaster pour utiliser la diffusion d\'événements.');
+        }
+
+        $this->app->register(new \Broadcaster\BroadcastServiceProvider);
         return $this;
     }
 }

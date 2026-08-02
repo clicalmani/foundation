@@ -163,26 +163,29 @@ class MessengerServiceProvider implements ServiceProviderInterface
         $handlersMapping = [];
         $handlersPath = root_path($this->handlersPath);
 
-        if (!is_dir($handlersPath)) {
-            return []; // Do not create the directory on the fly
-        }
+        $directory = new \RecursiveDirectoryIterator($handlersPath, \RecursiveDirectoryIterator::SKIP_DOTS);
+        $filter = new \RecursiveCallbackFilterIterator($directory, function ($current, $key, $iterator) {
+            if ($iterator->hasChildren()) {
+                return true;
+            }
+            return $current->isFile() && preg_match('/\.php$/', $current->getFilename());
+        });
 
-        $filter = new RecursiveFilter(
-            new \RecursiveDirectoryIterator($handlersPath, \RecursiveDirectoryIterator::SKIP_DOTS)
-        );
-        $filter->setPattern("\\.php$");
+        $rootPath = rtrim(realpath($handlersPath), DIRECTORY_SEPARATOR);
+        $baseNamespace = rtrim($this->namespace, '\\');
 
+        /** @var \SplFileInfo $file */
         foreach (new \RecursiveIteratorIterator($filter) as $file) {
-            // Supports subfolders (PSR-4 compliance)
-            $relativePath = str_replace(
-                [root_path($this->handlersPath), '/', '.php'], 
-                ['', '\\', ''], 
-                $file->getPathname()
-            );
-            $class = $this->namespace . ltrim($relativePath, '\\');
+            $currentSubDir = dirname($file->getRealPath());
+            $relativeSubDir = str_replace($rootPath, '', $currentSubDir);
+            $subNamespace = str_replace(DIRECTORY_SEPARATOR, '\\', $relativeSubDir);
+            $classNameOnly = $file->getBasename('.php');
+            
+            $className = $baseNamespace . $subNamespace . '\\' . $classNameOnly;
+            $className = str_replace('\\\\', '\\', $className); // Safeguard against double backslashes
 
-            if (class_exists($class)) {
-                $reflection = new \ReflectionClass($class);
+            if (class_exists($className)) {
+                $reflection = new \ReflectionClass($className);
                 if ($reflection->hasMethod('__invoke') && $reflection->isInstantiable()) {
                     $method = $reflection->getMethod('__invoke');
                     $parameters = $method->getParameters();
@@ -191,8 +194,8 @@ class MessengerServiceProvider implements ServiceProviderInterface
                         // Protects against Union Types (PHP 8+) and scalar types
                         if ($type instanceof \ReflectionNamedType && !$type->isBuiltin()) {
                             $messageClass = $type->getName();
-                            app()->addService($class, [$class]);
-                            $handlersMapping[$messageClass][] = new Reference($class);
+                            app()->addService($className, [$className]);
+                            $handlersMapping[$messageClass][] = new Reference($className);
                         }
                     }
                 }

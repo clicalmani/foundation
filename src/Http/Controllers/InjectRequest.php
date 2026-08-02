@@ -13,7 +13,7 @@ class InjectRequest extends InjectionLocator
 
 			$this->createInstance();
 
-            $request = isConsoleMode() ? Request::current() : new Request; // Fallback to default request
+            $request = Request::current();
 		
             $data = $request->all();
             /** @var \Clicalmani\Foundation\Http\Request */

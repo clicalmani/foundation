@@ -4,7 +4,7 @@ namespace Clicalmani\Foundation\Support\Facades;
 /**
  * @method static string getPrefix() Returns the default database table prefix.
  * @method static void setConnection(string $driver = '') Returns a database connection by specifying the driver as argument.
- * @method static \Clicalmani\Database\Interfaces\QueryInterface getInstance() Returns a single database instance.
+ * @method static \Clicalmani\Database\QueryInterface getInstance() Returns a single database instance.
  * @method static \PDO getPdo() Returns PDO instance.
  * @method static void setPdo(\PDO $pdo) Set PDO instance.
  * @method static \PDOStatement query(string $sql, ?array $options = [], ?array $flags = []) Execute a SQL query.
@@ -30,12 +30,12 @@ namespace Clicalmani\Foundation\Support\Facades;
  * @method static \PDOStatement rollbackTo(string $savepoint) Rollback to a specified save point.
  * @method static \PDOStatement isolateTransaction(int $isolation_lavel, string $scope = '') Isolate a transaction. 
  * @method static void close() Destroy the database connection. 
- * @method static \Clicalmani\Database\Interfaces\QueryInterface table(array|string $tables) Select a database table on which to execute a SQL query. 
+ * @method static \Clicalmani\Database\QueryInterface table(array|string $tables) Select a database table on which to execute a SQL query. 
  * @method static array select(string $sql, array $options = [], array $flags = []) Select raw SQL query. 
  * @method static array selectOne(string $sql, array $options = [], array $flags = []) Select one raw SQL query.
  * @method static \PDOStatement statement(string $sql, array $options = [], array $flags = []) Execute a raw SQL query.
  * @method static \PDOStatement unprepared(string $sql) Execute a raw SQL query
- * @method static \Clicalmani\Database\Interfaces\QueryInterface connection(string $driver = '') Establish a database connection.
+ * @method static \Clicalmani\Database\QueryInterface connection(string $driver = '') Establish a database connection.
  * @method static void listen(string $event, callable $callback) Listen for database query cumulative time. 
  */
 abstract class DB extends Facade

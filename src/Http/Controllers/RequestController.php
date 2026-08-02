@@ -111,7 +111,7 @@ class RequestController
 		if ($route = (new $builder)->build()) {
 			
 			$this->route = $route;
-			$request->extend($_REQUEST); 
+			$request->extend($_REQUEST);
 			
 			// Do Redirect
 			if ($route->isDirty()) $this->redirect();
@@ -162,8 +162,11 @@ class RequestController
 	 */
 	public function invokeMethod(ReflectorInterface $reflector) : \Psr\Http\Message\ResponseInterface|\Clicalmani\Foundation\Http\ResponseInterface|\Clicalmani\Foundation\Http\RedirectInterface
 	{
-		$request = isConsoleMode() ? Request::current() : new Request; // Fallback to default request
-		Request::current($request);
+		$request = Request::current();
+		if (!$request) {
+			$request = new Request;
+			Request::current($request);
+		}
 		
 		/** @var \ReflectionParameter[] */
 		$parameters = $reflector->getParameters();

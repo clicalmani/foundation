@@ -29,6 +29,13 @@ class Console
     private static $output;
 
     /**
+     * Manifest name
+     * 
+     * @var string
+     */
+    private string $manifest = 'manifest';
+
+    /**
      * Dump file name
      * 
      * @var ?string
@@ -46,7 +53,7 @@ class Console
         $this->maybeGenerateManifest($filename);
 
         $xdt = xdt();
-        $xdt->setDirectory(database_path('/migrations'));
+        $xdt->setDirectory(database_path('/manifests'));
         $xdt->connect($filename, true, true);
 
         /** @var \Clicalmani\XPower\XDTNodeList[] */
@@ -63,6 +70,23 @@ class Console
         $skipped = $this->processMigrate($nodes);
         
         while ( count($skipped) ) $skipped = $this->processMigrate($skipped);
+
+        // ── Alter ──────────────────────────────────────────────────────
+        foreach ($nodes as $node) {
+            if (!$node->hasChildren('alter')) continue;
+            $this->alterTable($node);
+        }
+
+        // ── Updates ──────────────────────────────────────────────────────
+        $updates = $xdt->getDocumentRootElement()->children('updates > entity');
+
+        if ($updates->length) {
+            $nodes = [];
+            foreach ($updates as $node) {
+                $nodes[] = $xdt->parse($node);
+            }
+            $this->processMigrate($nodes);
+        }
 
         $xdt->close();
         unset($skipped);
@@ -81,7 +105,7 @@ class Console
         $this->maybeGenerateManifest($filename);
 
         $xdt = xdt();
-        $xdt->setDirectory(database_path('/migrations'));
+        $xdt->setDirectory(database_path('/manifests'));
         $xdt->connect($filename, true, true);
 
         /** @var \Clicalmani\XPower\XDTNodeList[] */
@@ -173,15 +197,15 @@ class Console
             $classNs = "\Database\Seeders\\$class";
             $seeder = new $classNs;
 
-            $this->writeln('Running ' . $class);
+            $this->writeln('Running ' . $class, true, 'comment');
 
             if ( $this->runSeed($seeder) ) {
-                $this->writeln('success');
+                $this->writeln('Success', true, 'info');
 
                 return true;
             }
 
-            $this->writeln('failure');
+            $this->writeln('Failure', true, 'error');
 
             return false;
         }
@@ -189,7 +213,7 @@ class Console
         if (NULL === $filename) return false;
 
         $xdt = xdt();
-        $xdt->setDirectory(database_path('/migrations'));
+        $xdt->setDirectory(database_path('/manifests'));
         $xdt->connect($filename, true, true);
 
         try {
@@ -198,19 +222,19 @@ class Console
                 $classNs = $node->attr('name');
                 $seeder = new $classNs;
     
-                $this->writeln('Running ' . $classNs);
+                $this->writeln('Running ' . $classNs, true, 'comment');
     
                 if ( $this->runSeed($seeder) ) {
-                    $this->writeln('success');
+                    $this->writeln('Success', true, 'info');
                 } else {
-                    $this->writeln('failure');
+                    $this->writeln('Failure', true, 'error');
                 }
             }
 
             return true;
 
         } catch(\PDOException $e) {
-            $this->writeln($e->getMessage(), false);
+            $this->writeln($e->getMessage(), false, 'error');
             return false;
         }
     }
@@ -227,7 +251,7 @@ class Console
             $filter = new RecursiveFilter($functions_dir);
             // $filter->setPattern("\\.php$");
 
-            $this->writeln('Migration routine functions ...');
+            $this->writeln('Migration routine functions ...', true, 'comment');
 
             foreach (new \RecursiveIteratorIterator($filter) as $file) { 
                 $pathname = $file->getPathname();
@@ -236,12 +260,12 @@ class Console
                 if($file->isFile()) {
                     if(is_readable($pathname)) {
                         $function = require $pathname;
-                        $this->writeln("Creating $filename ...");
+                        $this->writeln("Creating $filename ...", true, 'comment');
                         $this->dropRoutine($filename, 'FUNCTION');
                         
                         if (false == $this->create($function)) {
-                            $this->writeln('Failure');
-                        } else $this->writeln('success');
+                            $this->writeln('Failure', true, 'error');
+                        } else $this->writeln('Success', true, 'info');
                     }
                 }
             }
@@ -249,7 +273,7 @@ class Console
             return true;
 
         } catch(\PDOException $e) {
-            $this->writeln($e->getMessage(), false);
+            $this->writeln($e->getMessage(), false, 'error');
             return false;
         }
     }
@@ -266,7 +290,7 @@ class Console
             $filter = new RecursiveFilter($procedures_dir);
             $filter->setPattern("\\.php$");
 
-            $this->writeln('Migration stored procedures ...');
+            $this->writeln('Migration stored procedures ...', true, 'comment');
 
             foreach (new \RecursiveIteratorIterator($filter) as $file) { 
                 $pathname = $file->getPathname();
@@ -275,12 +299,12 @@ class Console
                 if($file->isFile()) {
                     if(is_readable($pathname)) {
                         $function = require $pathname;
-                        $this->writeln("Creating $filename ...");
-                        $this->dropRoutine($filename, 'PROCEDURE');
+                        $this->writeln("Creating $filename ...", true, 'comment');
+                        $this->dropRoutine($filename, 'PROCEDURE', true, 'comment');
                         
                         if (false == $this->create($function)) {
-                            $this->writeln('Failure');
-                        } else $this->writeln('success');
+                            $this->writeln('Failure', true, 'error');
+                        } else $this->writeln('Success', true, 'info');
                     }
                 }
             }
@@ -288,7 +312,7 @@ class Console
             return true;
 
         } catch(\PDOException $e) {
-            $this->writeln($e->getMessage(), false);
+            $this->writeln($e->getMessage(), false, 'error');
             return false;
         }
     }
@@ -305,7 +329,7 @@ class Console
             $filter = new RecursiveFilter($views_dir);
             $filter->setPattern("\\.php$");
 
-            $this->writeln('Migration routine views ...');
+            $this->writeln('Migration routine views ...', true, 'comment');
 
             foreach (new \RecursiveIteratorIterator($filter) as $file) { 
                 $pathname = $file->getPathname();
@@ -314,12 +338,12 @@ class Console
                 if($file->isFile()) {
                     if(is_readable($pathname)) {
                         $function = require $pathname;
-                        $this->writeln("Creating $filename ...");
+                        $this->writeln("Creating $filename ...", true, 'comment');
                         $this->dropRoutine($filename, 'VIEW');
                         
                         if (false == $this->create($function)) {
-                            $this->writeln('Failure');
-                        } else $this->writeln('success');
+                            $this->writeln('Failure', true, 'error');
+                        } else $this->writeln('Success', true, 'info');
                     }
                 }
             }
@@ -327,7 +351,7 @@ class Console
             return true;
 
         } catch(\PDOException $e) {
-            $this->writeln($e->getMessage(), false);
+            $this->writeln($e->getMessage(), false, 'error');
             return false;
         }
     }
@@ -344,6 +368,30 @@ class Console
         return symlink($target, $link);
     }
 
+    private function alterTable(XDTNodeList $node)
+    {
+        /** @var class-string<\Clicalmani\Database\Factory\Models\Elegant> */
+        $modelClass = $node->attr('model');
+        $definitions = base64_decode($node->find('alter')->text() ?? '');
+        $model = new $modelClass;
+
+        $table = $model->getTable();
+        $query = $model->newQuery();
+        
+        if ($definitions) {
+            try {
+                $this->writeln(sprintf('Altering %s%s', env('DB_TABLE_PREFIX', ''), $table), true, 'comment');
+                $query->set('table', $table);
+                $query->set('definition', [$definitions]);
+                $query->set('type', \Clicalmani\Database\DBQuery::ALTER);
+                $query->exec();
+                $this->writeln('Success', true, 'info');
+            } catch (\PDOException $e) {
+                $this->writeln(sprintf('An error occured while altering %s: %s', $model->getTable(), $e->getMessage()), true, 'error');
+            }
+        }
+    }
+
     /**
      * Generate migration file
      * 
@@ -353,18 +401,18 @@ class Console
     private function generateManifest(string $filename) : bool
     {
         $models_path = app_path('/Models');
-        $migrations_path = database_path('/migrations');
+        $manifests_path = database_path('/manifests');
 
         $dir = new \RecursiveDirectoryIterator($models_path);
         $filter = new RecursiveFilter($dir);
         $filter->setPattern("\\.php$");
 
         $xdt = xdt();
-        $xdt->setDirectory($migrations_path);
+        $xdt->setDirectory($manifests_path);
         $xdt->newFile("$filename.xml", '<migration></migration>');
         $xdt->connect($filename, true, true);
 
-        $tables = [];
+        $tables = []; // Database tables
 
         /**
          * Walkthrough models
@@ -383,7 +431,21 @@ class Console
             $entity = $model->getEntity();
 
             $tables[$model->getTable()] = $modelClass;
-            $xdt->getDocumentRootElement()->append('<entity model="' . $modelClass . '">' . get_class($entity) . '</entity>');
+            $definitions = null; // Alter definitions
+
+            // ── Alter ──────────────────────────────────────────────────────
+            // Verify if the Entity has an alter attribute
+            if ($attributes = (new \ReflectionClass($entity))->getAttributes(\Clicalmani\Database\Factory\AlterOption::class)) {
+                try {
+                    $definitions = $entity->alter(new \Clicalmani\Database\Factory\AlterOption);
+                } catch(\Exception $e) {
+                    $this->writeln($e->getMessage(), true, 'error');
+                }
+            }
+
+            if ($definitions) $definitions = '<alter>' . base64_encode($definitions) . '</alter>';
+
+            $xdt->getDocumentRootElement()->append('<entity model="' . $modelClass . '">' . get_class($entity) . $definitions . '</entity>');
         }
 
         /**
@@ -473,7 +535,7 @@ class Console
             $seeder->run();
             return true;
         } catch(\PDOException $e) {
-            $this->writeln($e->getMessage(), false);
+            $this->writeln($e->getMessage(), false, 'error');
             return false;
         }
     }
@@ -485,12 +547,12 @@ class Console
      * @param ?bool $format Format output
      * @return void
      */
-    private function writeln(?string $message = '', ?bool $format = true) : void
+    private function writeln(?string $message = '', ?bool $format = true, ?string $format_tye = null) : void
     {
         if (self::$output) {
-            self::$output->writeln($format ? $this->formatOutput($message): $message);
+            self::$output->writeln($format ? $this->formatOutput($message, $format_tye): $message);
         } else {
-            printf("%s", $format ? $this->formatOutput($message): $message);
+            printf("%s", $format ? $this->formatOutput($message, $format_tye): $message);
             print("<br/>");
         }
     }
@@ -508,7 +570,7 @@ class Console
             DB::getInstance()->query($sql);
             return true;
         } catch(\PDOException $e) {
-            $this->writeln($e->getMessage(), false);
+            $this->writeln($e->getMessage(), false, 'error');
             return false;
         }
     }
@@ -583,7 +645,7 @@ class Console
                         $model = new $modelClass;
                         return $model->getTable();
                     }, $nodes);
-                    $this->writeln('Warning: Some tables have circular dependences: ' . implode(', ', $tables));
+                    $this->writeln('Warning: Some tables have circular dependences: ' . implode(', ', $tables), true, 'warning');
                 }
             }
         }
@@ -654,7 +716,7 @@ class Console
         $table = $model->getTable();
         $check = ( $command === 'migrated' ) ? $this->isMigrated($node): $this->isDroped($node);
 
-        if (FALSE === $check) $this->writeln(( ($command === 'migrate') ? 'Migrating ': 'Dropping ' ) . env('DB_TABLE_PREFIX', '') . $table);
+        if (FALSE === $check) $this->writeln(( ($command === 'migrate') ? 'Migrating ': 'Dropping ' ) . env('DB_TABLE_PREFIX', '') . $table, true, 'comment');
 
         try {
 
@@ -662,7 +724,7 @@ class Console
                 if (NULL === $this->dump_file) $entity->{$command}();
                 else $entity->{$command}(false, $this->dump_file);
 
-                $this->writeln('Success');
+                $this->writeln('Success', true, 'info');
                 
                 if ( $command === 'migrate' ) $this->migratedTables[] = $node;
                 else $this->dropped[] = $node;
@@ -681,7 +743,7 @@ class Console
              * | of a foreign key relationship, without addressing the dependency first.
              * | 23000 Integraty constraint violation
              */
-            if (in_array($e->getCode(), ['HY000', '1217', '23000'])) $this->writeln($e->getMessage()); 
+            if (in_array($e->getCode(), ['HY000', '1217', '23000'])) $this->writeln($e->getMessage(), true, 'error'); 
             else throw new \Exception($e->getMessage(), (int)$e->getCode(), $e);
         }
     }
@@ -690,10 +752,12 @@ class Console
      * Format output
      * 
      * @param string $message
+     * @param ?string $type info, comment, error
      * @return string
      */
-    private function formatOutput(string $message) : string
+    private function formatOutput(string $message, ?string $type = null) : string
     {
+        if ($type) $message = "<$type>$message</$type>";
         return str_pad("$message ", 100, '-');
     }
 
@@ -819,7 +883,7 @@ class Console
     private function maybeGenerateManifest(string $filename) : void
     {
         /** @var string */
-        $migrations_path = database_path('/migrations');
-        if ( !file_exists("$migrations_path/$filename.xml") ) $this->generateManifest($filename);
+        $manifests_path = database_path('/manifests');
+        if ( !file_exists("$manifests_path/$filename.xml") ) $this->generateManifest($filename);
     }
 }

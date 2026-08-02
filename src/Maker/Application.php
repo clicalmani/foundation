@@ -71,6 +71,7 @@ class Application
      * @var array|callable
      */
     protected $viewSharedData;
+    protected bool $viewDataShared = false;
 
     /**
      * Console commands
@@ -384,7 +385,11 @@ class Application
         if (isset($data)) $this->viewSharedData = $data;
         else {
             if ( is_array($this->viewSharedData)) return $this->viewSharedData;
-            elseif ( is_callable($this->viewSharedData) ) return call($this->viewSharedData, Request::getcurrent() ?? new Request);
+            elseif ( is_callable($this->viewSharedData) && !$this->viewDataShared ) {
+                $response = call($this->viewSharedData, Request::getcurrent() ?? new Request);
+                $this->viewDataShared = true;
+                return $response;
+            }
         }
 
         return [];
@@ -493,7 +498,7 @@ class Application
 
                 $this->services = $this->services->set($key, $value['class']);
 
-                if ($config = @$value['config']) {
+                if ($config = $value['config'] ?? null) {
                     if ($config instanceof \Closure) {
                         $config($this->services, $this);
                     } else {

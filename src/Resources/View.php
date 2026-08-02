@@ -15,6 +15,8 @@ class View extends Response implements ViewInterface
     private \Twig\Environment $twig;
 
     private $container;
+
+    private array $sharedData = [];
     
     /**
      * Constructor
@@ -26,9 +28,8 @@ class View extends Response implements ViewInterface
     {
         $this->container = Container::getInstance();
         $this->runCreators();
-        $sharedData = app()->viewSharedData();
-        $sharedData = array_merge($sharedData, $context);
-        $this->context = $sharedData;
+        $this->sharedData = array_merge(app()->viewSharedData() ?? [], $context);
+        $this->context = $this->sharedData;
         $this->body = new NonBufferedBody;
         $this->twig = new \Twig\Environment(new \Clicalmani\Foundation\Resources\TemplateLoader, []);
         $this->twig->addExtension(new \Clicalmani\Foundation\Resources\TonkaTwigExtension);
@@ -55,9 +56,8 @@ class View extends Response implements ViewInterface
 
     public function share(string $key, mixed $value): void
     {
-        $sharedData = app()->viewSharedData();
-        $sharedData[$key] = $value;
-        app()->viewSharedData($sharedData);
+        $this->sharedData[$key] = $value;
+        app()->viewSharedData($this->sharedData);
     }
 
     public function composer(string|array $views, string|callable $composer): void

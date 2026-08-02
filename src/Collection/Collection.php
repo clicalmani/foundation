@@ -2,6 +2,7 @@
 namespace Clicalmani\Foundation\Collection;
 
 use Clicalmani\Foundation\Support\Facades\Func;
+use Override;
 use TypeError;
 
 /**
@@ -10,7 +11,7 @@ use TypeError;
  * @package clicalmani/collection 
  * @author @clicalmani
  */
-class Collection extends SPLCollection implements CollectionInterface
+class Collection extends SPLCollection implements CollectionInterface, \JsonSerializable
 {
     public function __construct(iterable $elements = [])
     {
@@ -335,5 +336,11 @@ class Collection extends SPLCollection implements CollectionInterface
         }
 
         return null;
+    }
+
+    #[Override]
+    public function jsonSerialize(): mixed
+    {
+        return $this->toArray();
     }
 }
