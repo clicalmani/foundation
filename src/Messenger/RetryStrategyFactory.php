@@ -5,15 +5,31 @@ namespace Clicalmani\Foundation\Messenger;
 use Symfony\Component\Messenger\Retry\MultiplierRetryStrategy;
 use Symfony\Component\Messenger\Retry\RetryStrategyInterface;
 
+/**
+ * Class RetryStrategyFactory
+ * 
+ * Factory utility responsible for parsing queue execution parameters and assembling concrete 
+ * RetryStrategyInterface instances. Provisions failure fallback rules, linear or exponential 
+ * delay backoffs, and processing jitters dynamically per specific transport configurations.
+ * 
+ * @package Clicalmani\Foundation\Messenger
+ * @author @clicalmani
+ */
 class RetryStrategyFactory
 {
     /**
-     * Creates a retry strategy based on a transport's configuration
+     * Creates and provisions a specialized retry strategy based on runtime transport configurations.
+     * 
+     * @param string $transportName The unique identifier key representing the active targeted transport queue.
+     * @param array<string, array<string, mixed>> $config The top-level collection containing structural retry profiles.
+     * @return RetryStrategyInterface A fully provisioned exponential multiplier backoff retry manager strategy.
      */
     public static function make(string $transportName, array $config = []): RetryStrategyInterface
     {
-        // Default configuration if the transport is not configured
-        $defaults = $config[config('retry_strategy.default')] ?? [
+        // Define operational default profiles used when the target queue lacks custom parameters
+        $defaultKey = (string) config('retry_strategy.default');
+        
+        $defaults = $config[$defaultKey] ?? [
             'max_retries' => 3,
             'delay'       => 1000,
             'max_delay'   => 0,
@@ -21,6 +37,7 @@ class RetryStrategyFactory
             'jitter'      => 0.1
         ];
 
+        // Safely overlay specific transport-level parameters over base architectural configurations
         $settings = array_merge($defaults, $config[$transportName] ?? []);
 
         return new MultiplierRetryStrategy(

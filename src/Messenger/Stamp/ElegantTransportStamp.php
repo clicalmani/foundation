@@ -5,21 +5,32 @@ namespace Clicalmani\Foundation\Messenger\Stamp;
 use Symfony\Component\Messenger\Stamp\StampInterface;
 
 /**
- * Custom stamp to preserve the database identifier
- * throughout the message lifecycle within the Worker.
+ * Class ElegantTransportStamp
+ * 
+ * Custom operational stamp metadata attached to Symfony Messenger Envelopes. 
+ * Preserves the underlying persistent database row identifier throughout the 
+ * consumer lifecycle inside active queue workers.
+ * 
+ * @package Clicalmani\Foundation\Messenger\Stamp
+ * @author @clicalmani
  */
 class ElegantTransportStamp implements StampInterface
 {
     /**
-     * @param int $id The unique identifier of the message in the database table
+     * ElegantTransportStamp constructor.
+     * 
+     * @param int $id The unique primary key identifier of the message row inside the database.
      */
     public function __construct(
         private readonly int $id
-    ) {}
+    ) {
+        // Parameter tracking handled via native constructor property promotion
+    }
 
     /**
-     * Retrieves the message identifier from the database.
-     * * @return int
+     * Retrieves the tracking database primary key identifier stored within the envelope.
+     * 
+     * @return int The unique identity record number.
      */
     public function getId(): int
     {

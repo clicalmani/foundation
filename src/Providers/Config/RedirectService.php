@@ -20,7 +20,7 @@ final class RedirectService extends RouteService
      * 
      * @return void
      */
-    public function redirect()
+    public function redirect() : void
     {
         if ($this->route) {
             if ($this->route->isDirty()) {

@@ -375,7 +375,7 @@ class Console
         $definitions = base64_decode($node->find('alter')->text() ?? '');
         $model = new $modelClass;
 
-        $table = $model->getTable();
+        $table = $model->getTable()->name();
         $query = $model->newQuery();
         
         if ($definitions) {
@@ -387,7 +387,7 @@ class Console
                 $query->exec();
                 $this->writeln('Success', true, 'info');
             } catch (\PDOException $e) {
-                $this->writeln(sprintf('An error occured while altering %s: %s', $model->getTable(), $e->getMessage()), true, 'error');
+                $this->writeln(sprintf('An error occured while altering %s: %s', $model->getTable()->name(), $e->getMessage()), true, 'error');
             }
         }
     }
@@ -430,7 +430,7 @@ class Console
             $model = new $modelClass;
             $entity = $model->getEntity();
 
-            $tables[$model->getTable()] = $modelClass;
+            $tables[$model->getTable()->name()] = $modelClass;
             $definitions = null; // Alter definitions
 
             // ── Alter ──────────────────────────────────────────────────────
@@ -643,7 +643,7 @@ class Console
                         /** @var \Clicalmani\Database\Factory\Models\Elegant */
                         $modelClass = $node->attr('model');
                         $model = new $modelClass;
-                        return $model->getTable();
+                        return $model->getTable()->name;
                     }, $nodes);
                     $this->writeln('Warning: Some tables have circular dependences: ' . implode(', ', $tables), true, 'warning');
                 }
@@ -683,13 +683,13 @@ class Console
         /** @var \Clicalmani\Database\Factory\Models\Elegant */
         $modelClass = $node->attr('model');
         $model = new $modelClass;
-        $table1 = $model->getTable();
+        $table1 = $model->getTable()->name();
 
         foreach ($this->migratedTables as $n) {
             /** @var \Clicalmani\Database\Factory\Models\Elegant */
             $modelClass = $n->attr('model');
             $model = new $modelClass;
-            $table2 = $model->getTable();
+            $table2 = $model->getTable()->name();
 
             if ($table1 == $table2) return true;
         }
@@ -713,7 +713,7 @@ class Console
         $entity = $model->getEntity();
         $entity->setModel($model);
 
-        $table = $model->getTable();
+        $table = $model->getTable()->name();
         $check = ( $command === 'migrated' ) ? $this->isMigrated($node): $this->isDroped($node);
 
         if (FALSE === $check) $this->writeln(( ($command === 'migrate') ? 'Migrating ': 'Dropping ' ) . env('DB_TABLE_PREFIX', '') . $table, true, 'comment');
@@ -860,13 +860,13 @@ class Console
         /** @var \Clicalmani\Database\Factory\Models\Elegant */
         $modelClass = $node->attr('model');
         $model = new $modelClass;
-        $table1 = $model->getTable();
+        $table1 = $model->getTable()->name();
 
         foreach ($this->dropped as $n) {
             /** @var \Clicalmani\Database\Factory\Models\Elegant */
             $modelClass = $n->attr('model');
             $model = new $modelClass;
-            $table2 = $model->getTable();
+            $table2 = $model->getTable()->name();
 
             if ($table1 == $table2) return true;
         }

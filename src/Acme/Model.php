@@ -1,6 +1,8 @@
 <?php
 namespace Clicalmani\Foundation\Acme;
 
+use Clicalmani\Database\Factory\Models\ScopeInterface;
+
 /**
  * @method static void resolveRouteBindingUsing(\Closure $callback) Resolve route binding using a callback.
  * @method static void preventSilentlyDiscardingAttributes() Prevent silent discard attribute setting
@@ -18,13 +20,6 @@ namespace Clicalmani\Foundation\Acme;
 abstract class Model extends \Clicalmani\Database\Factory\Models\Elegant
 {
     /**
-     * Prefix conventionnel identifiant une méthode de scope.
-     * 
-     * @var string
-     */
-    protected const SCOPE_PREFIX = 'scope';
-
-    /**
      * Handle dynamic static calls that correspond to local query scopes.
      * 
      * @param string $name
@@ -36,7 +31,7 @@ abstract class Model extends \Clicalmani\Database\Factory\Models\Elegant
         if (static::isScope($name)) {
             return static::callScope($name, $arguments);
         }
-
+        
         throw new \BadMethodCallException(
             sprintf('Call to undefined method %s::%s()', static::class, $name)
         );
@@ -55,7 +50,9 @@ abstract class Model extends \Clicalmani\Database\Factory\Models\Elegant
      */
     protected static function isScope(string $name) : bool
     {
-        return method_exists(static::class, static::getScopeMethodName($name));
+        $class = static::getScopeClass($name);
+        return class_exists($class) && 
+                    is_subclass_of($class, ScopeInterface::class);
     }
 
     /**
@@ -68,19 +65,15 @@ abstract class Model extends \Clicalmani\Database\Factory\Models\Elegant
     protected static function callScope(string $name, array $arguments) : mixed
     {
         $instance = new static();
-        $method = static::getScopeMethodName($name);
+        $class    = static::getScopeClass($name);
 
-        return $instance->{$method}(...$arguments);
+        /** @var ScopeInterface */
+        $scope = new $class(...$arguments);
+        return $scope->apply($instance->getQuery(), $instance);
     }
 
-    /**
-     * Build the real method name behind a scope call.
-     * 
-     * @param string $name
-     * @return string
-     */
-    protected static function getScopeMethodName(string $name) : string
+    protected static function getScopeClass(string $name) : string
     {
-        return static::SCOPE_PREFIX . ucfirst($name);
+        return "\\Clicalmani\\Database\\Factory\\Models\\Scope\\Scope" . ucfirst($name);
     }
 }

@@ -4,12 +4,21 @@ namespace Clicalmani\Foundation\Maker;
 use Clicalmani\Foundation\Http\Middlewares\Api;
 use Clicalmani\Foundation\Http\Middlewares\Web;
 
+/**
+ * Class HttpKernel
+ * 
+ * Handles the HTTP execution lifecycle context, configuring web and API middleware stacks
+ * alongside custom validation rules within the application core.
+ * 
+ * @package Clicalmani\Foundation\Maker
+ * @author @clicalmani
+ */
 class HttpKernel extends Kernel
 {
     /**
-     * The application's global HTTP middleware stack.
+     * The application's global HTTP middleware stack groups.
      *
-     * These middleware are run during every request to your application.
+     * These middleware layers are executed dynamically based on the targeted route gateway.
      *
      * @var array
      */
@@ -17,49 +26,55 @@ class HttpKernel extends Kernel
 
         /**
          * |-------------------------------------------------------------------
-         * |                          Web Gateway
+         * | Web Gateway
          * |-------------------------------------------------------------------
          * 
-         * Web gateway middleware stack
+         * Web gateway middleware stack.
          * 
-         * Register here your custom middlewares for web gateway.
+         * Register application-specific custom web middleware here.
          */
         'web' => [],
 
         /**
          * |-------------------------------------------------------------------
-         * |                          API Gateway
+         * | API Gateway
          * |-------------------------------------------------------------------
          * 
-         * API gateway middleware stack
+         * API gateway middleware stack.
          * 
-         * Register here your custom middlewares for api gateway.
+         * Register application-specific custom API middleware here.
          */
         'api' => []
     ];
 
     /**
-     * The application's global HTTP validator stack.
+     * The application's global HTTP validation rules stack.
      *
-     * These validators can be invoked anywhere in your application.
+     * These custom rule validators can be invoked throughout the data validation process.
      *
      * @var array
      */
     protected array $custom_rules = [];
 
+    /**
+     * Boots the prerequisite HTTP components.
+     * Merges internal core framework gateway interceptors with user-defined global middlewares.
+     * 
+     * @return void
+     */
     public function boot(): void
     {
         $this->middleware = [
             /**
              * |------------------------------------------------------------------------------
-             * | Register web middleware
+             * | Register Web Middleware
              * |------------------------------------------------------------------------------
              * 
-             * Web middleware is registered here for global access and usage in the application
-             * for web routes. Web middleware is used to check CSRF token for non GET and OPTIONS
-             * requests.
+             * Configures web middleware stacks for global route interceptors.
+             * The core Web middleware enforces state protection routines such as CSRF verification 
+             * on non-safe HTTP methods (e.g., POST, PUT, DELETE).
              * 
-             * @var \Clicalmani\Foundation\Http\Middlewares\Web
+             * @var class-string<\Clicalmani\Foundation\Http\Middlewares\Web>
              */
             'web' => array_merge(
                 [
@@ -70,14 +85,14 @@ class HttpKernel extends Kernel
 
             /**
              * |------------------------------------------------------------------------------
-             * | Register api middleware
+             * | Register API Middleware
              * |------------------------------------------------------------------------------
              * 
-             * API middleware is registered here for global access and usage in the application
-             * for API routes. Each route will have a /api prfix will be handled by this middleware.
-             * However, /api prefix will be added to the route automatically.
+             * Configures API middleware stacks for global stateless API route boundaries.
+             * Requests hitting the automatic '/api' prefix route prefix groups are matched 
+             * and processed through this specific layer.
              * 
-             * @var \Clicalmani\Foundation\Http\Middlewares\Api
+             * @var class-string<\Clicalmani\Foundation\Http\Middlewares\Api>
              */
             'api' => array_merge(
                 [
@@ -88,12 +103,18 @@ class HttpKernel extends Kernel
         ];
     }
 
+    /**
+     * Commits the compiled middleware pipelines and custom validation rules 
+     * into the global application configuration storage.
+     * 
+     * @return void
+     */
     public function register(): void
     {
-        $http_config = $this->app->config['http'];
+        $http_config        = $this->app->config['http'];
         $http_config['web'] = $this->middleware['web'];
         $http_config['api'] = $this->middleware['api'];
         $http_config['custom_rules'] = $this->custom_rules;
-        $this->app->config['http'] = $http_config;
+        $this->app->config['http']   = $http_config;
     }
 }

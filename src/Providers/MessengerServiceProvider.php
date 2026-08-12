@@ -10,34 +10,71 @@ use Symfony\Component\DependencyInjection\Loader\Configurator\ServiceConfigurato
 use Symfony\Component\DependencyInjection\Reference;
 use Override;
 
-use function Symfony\Component\DependencyInjection\Loader\Configurator\service;
-
+/**
+ * Class MessengerServiceProvider
+ * 
+ * Boots, provisions, and configures the framework's internal message bus system,
+ * handles automatic runtime class discovery of custom invokable handlers, and configures
+ * middleware stacks alongside specialized asynchronous transport layers.
+ * 
+ * @package Clicalmani\Foundation\Providers
+ * @author @clicalmani
+ */
 class MessengerServiceProvider implements ServiceProviderInterface
 {
+    /**
+     * Relative path to the application message handlers directory.
+     * 
+     * @var string|null
+     */
     protected ?string $handlersPath = "app/Handlers";
+
+    /**
+     * Root PHP namespace prefix assigned to application message handlers.
+     * 
+     * @var string|null
+     */
     protected ?string $namespace = "\\App\\Handlers\\";
+
+    /**
+     * Explicit transport driver target reference string.
+     * 
+     * @var string|null
+     */
     protected ?string $transport = null;
 
+    /**
+     * Internal operational array storage holding raw configuration data values.
+     * 
+     * @var array
+     */
+    protected array $config = [];
+
+    /**
+     * Registers message bus infrastructure dependencies, discovery maps, and routing middlewares.
+     * 
+     * @return void
+     */
     #[Override]
     public function register(): void
     {
-        // Load the config directly within register() to prevent side effects
+        // Load the framework's primary messenger configuration blueprints directly into memory
         $this->config = require config_path('/messenger.php');
 
+        // Execute reflection routines to automatically construct message-to-handler maps
         $handlersMapping = $this->discoverHandlers();
         
-        /**
-         * Elegant Transport
-         */
-        app()->addService('messenger.transport_factory.elegant', [
+        // Register the framework's proprietary Elegant Transport Factory component
+        app()->addService('messenger.transport_factory.elegant', 
             ElegantTransportFactory::class,
             fn($config) => $config->args([
                 $this->config['default'],
                 $this->config
             ])
-        ]);
+        );
 
-        app()->addService('messenger.transport.elegant', [
+        // Provision the default Elegant asynchronous runtime transport engine
+        app()->addService('messenger.transport.elegant', 
             \Symfony\Component\Messenger\Transport\TransportInterface::class,
             function (ServiceConfigurator|DefaultsConfigurator $config) {
                 $config->factory([
@@ -48,83 +85,84 @@ class MessengerServiceProvider implements ServiceProviderInterface
                     $this->config
                 ]);
             }
-        ]);
+        );
 
-        app()->addService('messenger.transport.sync', [
+        // Provision a synchronous, immediate execution transport strategy fallback
+        app()->addService('messenger.transport.sync', 
             \Symfony\Component\Messenger\Transport\Sync\SyncTransport::class,
             static function(ServiceConfigurator|DefaultsConfigurator $config) {
                 $config->args([
                     app()->dependency('service', 'messenger')
                 ]);
             }
-        ]);
+        );
 
-        app()->addService('messenger.transport.failed', [
+        // Provision a specialized error handling transport engine for dead-letter processing
+        app()->addService('messenger.transport.failed', 
             \Symfony\Component\Messenger\Transport\TransportInterface::class,
             static function(ServiceConfigurator|DefaultsConfigurator $config) {
                 $config->factory([
                     app()->dependency('service', 'messenger.transport_factory.elegant'), 
                     'createTransport'
                 ])->args([
-                    'elegant://failed', // DSN pointing to the failed messages table
-                    ['table_name' => 'failed_messages'], // Transport-specific option
+                    'elegant://failed',
+                    ['table_name' => 'failed_messages'],
                 ]);
             }
-        ]);
+        );
 
-        /**
-         * Failure transport locator
-         * Maps which transport routes its failures where.
-         */
-        app()->addService('messenger.failure_transports', [
+        // Map which specific operational transports route unexpected failures into storage
+        app()->addService('messenger.failure_transports', 
             \Clicalmani\Foundation\Messenger\FailureTransportLocator::class,
             function(ServiceConfigurator|DefaultsConfigurator $config) {
                 $config->args([
                     $this->config['failure_transports'] ?? []
                 ]);
             }
-        ]);
+        );
         
-        app()->addService('messenger.senders_locator', [
+        // Compile physical message-to-transport sender mappings across the application context
+        app()->addService('messenger.senders_locator', 
             \Symfony\Component\Messenger\Transport\Sender\SendersLocator::class,
             function (ServiceConfigurator|DefaultsConfigurator $config) {
                 $config->args([
                     [
                         ...($this->config['routing'] ?? []),
-                        '*' => [($this->transport === "elegant://default") ? 'messenger.transport.elegant': $this->transport]
+                        '*' => [($this->transport === "elegant://default") ? 'messenger.transport.elegant' : $this->transport]
                     ],
                     new Reference('service_container')
                 ]);
             }
-        ]);
+        );
 
-        app()->addService('messenger.middleware.send_message', [
+        // Bind the fundamental message outward dispatching middleware engine
+        app()->addService('messenger.middleware.send_message', 
             \Symfony\Component\Messenger\Middleware\SendMessageMiddleware::class,
             static function (ServiceConfigurator|DefaultsConfigurator $config) {
                 $config->args([
                     app()->dependency('service', 'messenger.senders_locator')
                 ]);
             }
-        ]);
+        );
 
-        /**
-         * Handlers
-         */
-        app()->addService('messenger.handlers_locator', [
+        // Register the handler locator storage containing resolved invokable maps
+        app()->addService('messenger.handlers_locator', 
             \Symfony\Component\Messenger\Handler\HandlersLocator::class,
             static fn(ServiceConfigurator|DefaultsConfigurator $config) => $config->args([
                 $handlersMapping
             ])
-        ]);
+        );
         
-        app()->addService('messenger.middleware.handle_message', [
+        // Bind the inbound message target handling execution middleware engine
+        app()->addService('messenger.middleware.handle_message', 
             \Symfony\Component\Messenger\Middleware\HandleMessageMiddleware::class,
             static fn(ServiceConfigurator|DefaultsConfigurator $config) => $config->args([
                 app()->dependency('service', 'messenger.handlers_locator')
             ])
-        ]);
+        );
         
-        app()->addService('messenger', [
+        // Core framework Message Bus orchestration service containing the sequenced middleware pipeline
+        app()->addService('messenger', 
             \Symfony\Component\Messenger\MessageBus::class,
             static fn(ServiceConfigurator|DefaultsConfigurator $config) => $config->args([
                 [
@@ -132,9 +170,14 @@ class MessengerServiceProvider implements ServiceProviderInterface
                     app()->dependency('service', 'messenger.middleware.handle_message'),
                 ]
             ])
-        ]);
+        );
     }
 
+    /**
+     * Synchronizes global configuration instances inside application boot cycles.
+     * 
+     * @return void
+     */
     #[Override]
     public function boot(): void
     {
@@ -143,25 +186,53 @@ class MessengerServiceProvider implements ServiceProviderInterface
         }
     }
 
+    /**
+     * Mutates the target transport driver definition pointer string.
+     * 
+     * @param string $transport The targeted transport URI scheme string.
+     * @return void
+     */
     public function setTransport(string $transport): void
     {
         $this->transport = $transport;
     }
 
+    /**
+     * Mutates the filesystem directory track targeted for automatic handler scanning.
+     * 
+     * @param string $handlersPath Relative application file pathway.
+     * @return void
+     */
     public function setHandlersPath(string $handlersPath): void
     {
         $this->handlersPath = $handlersPath;
     }
 
+    /**
+     * Mutates the root PHP structural class namespace prefix for handlers.
+     * 
+     * @param string $namespace The targeted namespace structure string.
+     * @return void
+     */
     public function setNamespace(string $namespace): void
     {
         $this->namespace = $namespace;
     }
 
+    /**
+     * Inspects the target filesystem to dynamically build an execution map 
+     * binding typed parameter objects to invokable class handlers.
+     * 
+     * @return array Calculated multidimensional message-to-handler execution map array.
+     */
     protected function discoverHandlers(): array
     {
         $handlersMapping = [];
         $handlersPath = root_path($this->handlersPath);
+
+        if (!is_dir($handlersPath)) {
+            return $handlersMapping;
+        }
 
         $directory = new \RecursiveDirectoryIterator($handlersPath, \RecursiveDirectoryIterator::SKIP_DOTS);
         $filter = new \RecursiveCallbackFilterIterator($directory, function ($current, $key, $iterator) {
@@ -182,7 +253,7 @@ class MessengerServiceProvider implements ServiceProviderInterface
             $classNameOnly = $file->getBasename('.php');
             
             $className = $baseNamespace . $subNamespace . '\\' . $classNameOnly;
-            $className = str_replace('\\\\', '\\', $className); // Safeguard against double backslashes
+            $className = str_replace('\\\\', '\\', $className); // Safeguard against trailing or double backslashes
 
             if (class_exists($className)) {
                 $reflection = new \ReflectionClass($className);
@@ -194,7 +265,7 @@ class MessengerServiceProvider implements ServiceProviderInterface
                         // Protects against Union Types (PHP 8+) and scalar types
                         if ($type instanceof \ReflectionNamedType && !$type->isBuiltin()) {
                             $messageClass = $type->getName();
-                            app()->addService($className, [$className]);
+                            app()->addService($className, $className);
                             $handlersMapping[$messageClass][] = new Reference($className);
                         }
                     }

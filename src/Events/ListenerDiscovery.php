@@ -35,7 +35,7 @@ class ListenerDiscovery
             $classNameOnly = $file->getBasename('.php');
             
             $className = $baseNamespace . $subNamespace . '\\' . $classNameOnly;
-            $className = str_replace('\\\\', '\\', $className); // Sécurité anti-double slash
+            $className = str_replace('\\\\', '\\', $className); // Double slash safety guard
             
             if (class_exists($className)) {
                 $reflection = new ReflectionClass($className);
@@ -45,11 +45,11 @@ class ListenerDiscovery
                     /** @var AsEventListener $instance */
                     $instance = $attribute->newInstance();
                     
-                    // On récupère le nom de l'événement configuré dans l'attribut
+                    // Retrieve the event name configured inside the attribute
                     $event = $instance->event;
 
-                    // Si l'événement n'est pas spécifié, on essaie de le deviner 
-                    // via le type du premier argument de la méthode exécutée
+                    // If the event name is not specified, attempt to infer it 
+                    // from the typehint of the first argument on the target method.
                     $method = $instance->method ?? '__invoke';
                     
                     if (!$event && $reflection->hasMethod($method)) {
@@ -61,8 +61,8 @@ class ListenerDiscovery
                     }
 
                     if ($event) {
-                        // On attache le listener au dispatcher
-                        // Symfony accepte un callable de type [Instance, Méthode]
+                        // Attach the listener to the dispatcher.
+                        // Symfony accepts an [Instance, Method] callable array syntax.
                         $this->dispatcher->addListener($event, [new $className(), $method], $instance->priority);
                     }
                 }

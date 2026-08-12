@@ -1,11 +1,37 @@
 <?php
 namespace Clicalmani\Foundation\Maker;
 
+/**
+ * Class AppKernel
+ * 
+ * Handles the loading and registration of the core application environment configurations 
+ * and explicit mail service blueprints during the framework boot phase.
+ * 
+ * @package Clicalmani\Foundation\Maker
+ * @author @clicalmani
+ */
 class AppKernel extends Kernel
 {
+    /**
+     * Cached application core configuration array.
+     * 
+     * @var array|null
+     */
     private $app_config;
+
+    /**
+     * Cached mailing component configuration array.
+     * 
+     * @var array|null
+     */
     private $mail_config;
 
+    /**
+     * Boots the core framework runtime configurations.
+     * Resolves absolute paths, verifies file existence, and imports targeted arrays into memory.
+     * 
+     * @return void
+     */
     public function boot(): void
     {
         $app_config_file = $this->app->config['paths']['root'] . '/config/app.php';
@@ -20,9 +46,14 @@ class AppKernel extends Kernel
         }
     }
 
+    /**
+     * Commits the loaded application and mailing configurations into the global framework settings container.
+     * 
+     * @return void
+     */
     public function register(): void
     {
-        $this->app->config['app'] = $this->app_config;
+        $this->app->config['app']  = $this->app_config;
         $this->app->config['mail'] = $this->mail_config;
     }
 }

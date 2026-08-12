@@ -6,77 +6,83 @@ use Clicalmani\Foundation\Support\Facades\Route;
 use Clicalmani\Foundation\Support\Facades\Config;
 use Clicalmani\Routing\Memory;
 use Clicalmani\Routing\Record;
+use Override;
 
 /**
- * RouteServiceProvider class
+ * Class RouteServiceProvider
  * 
- * @package Clicalmani\Foundation/flesco 
- * @author @Clicalmani\Foundation
+ * Provisions the application routing layer infrastructure, establishing CORS configuration headers, 
+ * tracking route discovery sequences, executing CSRF defense states, and managing third-party 
+ * navigation redirection handler middleware services.
+ * 
+ * @package Clicalmani\Foundation\Providers
+ * @author @clicalmani
  */
 class RouteServiceProvider extends ServiceProvider
 {
     /**
-     * API prefix
+     * URI prefix assigned to identify API entry endpoints.
      * 
      * @var string
      */
-    protected $api_prefix = 'api';
+    protected string $api_prefix = 'api';
 
     /**
-     * Parameter prefix
-     * 
-     * @var string 
-     */
-    protected $parameter_prefix = ':';
-
-    /**
-     * Default api handler
+     * Leading separator character flag parsing parameterized dynamic route parameter.
      * 
      * @var string
      */
-    protected $api_handler = 'routes/api.php';
+    protected string $parameter_prefix = ':';
 
     /**
-     * Default web handler
+     * Primary filesystem pathway location containing API gateway definitions.
      * 
      * @var string
      */
-    protected $web_handler = 'routes/web.php';
+    protected string $api_handler = 'routes/api.php';
 
     /**
-     * Request response
+     * Primary filesystem pathway location containing public web page definitions.
+     * 
+     * @var string
+     */
+    protected string $web_handler = 'routes/web.php';
+
+    /**
+     * Internal runtime response cache storage parsed from active route callbacks.
      * 
      * @var mixed
      */
-    private static $response_data;
+    private static mixed $response_data;
 
     /**
-     * CORS settings
+     * Map block capturing Cross-Origin Resource Sharing policy rules.
      * 
-     * @var array
+     * @var array|null
      */
-    private static $cors_settings;
+    private static ?array $cors_settings = null;
 
     /**
-     * Route settings
+     * Structure collection holding global routing driver properties.
      * 
-     * @var array
+     * @var array|null
      */
-    private static $route_settings;
+    private static ?array $route_settings = null;
 
     /**
-     * Global route binging callback.
+     * Execution container callback handling custom parameter bindings.
      * 
-     * @var callable
+     * @var callable|\Closure|null
      */
-    private static $route_binding_callback;
+    private static mixed $route_binding_callback = null;
     
     /**
-     * Initialize route service
+     * Envelopes route scanning phases, configuring context hooks and clearing temporary caches.
      * 
-     * @param callable $callback
+     * @param callable $callback Discovery script processing logic execution loop.
+     * @return void
      */
-    public function routes(callable $callback)
+    public function routes(callable $callback): void
     {
         Record::start('api');
         $this->setHeaders();
@@ -91,122 +97,123 @@ class RouteServiceProvider extends ServiceProvider
     }
 
     /**
-     * Get api prefix
+     * Retrieves the operational API URI prefix.
      * 
      * @return string
      */
-    public function getApiPrefix()
+    public function getApiPrefix(): string
     {
         return $this->api_prefix;
     }
 
     /**
-     * Get parameter prefix
+     * Retrieves the structural dynamic parameter identification prefix token.
      * 
      * @return string
      */
-    public function getParameterPrefix()
+    public function getParameterPrefix(): string
     {
         return $this->parameter_prefix;
     }
 
     /**
-     * Get api handler
+     * Retrieves the relative pathway location targeting API route collections.
      * 
      * @return string
      */
-    public function getApiHandler()
+    public function getApiHandler(): string
     {
         return $this->api_handler;
     }
 
     /**
-     * Get web handler
+     * Retrieves the relative pathway location targeting standard web route collections.
      * 
      * @return string
      */
-    public function getWebHandler()
+    public function getWebHandler(): string
     {
         return $this->web_handler;
     }
 
     /**
-     * Set response headers
+     * Resolves and issues necessary CORS context response headers back to browser clients.
+     * Intercepts HTTP preflight checks to guarantee proper protocol understanding matches config rules.
      * 
      * @return void
      */
-    public function setHeaders()
+    public function setHeaders(): void
     {
-        header("Access-Control-Allow-Origin: " . static::$cors_settings['allowed_origin']);
-        header('Access-Control-Allow-Credentials: ' . static::$cors_settings['allow_credentials']);
-        header('Access-Control-Max-Age: ' . static::$cors_settings['max_age']);
+        if (isset(static::$cors_settings['allowed_origin'])) {
+            header("Access-Control-Allow-Origin: " . static::$cors_settings['allowed_origin']);
+        }
+        if (isset(static::$cors_settings['allow_credentials'])) {
+            header('Access-Control-Allow-Credentials: ' . static::$cors_settings['allow_credentials']);
+        }
+        if (isset(static::$cors_settings['max_age'])) {
+            header('Access-Control-Max-Age: ' . static::$cors_settings['max_age']);
+        }
     
-        /**
-         * |-------------------------------------------------------------------
-         * |                ***** Preflight Routes *****
-         * |-------------------------------------------------------------------
-         * 
-         * API Request is composed of preflight request and request.
-         * Prefilght request is meant to check wether the CORS protocol is understood
-         */
-        if (@ $_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+        // Evaluate preflight requests containing specific query check instructions
+        if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     
-            if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD']))
-                header("Access-Control-Allow-Methods: " . join(',', static::$cors_settings['allowed_methods']));         
+            if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD']) && isset(static::$cors_settings['allowed_methods'])) {
+                header("Access-Control-Allow-Methods: " . join(',', (array) static::$cors_settings['allowed_methods']));         
+            }
     
-            if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']))
+            if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']) && isset(static::$cors_settings['allowed_headers'])) {
                 header("Access-Control-Allow-Headers: " . static::$cors_settings['allowed_headers']);
+            }
                 
-                // Preflight
-                response()->sendStatus(204);
-                exit;
+            // Terminate preflight early with a clean status code indicating validation success
+            response()->sendStatus(204);
+            exit;
         }
     }
 
     /**
-     * Store CSRF token
+     * Compiles a cross-site request forgery defense token within active state session structures.
      * 
      * @return void
      */
-    public function storeCSRFToken() : void
+    public function storeCSRFToken(): void
     {
-        // Escape console mode
-        if ( FALSE == isConsoleMode() ) {
-            // Generate CSRF token and Store it in $_SESSION global variable
-            if ( ! isset($_SESSION['csrf_token']) ) {
-                $_SESSION['csrf_token'] = with ( new \Clicalmani\Foundation\Auth\CSRF )->getToken(); 
+        // Execute strictly inside real HTTP server lifecycles, bypassing console terminal runs
+        if ( false === isConsoleMode() ) {
+            if ( ! isset($_SESSION['csrf_token']) && class_exists('\Clicalmani\Foundation\Auth\CSRF') ) {
+                $_SESSION['csrf_token'] = (new \Clicalmani\Foundation\Auth\CSRF())->getToken(); 
             }
         }
     }
 
     /**
-     * Request response handler
+     * Binds the request response parser context to resolve current authenticated user entities.
      * 
-     * @param callable $callback
+     * @param callable $callback Extraction mapping directive execution logic.
      * @return void
      */
-    public static function responseHandler(callable $callback) : void
+    public static function responseHandler(callable $callback): void
     {
         static::$response_data = $callback( (new Request)->user() );
     }
 
     /**
-     * Get response data
+     * Obtains the accumulated static response instance pointer data.
      * 
      * @return mixed
      */
-    public static function getResponseData() : mixed
+    public static function getResponseData(): mixed
     {
         return static::$response_data;
     }
 
     /**
-     * Get provided third party route services
+     * Assembles full file paths mapping authorized Third-Party Redirection Services (TPS).
      * 
-     * @param string $service_type
-     * @return array
+     * @param int $service_level Target authorization depth verification scope index.
+     * @return array Calculated class namespace path strings collection.
      */
-    public static function getProvidedTPS(int $service_level = 0) : array 
+    public static function getProvidedTPS(int $service_level = 0): array 
     {
         $tps = Config::bootstrap('tps')[$service_level] ?? [];
 
@@ -218,82 +225,89 @@ class RouteServiceProvider extends ServiceProvider
     }
 
     /**
-     * Fire third party services
+     * Iterates across active Third-Party Service hooks to execute secondary redirection routines.
      * 
-     * @param mixed $response Request response
+     * @param mixed $route_response Internal context data generated by active controller routes.
+     * @param int $service_level Target verification structural tier index level.
      * @return void
      */
-    public static function fireTPS(mixed &$route_response, int $service_level = 0) : void
+    public static function fireTPS(mixed &$route_response, int $service_level = 0): void
     {
         foreach (self::getProvidedTPS($service_level) as $tps) {
-            with( new $tps($route_response ?? false) )->redirect();
+            (new $tps($route_response ?? false))->redirect();
         }
     }
 
     /**
-     * Get default builder
+     * Obtains the designated core framework query mapping generator builder instance.
      * 
      * @return mixed
      */
-    public function getDefaultBuilder() : mixed
+    public function getDefaultBuilder(): mixed
     {
-        return @static::$route_settings['default_builder'];
+        return static::$route_settings['default_builder'] ?? null;
     }
 
     /**
-     * Get builders
+     * Retrieves the list of architectural route compiler builders registered in the layout system.
      * 
      * @return mixed
      */
-    public function getBuilders() : mixed 
+    public function getBuilders(): mixed 
     {
-        return @static::$route_settings['builders'];
+        return static::$route_settings['builders'] ?? null;
     }
 
     /**
-     * Get or set route binding callback.
+     * Mutates or acquires current execution pointers targeting localized route context binders.
      * 
-     * @return mixed
+     * @param \Closure|null $callback Optional function to bind parameter model entities.
+     * @return mixed Closure reference binding map if fetching, otherwise execution update statuses.
      */
-    public static function routeBindingCallback(?\Closure $callback = null) : mixed
+    public static function routeBindingCallback(?\Closure $callback = null): mixed
     {
-        if (NULL === $callback) return static::$route_binding_callback;
+        if (null === $callback) {
+            return static::$route_binding_callback;
+        }
         return static::$route_binding_callback = $callback;
     }
 
+    /**
+     * Boots configurations, merging application routing setups with environment parameters 
+     * while resetting global memory tables.
+     * 
+     * @return void
+     */
+    #[Override]
     public function boot(): void
     {
         static::$route_settings = require_once config_path('/routing.php');
         static::$cors_settings = require_once config_path('/cors.php');
 
-        /**
-         * |-------------------------------------------------------------------
-         * |                ***** Route Configuration *****
-         * |-------------------------------------------------------------------
-         * Route configuration is set here to be used by the routing package and the route builder.
-         */
-        $provider = new \App\Providers\RouteServiceProvider;
+        // Capture properties explicitly to respect downstream local overrides
+        $provider = new \App\Providers\RouteServiceProvider();
+        
         app()->config->set('route', array_merge(static::$route_settings ?? [], [
-            'api_prefix' => $provider->api_prefix,
+            'api_prefix'       => $provider->api_prefix,
             'parameter_prefix' => $provider->parameter_prefix,
-            'api_handler' => $provider->web_handler,
-            'web_handler' => $provider->web_handler,
-            'default_builder' => $provider->getDefaultBuilder(),
-            'builders' => $provider->getBuilders(),
-            'cors' => static::$cors_settings
+            'api_handler'      => $provider->web_handler,
+            'web_handler'      => $provider->web_handler,
+            'default_builder'  => $provider->getDefaultBuilder(),
+            'builders'         => $provider->getBuilders(),
+            'cors'             => static::$cors_settings
         ]));
 
+        // Include downstream helpers explicitly supporting global request evaluation methods
         require_once dirname(__DIR__, 3) . '/routing/src/functions.php';
         
-        Memory::setRoutes(
-            [
-                'get'     => [], 
-                'post'    => [],
-                'options' => [],
-                'delete'  => [],
-                'put'     => [],
-                'patch'   => []
-            ]
-        );
+        // Wipe and isolate initial static routing tracking containers
+        Memory::setRoutes([
+            'get'     => [], 
+            'post'    => [],
+            'options' => [],
+            'delete'  => [],
+            'put'     => [],
+            'patch'   => []
+        ]);
     }
 }

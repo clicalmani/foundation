@@ -3,14 +3,34 @@
 namespace Clicalmani\Foundation\Messenger;
 
 use Clicalmani\Foundation\Messenger\Stamp\ElegantTransportStamp;
+use Clicalmani\Foundation\Messenger\Stamp\RetryingStamp;
 use Symfony\Component\Messenger\Transport\TransportInterface;
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\Transport\Serialization\SerializerInterface;
 use Symfony\Component\Messenger\Transport\Serialization\PhpSerializer;
 use Symfony\Component\Messenger\Stamp\ReceivedStamp;
+use Symfony\Component\Messenger\Stamp\RedeliveryStamp;
+use Symfony\Component\Messenger\Stamp\DelayStamp;
 
+/**
+ * Class ElegantTransport
+ * 
+ * Implements a database-backed Symfony Messenger transport interface leveraging 
+ * your framework's Elegant ORM models. Manages advanced message queuing pipelines 
+ * including delayed delivery, conditional retries, and failure state handling.
+ * 
+ * @package Clicalmani\Foundation\Messenger
+ * @author @clicalmani
+ */
 class ElegantTransport implements TransportInterface
 {
+    /**
+     * ElegantTransport constructor.
+     * 
+     * @param string $model The fully qualified class name of the Elegant ORM Model.
+     * @param SerializerInterface|null $serializer Serializer instance for message payload encoding/decoding.
+     * @param array<string, mixed> $options Transport run-time configuration attributes.
+     */
     public function __construct(
         protected string $model, 
         protected ?SerializerInterface $serializer = null,
@@ -20,7 +40,10 @@ class ElegantTransport implements TransportInterface
     }
 
     /**
-     * Retrieves messages from the database (for the Worker)
+     * Retrieves available message envelopes from the persistent database queue.
+     * Marks targeted records as in-progress to prevent concurrent consumption by separate workers.
+     * 
+     * @return iterable<Envelope> Collection containing the decoded message envelope if found, or empty array.
      */
     public function get(): iterable
     {
@@ -37,60 +60,62 @@ class ElegantTransport implements TransportInterface
         
         // Deserialize to return an Envelope back to Symfony
         $envelope = $this->serializer->decode([
-            'body'    => $record->body,
-            'headers' => (array) $record->headers
+            'body'    => (string) $record->body,
+            'headers' => (array) json_decode((string) $record->headers, true)
         ]);
         
-        // ⚠️ IMPORTANT: Inject the ID into the Envelope to find it back in ack/reject
+        // Inject operational tracking stamps into the active lifecycle envelope
         return [$envelope->with(
-            new ElegantTransportStamp($record->id),
+            new ElegantTransportStamp((int) $record->id),
             new ReceivedStamp('messenger.transport.elegant')
         )];
     }
 
     /**
-     * Sends a message to the database (for the Dispatcher)
+     * Dispatches or schedules a message envelope into the underlying persistent database layer.
+     * 
+     * @param Envelope $envelope The message envelope payload ready for delivery.
+     * @return Envelope The updated message envelope appended with transactional queue metadata stamps.
      */
     public function send(Envelope $envelope): Envelope
     {
         $encoded = $this->serializer->encode($envelope);
 
         /** @var RedeliveryStamp|null $redelivery */
-        $redelivery = $envelope->last(\Symfony\Component\Messenger\Stamp\RedeliveryStamp::class);
+        $redelivery = $envelope->last(RedeliveryStamp::class);
 
         /** @var ElegantTransportStamp|null $idStamp */
         $idStamp = $envelope->last(ElegantTransportStamp::class);
         
         if ($redelivery !== null && $idStamp !== null) {
-            // ── Retry: update the existing record ────────────────────────────────
-            // Do NOT create a new record — overwrite the body/headers with the new
-            // stamps (updated RedeliveryStamp) and reset delivered_at to null so
-            // that the worker can process it again.
+            // ── Retry Execution Flow: Update existing historical record ───────────────────────
+            // Overwrite payload parameters without introducing disjointed row records.
+            // Reset delivery states to bring the message entity back into worker visibility.
             $this->model::find($idStamp->getId())?->update([
                 'body'         => $encoded['body'],
                 'headers'      => json_encode($encoded['headers'] ?? []),
-                'delivered_at' => null,  // Puts the message back into the queue
-                'available_at' => now(), // Available immediately (or add a delay if desired)
+                'delivered_at' => null,  
+                'available_at' => now(), 
             ]);
 
             return $envelope;
         }
 
-        /** @var \Symfony\Component\Messenger\Stamp\DelayStamp|null $delayStamp */
-        $delayStamp = $envelope->last(\Symfony\Component\Messenger\Stamp\DelayStamp::class);
+        /** @var DelayStamp|null $delayStamp */
+        $delayStamp = $envelope->last(DelayStamp::class);
 
         $availableAt = now(); 
 
         if (isset($this->options['delay'])) {
-            $availableAt = now()->addSeconds($this->options['delay'] / 1000);
+            $availableAt = now()->addSeconds((int) $this->options['delay'] / 1000);
         }
 
         if ($delayStamp) {
-            $seconds = $delayStamp->getDelay() / 1000;
+            $seconds = (int) $delayStamp->getDelay() / 1000;
             $availableAt = now()->addSeconds($seconds); 
         }
 
-        // ── First dispatch: normal insertion ────────────────────────────────────
+        // ── Standard Dispatch Flow: Persistent state insertion ───────────────────────
         $model = new $this->model;
         $model->body         = $encoded['body'];
         $model->headers      = json_encode($encoded['headers'] ?? []);
@@ -100,41 +125,52 @@ class ElegantTransport implements TransportInterface
         $model->save();
 
         return $envelope->with(
-            new ElegantTransportStamp($model->id)
+            new ElegantTransportStamp((int) $model->id)
         );
     }
 
     /**
-     * Called when the Worker successfully processes the message WITHOUT errors
+     * Acknowledges successful processing of a message envelope by the consumer worker.
+     * Purges or flags records based on storage retention strategies.
+     * 
+     * @param Envelope $envelope The target successfully consumed message wrapper.
+     * @return void
      */
     public function ack(Envelope $envelope): void 
     {
-        // Retrieve our custom Stamp containing the ID
+        /** @var ElegantTransportStamp|null $stamp */
         $stamp = $envelope->last(ElegantTransportStamp::class);
         
         if (null === $stamp) {
-            return; // Cannot proceed without the ID
+            return; 
         } 
         
-        if (false === $this->options['keep']) $this->model::find($stamp->getId())?->delete();
-        else $this->model::find($stamp->getId())?->update(['completed_at' => now()]);
+        if (false === ($this->options['keep'] ?? false)) {
+            $this->model::find($stamp->getId())?->delete();
+        } else {
+            $this->model::find($stamp->getId())?->update(['completed_at' => now()]);
+        }
     }
 
     /**
-     * Called when the Worker fails (Exception thrown in the Handler)
+     * Rejects an envelope when processing terminates due to a structural exception.
+     * Determines whether to hold or scrap records based on current retry counts.
+     * 
+     * @param Envelope $envelope The message envelope causing runtime execution faults.
+     * @return void
      */
     public function reject(Envelope $envelope): void
     {
-        // If RetryingStamp is present → retry in progress, send() has already
-        // updated the record — do nothing here
-        if ($envelope->last(\Clicalmani\Foundation\Messenger\Stamp\RetryingStamp::class)) {
+        // Skip routine actions if external retries remain active on this envelope
+        if ($envelope->last(RetryingStamp::class)) {
             return;
         }
 
-        // Permanent failure (retries exhausted) or manual rejection — delete/archive
         /** @var ElegantTransportStamp|null $stamp */
         $stamp = $envelope->last(ElegantTransportStamp::class);
-        if (!$stamp) return;
+        if (!$stamp) {
+            return;
+        }
 
         if (false === ($this->options['keep'] ?? false)) {
             $this->model::find($stamp->getId())?->delete();
