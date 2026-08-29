@@ -6,7 +6,10 @@ use Broadcaster\Event\ShouldBroadcastInterface;
 use Broadcaster\SystemBroadcastListener;
 use Clicalmani\Foundation\Events\BroadcastEventDispatcher;
 use Clicalmani\Foundation\Events\CoreEventDispatcher;
+use Clicalmani\Foundation\Events\Listeners\NoticeableListener;
+use Clicalmani\Foundation\Events\Listeners\SystemNoticeableListener;
 use Clicalmani\Foundation\Events\MailableEventDispatcher;
+use Clicalmani\Foundation\Events\NoticeableEventDispatcher;
 use Clicalmani\Foundation\Mail\MailableListener;
 use Clicalmani\Foundation\Mail\SystemMailableListener;
 use Symfony\Component\DependencyInjection\Loader\Configurator\DefaultsConfigurator;
@@ -65,6 +68,16 @@ class EventServiceProvider implements ServiceProviderInterface
             static function(ServiceConfigurator|DefaultsConfigurator $config) {}
         );
 
+        app()->addService(SystemNoticeableListener::class, 
+            SystemNoticeableListener::class,
+            static function(ServiceConfigurator|DefaultsConfigurator $config) {}
+        );
+
+        app()->addService(NoticeableListener::class, 
+            NoticeableListener::class,
+            static function(ServiceConfigurator|DefaultsConfigurator $config) {}
+        );
+
         // Wire the specialized event dispatchers with their corresponding system listeners
         app()->addService(BroadcastEventDispatcher::class, 
             BroadcastEventDispatcher::class,
@@ -84,6 +97,15 @@ class EventServiceProvider implements ServiceProviderInterface
             }
         );
 
+        app()->addService(NoticeableEventDispatcher::class, 
+            NoticeableEventDispatcher::class,
+            static function(ServiceConfigurator|DefaultsConfigurator $config) {
+                $config->args([
+                    app()->dependency('service', SystemNoticeableListener::class)
+                ]);
+            }
+        );
+
         // Consolidate specialized dispatchers into the primary core event dispatcher pipeline
         app()->addService(CoreEventDispatcher::class, 
             CoreEventDispatcher::class,
@@ -92,6 +114,7 @@ class EventServiceProvider implements ServiceProviderInterface
                     [
                         app()->dependency('service', BroadcastEventDispatcher::class),
                         app()->dependency('service', MailableEventDispatcher::class),
+                        app()->dependency('service', NoticeableEventDispatcher::class),
                     ]
                 ]);
             }

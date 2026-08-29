@@ -79,13 +79,13 @@ abstract class ServiceProvider implements ServiceProviderInterface
         if ( class_exists($service_class) ) {
             $service = new $service_class();
             
+            if ( method_exists($service, 'boot') ) {
+                $service->boot();
+            }
+            
             // Execute standard framework bootstrapping and dependency registration hooks
             if ( method_exists($service, 'register') ) {
                 $service->register();
-            }
-            
-            if ( method_exists($service, 'boot') ) {
-                $service->boot();
             }
         }
     }

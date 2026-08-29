@@ -2,6 +2,7 @@
 
 namespace Clicalmani\Foundation\Messenger;
 
+use Clicalmani\Foundation\Filesystem\DirectoryScanner;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
@@ -33,37 +34,21 @@ class SubscriberDiscovery
             return $subscribers;
         }
 
-        // Safely extract directories and files while filtering out dot reference markers
-        $scannedItems = scandir($dir);
-        $items        = false !== $scannedItems ? array_diff($scannedItems, ['.', '..']) : [];
+        $subscriberClasses = (new DirectoryScanner(
+            rootPath: $dir,
+            baseNamespace: $namespace,
+            ignore: ['.', '..']
+        ))->discoverClasses(
+            fn(string $className) => is_subclass_of($className, EventSubscriberInterface::class)
+        );
 
-        foreach ($items as $item) {
-            $path = $dir . DIRECTORY_SEPARATOR . $item;
-            
-            // ── 1. Recursive handling of subdirectories ─────────────────────
-            // Propagate the subdirectory item names upward to safely follow nested PSR-4 structures.
-            if (is_dir($path)) {
-                $subSubscribers = self::discover($path, $namespace . '\\' . $item);
-                $subscribers    = array_merge($subscribers, $subSubscribers);
-                continue;
-            }
-
-            // ── 2. Processing Subscriber files ─────────────────────────────
-            if (pathinfo($item, PATHINFO_EXTENSION) === 'php') {
-                $className = $namespace . '\\' . pathinfo($item, PATHINFO_FILENAME);
-
-                // Ensure the extracted class string is loaded and conforms to Symfony's contract
-                if (class_exists($className) && is_subclass_of($className, EventSubscriberInterface::class)) {
-                    
-                    // Route resolution through Tonka's dependency container or fall back to native setup
-                    /** @var EventSubscriberInterface $instance */
-                    $instance = container()->has($className) 
-                        ? container()->get($className) 
-                        : new $className();
-                        
-                    $subscribers[] = $instance;
-                }
-            }
+        foreach ($subscriberClasses as $className) {
+            /** @var EventSubscriberInterface $instance */
+            $instance = container()->has($className) 
+                ? container()->get($className) 
+                : new $className();
+                
+            $subscribers[] = $instance;
         }
 
         return $subscribers;

@@ -1,10 +1,19 @@
 <?php
 namespace Clicalmani\Foundation\Acme;
 
-use Clicalmani\Foundation\Filesystem\RecursiveFilter;
+use Clicalmani\Foundation\Filesystem\DirectoryScanner;
 use Clicalmani\Foundation\Support\Facades\DB;
 use Clicalmani\XPower\XDTNodeList;
 
+/**
+ * Class Console
+ * 
+ * Manages framework database operations including topological migrations,
+ * table drops, database seeding, SQL exports, and routine creation.
+ * 
+ * @package Clicalmani\Foundation\Acme
+ * @author @clicalmani
+ */
 class Console
 {
     /**
@@ -66,10 +75,7 @@ class Console
             $nodes[] = $node;
         }
 
-        /** @var \Clicalmani\XPower\XDTNodeList[] */
-        $skipped = $this->processMigrate($nodes);
-        
-        while ( count($skipped) ) $skipped = $this->processMigrate($skipped);
+        $this->processMigrate($nodes);
 
         // ── Alter ──────────────────────────────────────────────────────
         foreach ($nodes as $node) {
@@ -89,13 +95,12 @@ class Console
         }
 
         $xdt->close();
-        unset($skipped);
         $this->migratedTables = [];
         DB::getInstance()->getPdo()->query('SET FOREIGN_KEY_CHECKS = 1');
     }
 
     /**
-     * Drop all table from the current database.
+     * Drop all tables from the current database.
      * 
      * @param string $filename Migration file
      * @return void
@@ -116,12 +121,9 @@ class Console
             $nodes[] = $node;
         }
 
-        $skipped = $this->processDrop($nodes);
-        
-        while ( count($skipped) ) $skipped = $this->processDrop($skipped);
+        $this->processDrop($nodes);
 
         $xdt->close();
-        unset($skipped);
         $this->dropped = [];
     }
 
@@ -148,7 +150,7 @@ class Console
     }
 
     /**
-     * Export database migration
+     * Export database migration.
      * 
      * @param string $filename File to export to
      * @return void
@@ -161,9 +163,9 @@ class Console
     }
 
     /**
-     * Output setter
+     * Output setter.
      * 
-     * @param \Symfony\Component\Console\Output\OutputInterface $output
+     * @param \Symfony\Component\Console\Output\OutputInterface|null $output
      * @return void
      */
     public function setOutput(\Symfony\Component\Console\Output\OutputInterface|null $output) : void
@@ -172,7 +174,7 @@ class Console
     }
 
     /**
-     * Dump file setter
+     * Dump file setter.
      * 
      * @param ?string $filename File name
      * @return void
@@ -183,7 +185,7 @@ class Console
     }
 
     /**
-     * Seed the default database
+     * Seed the default database.
      * 
      * @param ?string $class
      * @param ?string $filename Migration file
@@ -192,10 +194,8 @@ class Console
     public function seed(?string $class = null, ?string $filename = null) : bool
     {
         if (NULL !== $class) {
-            require_once database_path("/seeders/$class.php");
-
-            $classNs = "\Database\Seeders\\$class";
-            $seeder = new $classNs;
+            require_once "{$class}.php";
+            $seeder = new $class;
 
             $this->writeln('Running ' . $class, true, 'comment');
 
@@ -247,27 +247,22 @@ class Console
     public function routineFunctions() : bool
     {
         try {
-            $functions_dir = new \RecursiveDirectoryIterator( database_path('/routines/functions'));
-            $filter = new RecursiveFilter($functions_dir);
-            // $filter->setPattern("\\.php$");
+            $scanner = new DirectoryScanner(
+                rootPath: app()->databasePath('routines/functions'),
+                extensions: [''],
+            );
 
-            $this->writeln('Migration routine functions ...', true, 'comment');
+            $this->writeln('Migrating routine functions ...', true, 'comment');
 
-            foreach (new \RecursiveIteratorIterator($filter) as $file) { 
-                $pathname = $file->getPathname();
-                $filename = $file->getFileName();
-
-                if($file->isFile()) {
-                    if(is_readable($pathname)) {
-                        $function = require $pathname;
-                        $this->writeln("Creating $filename ...", true, 'comment');
-                        $this->dropRoutine($filename, 'FUNCTION');
-                        
-                        if (false == $this->create($function)) {
-                            $this->writeln('Failure', true, 'error');
-                        } else $this->writeln('Success', true, 'info');
-                    }
-                }
+            foreach ($scanner->files() as $pathname) { 
+                $function = require $pathname;
+                $filename = basename($pathname);
+                $this->writeln("Creating $filename ...", true, 'comment');
+                $this->dropRoutine($filename, 'FUNCTION');
+                
+                if (false == $this->create($function)) {
+                    $this->writeln('Failure', true, 'error');
+                } else $this->writeln('Success', true, 'info');
             }
 
             return true;
@@ -279,34 +274,29 @@ class Console
     }
 
     /**
-     * Create procedure routine
+     * Create procedure routine.
      * 
      * @return bool
      */
     public function routineProcs() : bool
     {
         try {
-            $procedures_dir = new \RecursiveDirectoryIterator( database_path('/routines/procedures') );
-            $filter = new RecursiveFilter($procedures_dir);
-            $filter->setPattern("\\.php$");
+            $scanner = new DirectoryScanner(
+                rootPath: app()->databasePath('routines/procedures'),
+                extensions: [''],
+            );
 
-            $this->writeln('Migration stored procedures ...', true, 'comment');
+            $this->writeln('Migrating stored procedures ...', true, 'comment');
 
-            foreach (new \RecursiveIteratorIterator($filter) as $file) { 
-                $pathname = $file->getPathname();
-                $filename = $file->getFileName();
-
-                if($file->isFile()) {
-                    if(is_readable($pathname)) {
-                        $function = require $pathname;
-                        $this->writeln("Creating $filename ...", true, 'comment');
-                        $this->dropRoutine($filename, 'PROCEDURE', true, 'comment');
-                        
-                        if (false == $this->create($function)) {
-                            $this->writeln('Failure', true, 'error');
-                        } else $this->writeln('Success', true, 'info');
-                    }
-                }
+            foreach ($scanner->files() as $pathname) { 
+                $function = require $pathname;
+                $filename = basename($pathname);
+                $this->writeln("Creating $filename ...", true, 'comment');
+                $this->dropRoutine($filename, 'PROCEDURE', true, 'comment');
+                
+                if (false == $this->create($function)) {
+                    $this->writeln('Failure', true, 'error');
+                } else $this->writeln('Success', true, 'info');
             }
 
             return true;
@@ -318,34 +308,29 @@ class Console
     }
 
     /**
-     * Create view routine
+     * Create view routine.
      * 
      * @return bool
      */
     public function routineViews() : bool
     {
         try {
-            $views_dir = new \RecursiveDirectoryIterator( database_path('/routines/views') );
-            $filter = new RecursiveFilter($views_dir);
-            $filter->setPattern("\\.php$");
+            $scanner = new DirectoryScanner(
+                rootPath: app()->databasePath('routines/views'),
+                extensions: [''],
+            );
 
-            $this->writeln('Migration routine views ...', true, 'comment');
+            $this->writeln('Migrating routine views ...', true, 'comment');
 
-            foreach (new \RecursiveIteratorIterator($filter) as $file) { 
-                $pathname = $file->getPathname();
-                $filename = $file->getFileName();
-
-                if($file->isFile()) {
-                    if(is_readable($pathname)) {
-                        $function = require $pathname;
-                        $this->writeln("Creating $filename ...", true, 'comment');
-                        $this->dropRoutine($filename, 'VIEW');
-                        
-                        if (false == $this->create($function)) {
-                            $this->writeln('Failure', true, 'error');
-                        } else $this->writeln('Success', true, 'info');
-                    }
-                }
+            foreach ($scanner->files() as $pathname) { 
+                $function = require $pathname;
+                $filename = basename($pathname);
+                $this->writeln("Creating $filename ...", true, 'comment');
+                $this->dropRoutine($filename, 'VIEW');
+                
+                if (false == $this->create($function)) {
+                    $this->writeln('Failure', true, 'error');
+                } else $this->writeln('Success', true, 'info');
             }
 
             return true;
@@ -357,7 +342,7 @@ class Console
     }
 
     /**
-     * Create a symbolic link
+     * Create a symbolic link.
      * 
      * @param string $target Target of the link
      * @param string $link Link name
@@ -368,7 +353,13 @@ class Console
         return symlink($target, $link);
     }
 
-    private function alterTable(XDTNodeList $node)
+    /**
+     * Alter an existing table structure.
+     * 
+     * @param \Clicalmani\XPower\XDTNodeList $node
+     * @return void
+     */
+    private function alterTable(XDTNodeList $node): void
     {
         /** @var class-string<\Clicalmani\Database\Factory\Models\Elegant> */
         $modelClass = $node->attr('model');
@@ -387,25 +378,25 @@ class Console
                 $query->exec();
                 $this->writeln('Success', true, 'info');
             } catch (\PDOException $e) {
-                $this->writeln(sprintf('An error occured while altering %s: %s', $model->getTable()->name(), $e->getMessage()), true, 'error');
+                $this->writeln(sprintf('An error occurred while altering %s: %s', $model->getTable()->name(), $e->getMessage()), true, 'error');
             }
         }
     }
 
     /**
-     * Generate migration file
+     * Generate migration manifest file.
      * 
      * @param string $filename File name
      * @return bool TRUE on success, FALSE otherwise.
      */
     private function generateManifest(string $filename) : bool
     {
-        $models_path = app_path('/Models');
         $manifests_path = database_path('/manifests');
 
-        $dir = new \RecursiveDirectoryIterator($models_path);
-        $filter = new RecursiveFilter($dir);
-        $filter->setPattern("\\.php$");
+        $scanner = new DirectoryScanner(
+            rootPath: app()->appPath('Models'),
+            baseNamespace: 'App\\Models',
+        );
 
         $xdt = xdt();
         $xdt->setDirectory($manifests_path);
@@ -416,17 +407,11 @@ class Console
 
         /**
          * Walkthrough models
-         * Keep a track of each model and its entity.
+         * Keep track of each model and its entity.
          * 
-         * @var \RecursiveDirectoryIterator $file 
+         * @var class-string<\Clicalmani\Database\Factory\Models\Elegant> 
          */
-        foreach (new \RecursiveIteratorIterator($filter) as $file) {
-            $modelClass = "App\\" . substr($file->getPathname(), strlen( root_path() ) + 4);
-            $modelClass = str_replace('/', '\\', $modelClass);
-            $modelClass = substr($modelClass, 0, strlen($modelClass) - 4);
-            $modelClass = join('\\', preg_split('/\\\/', $modelClass, -1, PREG_SPLIT_NO_EMPTY));
-            
-            /** @var \Clicalmani\Database\Factory\Models\Elegant */
+        foreach ($scanner->classes() as $modelClass) {
             $model = new $modelClass;
             $entity = $model->getEntity();
 
@@ -449,8 +434,8 @@ class Console
         }
 
         /**
-         * Establish relationship
-         * Each entity must have its dependences migrated before migrating itself.
+         * Establish relationships
+         * Each entity must have its dependencies migrated before migrating itself.
          * 
          * @var \DOMNode $node
          */
@@ -476,7 +461,7 @@ class Console
 
                         $depModelClass = $tables[$table];
 
-                        // Avoid refercing a model by itself
+                        // Avoid referencing a model by itself
                         if ($node->attr('model') !== $depModelClass) 
                             $node->children()->first()->append('<entity model="' . $depModelClass . '">' . get_class(( new $depModelClass )->getEntity()) . '</entity>');
                     }
@@ -484,33 +469,18 @@ class Console
             }
         }
 
-        /**
-         * Set seeders priority
-         */
-        $seeders_dir = new \RecursiveDirectoryIterator( database_path('/seeders') );
-        $filter = new RecursiveFilter($seeders_dir);
-        $filter->setPattern("\\.php$");
+        $scanner = new DirectoryScanner(
+            rootPath: app()->databasePath('seeders'),
+            baseNamespace: 'Database\\Seeders',
+        );
 
         $seeders = [];
-
-        /** @var \RecursiveDirectoryIterator $file */
-        foreach (new \RecursiveIteratorIterator($filter) as $file) { 
-            $pathname = $file->getPathname();
-            
-            if($file->isFile()) {
-                $filename = $file->getFileName();
-                $class = substr($filename, 0, strlen($filename) - 4); 
-                
-                if(is_readable($pathname)) {
-                    
-                    $classNs = "\Database\Seeders\\$class";
-                    
-                    if ($attributes = (new \ReflectionClass($classNs))->getAttributes(\Clicalmani\Database\Factory\Priority::class)) {
-                        $attribute = $attributes[0];
-                        $instance = $attribute->newInstance();
-                        $seeders[(int)$instance->priority] = $classNs;
-                    }
-                }
+        
+        foreach ($scanner->classes() as $classNs) { 
+            if ($attributes = (new \ReflectionClass($classNs))->getAttributes(\Clicalmani\Database\Factory\Priority::class)) {
+                $attribute = $attributes[0];
+                $instance  = $attribute->newInstance();
+                $seeders[(int)$instance->priority] = $classNs;
             }
         }
 
@@ -524,7 +494,7 @@ class Console
     }
 
     /**
-     * Run the specified seeder
+     * Run the specified seeder.
      * 
      * @param \Clicalmani\Database\Seeders\Seeder $seeder
      * @return bool TRUE on success, FALSE otherwise.
@@ -545,6 +515,7 @@ class Console
      * 
      * @param ?string $message
      * @param ?bool $format Format output
+     * @param ?string $format_tye
      * @return void
      */
     private function writeln(?string $message = '', ?bool $format = true, ?string $format_tye = null) : void
@@ -576,7 +547,7 @@ class Console
     }
 
     /**
-     * Drop the specified routine
+     * Drop the specified routine.
      * 
      * @param string $name
      * @param ?string $type
@@ -588,88 +559,234 @@ class Console
     }
 
     /**
-     * Migration process
+     * Calculates the migration order using topological sorting (Kahn's algorithm).
+     *
+     * Each node is processed exactly once using the canonical node indexed by model
+     * (never via a parsed copy from another node's <dependences>), and true circular
+     * dependencies are detected with precision (isolating the exact models involved).
      * 
      * @param \Clicalmani\XPower\XDTNodeList[] $nodes
-     * @return \Clicalmani\XPower\XDTNodeList[]
+     * @return \Clicalmani\XPower\XDTNodeList[] Nodes in resolved execution order
      */
-    private function processMigrate(array $nodes) : array
+    private function topologicalOrder(array $nodes): array
     {
-        /**
-         * Start by non dependent and no reference.
-         */
+        // Model index: guarantees referencing the exact SAME node instance,
+        // never a parsed XML copy from a dependency declaration.
+        $byModel = [];
         foreach ($nodes as $node) {
-            
-            if ($node->hasChildren('dependences') || $this->getReferences($node)->length) continue;
-            
-            $this->execute($node);
+            $byModel[$node->attr('model')] = $node;
         }
 
-        $nodes = collection($nodes)->filter(fn(XDTNodeList $node) => !$this->isMigrated($node))->toArray();
-
-        /**
-         * Walk through nodes with references and none dependent.
-         */
+        // Build adjacency graph: model => [direct dependencies]
+        //
+        // MANDATORY deduplication: manifests may declare the same dependency multiple times
+        // for a model (e.g., <dependences> listing <entity model="...Branch"> twice).
+        // Without deduplication, array_diff() removes all occurrences of a value at once
+        // while $inDegree is only decremented once per resolution — preventing $inDegree from
+        // reaching zero, causing nodes to remain stuck and falsely marked as circular.
+        $dependencies = [];
         foreach ($nodes as $node) {
-            
-            if ($node->hasChildren('dependences') || $this->getReferences($node)->length === 0) continue;
-            
-            $this->execute($node);
-        }
+            $model = $node->attr('model');
+            $deps  = []; // Associative set: deduplicates by structure
 
-        $nodes = collection($nodes)->filter(fn(XDTNodeList $node) => !$this->isMigrated($node))->toArray();
+            if ($node->hasChildren('dependences')) {
+                foreach ($node->find('dependences > entity') as $dep) {
+                    $depModel = xdt()->parse($dep)->attr('model');
 
-        /**
-         * Walk through nodes with dependences
-         */
-        foreach ($nodes as $index => $node) {
-
-            if (FALSE == $node->hasChildren('dependences')) continue;
-            
-            $count = 0;
-            $children = $node->find('entity');
-
-            foreach ($children as $child) {
-                if ($this->isMigrated(xdt()->parse($child))) {
-                    $count++;
-                    continue;
+                    // Ignore self-references and dependencies outside current batch
+                    // (e.g., during "updates" migrations containing only a subset)
+                    if ($depModel !== $model && isset($byModel[$depModel])) {
+                        $deps[$depModel] = true;
+                    }
                 }
             }
-            
-            if ($count == $children->length) $this->execute($node);
-            else {
-                if ($index == count($nodes) - 1) {
-                    $tables = array_map(function(XDTNodeList $node) {
-                        /** @var \Clicalmani\Database\Factory\Models\Elegant */
-                        $modelClass = $node->attr('model');
-                        $model = new $modelClass;
-                        return $model->getTable()->name;
-                    }, $nodes);
-                    $this->writeln('Warning: Some tables have circular dependences: ' . implode(', ', $tables), true, 'warning');
+
+            // array_keys() returns contiguous 0..n-1 integer keys, which is
+            // required for extractCycles() to reliably access index [0] after array_diff().
+            $dependencies[$model] = array_keys($deps);
+        }
+
+        // ── Kahn's algorithm ──────────────────────────────────────────
+        $inDegree = array_map('count', $dependencies);
+        $queue    = array_keys(array_filter($inDegree, fn($d) => $d === 0));
+        $ordered  = [];
+
+        while ($queue) {
+            $current   = array_shift($queue);
+            $ordered[] = $byModel[$current];
+
+            foreach ($dependencies as $model => $deps) {
+                if (in_array($current, $deps, true)) {
+                    // array_values() re-indexes keys after array_diff() leaves gaps —
+                    // without this, missing index [0] silently breaks traversal in extractCycles().
+                    $dependencies[$model] = array_values(array_diff($deps, [$current]));
+
+                    if (0 === --$inDegree[$model]) {
+                        $queue[] = $model;
+                    }
                 }
             }
         }
 
-        $nodes = collection($nodes)->filter(fn(XDTNodeList $node) => !$this->isMigrated($node))->toArray();
+        // Any unresolved node belongs to a TRUE circular dependency cycle.
+        if (count($ordered) < count($nodes)) {
+            $resolvedModels = array_map(fn($n) => $n->attr('model'), $ordered);
+            $stuck = array_diff(array_keys($byModel), $resolvedModels);
 
-        /**
-         * Walk through nodes with dependences and references
-         */
-        foreach ($nodes as $node) {
+            // At this point, $dependencies only contains unresolved edges for stuck nodes —
+            // representing the exact cyclic subgraph used to extract real dependency paths.
+            $this->handleCircularDependency($stuck, $dependencies, $byModel);
 
-            $refs = $this->getReferences($node);
-
-            if (FALSE == $node->hasChildren('dependences') || $refs->length === 0) continue;
-            
-            $this->execute($node);
-
-            foreach ($refs as $ref) {
-                $ref = xdt()->parse($ref);
-                $this->execute($ref);
+            // Append stuck cyclic nodes sequentially to prevent blocking non-cyclic execution.
+            foreach ($stuck as $model) {
+                $ordered[] = $byModel[$model];
             }
         }
-        
-        return collection($nodes)->filter(fn(XDTNodeList $node) => !$this->isMigrated($node))->toArray();
+
+        return $ordered;
+    }
+
+    /**
+     * Handles circular dependencies detected during topological sorting.
+     *
+     * Under strict mode (FK checks enabled), circularities cannot be automatically
+     * resolved without explicit user intervention (e.g., deferred constraint or #[AlterOption]):
+     * throws an exception to prevent lower-level SQL errors.
+     * Under non-strict mode, FK checks are disabled during execution: emits a console warning
+     * and continues execution.
+     *
+     * @param string[] $stuck Model names involved in circular dependency cycles
+     * @param array<string, string[]> $dependencies Residual adjacency graph (model => unresolved dependencies)
+     * @param array<string, \Clicalmani\XPower\XDTNodeList> $byModel Map of model FQCN to node instances
+     * @return void
+     * @throws \RuntimeException When running under strict database configuration
+     */
+    private function handleCircularDependency(array $stuck, array $dependencies, array $byModel): void
+    {
+        $cycles = $this->extractCycles($stuck, $dependencies);
+
+        // Fallback: if cycle extraction returns empty, fall back to the entire stuck array.
+        if (empty($cycles)) {
+            $cycles = [$stuck];
+        }
+
+        foreach ($cycles as $cycle) {
+            $path = $this->formatCyclePath($cycle);
+
+            if (config('database.strict')) {
+                throw new \RuntimeException(
+                    sprintf(
+                        "Circular dependency detected between models: %s. --> Strict resolution order impossible. --> Add a deferred constraint or use #[AlterOption] to break the cycle.",
+                        $path
+                    )
+                );
+            }
+
+            $this->writeln(
+                sprintf(
+                    "[WARNING] Circular dependency detected between models: %s. --> Strict resolution order impossible. --> Permissive fallback mode active: check foreign key constraints.",
+                    $path
+                ),
+                true,
+                'question'
+            );
+        }
+    }
+
+    /**
+     * Extracts exact cycle paths from the residual subgraph left by Kahn's algorithm.
+     *
+     * Traverses dependency edges from unresolved nodes until encountering an already visited node,
+     * isolating the exact cyclic loop.
+     *
+     * @param string[] $stuck Model names involved in circular dependency cycles
+     * @param array<string, string[]> $dependencies Residual graph
+     * @return array<int, string[]> List of extracted cycles closed upon themselves
+     */
+    private function extractCycles(array $stuck, array $dependencies): array
+    {
+        $cycles  = [];
+        $visited = [];
+
+        foreach ($stuck as $start) {
+            if (isset($visited[$start])) continue;
+
+            $path    = [];
+            $indexOf = [];
+            $current = $start;
+            $deadEnd = false;
+
+            while (!isset($indexOf[$current])) {
+                $indexOf[$current] = count($path);
+                $path[]             = $current;
+                $visited[$current]  = true;
+
+                $next = $dependencies[$current][0] ?? null;
+
+                if (null === $next) {
+                    // Dead-end node with no remaining dependencies: not part of a cycle.
+                    $deadEnd = true;
+                    break;
+                }
+
+                $current = $next;
+            }
+
+            // Record cycle only if traversal re-visited a node in the current path.
+            if (!$deadEnd && isset($indexOf[$current])) {
+                $cycle   = array_slice($path, $indexOf[$current]);
+                $cycle[] = $current; // Close cycle loop
+                $cycles[] = $cycle;
+            }
+        }
+
+        return $cycles;
+    }
+
+    /**
+     * Formats a cycle path into a human-readable representation.
+     * Example output: "[User] <--> [Team]" or "[A] --> [B] --> [C] --> [A]"
+     *
+     * @param string[] $cycle Array of model names closing on themselves (last element equals first)
+     * @return string Formatted cycle string
+     */
+    private function formatCyclePath(array $cycle): string
+    {
+        $names = array_map([$this, 'shortModelName'], $cycle);
+
+        // Direct two-node cycle A -> B -> A: display as bidirectional
+        if (count($names) === 3 && $names[0] === $names[2]) {
+            return sprintf('[%s] <--> [%s]', $names[0], $names[1]);
+        }
+
+        return '[' . implode('] --> [', $names) . ']';
+    }
+
+    /**
+     * Extracts short class name (without namespace) for console formatting.
+     *
+     * @param string $model Fully qualified class name
+     * @return string Short class name
+     */
+    private function shortModelName(string $model): string
+    {
+        $parts = explode('\\', $model);
+        return end($parts);
+    }
+
+    /**
+     * Migration process: resolves topological execution order then executes each node once.
+     * 
+     * @param \Clicalmani\XPower\XDTNodeList[] $nodes
+     * @return void
+     */
+    private function processMigrate(array $nodes) : void
+    {
+        foreach ($this->topologicalOrder($nodes) as $node) {
+            if (!$this->isMigrated($node)) {
+                $this->execute($node, 'migrate');
+            }
+        }
     }
 
     /**
@@ -698,10 +815,10 @@ class Console
     }
 
     /**
-     * Execute a node
+     * Execute a migration or drop action on a node.
      * 
      * @param \Clicalmani\XPower\XDTNodeList $node
-     * @param ?string $command
+     * @param ?string $command 'migrate' or 'drop'
      * @return void
      */
     private function execute(XDTNodeList $node, ?string $command = 'migrate') : void
@@ -714,7 +831,8 @@ class Console
         $entity->setModel($model);
 
         $table = $model->getTable()->name();
-        $check = ( $command === 'migrated' ) ? $this->isMigrated($node): $this->isDroped($node);
+
+        $check = ( $command === 'migrate' ) ? $this->isMigrated($node): $this->isDroped($node);
 
         if (FALSE === $check) $this->writeln(( ($command === 'migrate') ? 'Migrating ': 'Dropping ' ) . env('DB_TABLE_PREFIX', '') . $table, true, 'comment');
 
@@ -741,7 +859,7 @@ class Console
              * |------------------------------------------------------------------------
              * | 1217 Occurs when a user tries to modify or delete a table that is part
              * | of a foreign key relationship, without addressing the dependency first.
-             * | 23000 Integraty constraint violation
+             * | 23000 Integrity constraint violation
              */
             if (in_array($e->getCode(), ['HY000', '1217', '23000'])) $this->writeln($e->getMessage(), true, 'error'); 
             else throw new \Exception($e->getMessage(), (int)$e->getCode(), $e);
@@ -749,10 +867,10 @@ class Console
     }
 
     /**
-     * Format output
+     * Format output message for console display.
      * 
      * @param string $message
-     * @param ?string $type info, comment, error
+     * @param ?string $type info, comment, error, question
      * @return string
      */
     private function formatOutput(string $message, ?string $type = null) : string
@@ -762,95 +880,27 @@ class Console
     }
 
     /**
-     * Get a node references
-     * 
-     * @param \Clicalmani\XPower\XDTNodeList $node
-     * @return \Clicalmani\XPower\XDTNodeList
-     */
-    private function getReferences(XDTNodeList $node) : XDTNodeList
-    {
-        if ($owner = $node[0]->ownerDocument AND $root = $owner->firstChild) {
-            $root = xdt()->parse($root);
-
-            if ($relations = $root->find('dependences > entity[model="' . $node->attr('model') . '"]')) return $relations;
-        }
-
-        return new XDTNodeList;
-    }
-
-    /**
-     * Dropping process
+     * Dropping process: resolves inverse topological order (dependents before dependencies)
+     * then executes each drop action once.
      * 
      * @param \Clicalmani\XPower\XDTNodeList[] $nodes
-     * @return \Clicalmani\XPower\XDTNodeList[]
+     * @return void
      */
-    private function processDrop(array $nodes) : array
+    private function processDrop(array $nodes) : void
     {
         DB::getInstance()->getPdo()->query('SET FOREIGN_KEY_CHECKS = 0');
 
-        /**
-         * Search for independent nodes
-         * Node that has no dependency and not referenced by
-         * any other node.
-         */
-        foreach ($nodes as $node) {
-            
-            if ($node->hasChildren('dependences')) continue;
-
-            $refs = $this->getReferences($node);
-
-            if ($refs->length === 0) $this->execute($node, 'drop');
-        }
-
-        $nodes = collection($nodes)->filter(fn(XDTNodeList $node) => !$this->isDroped($node))->toArray();
-
-        /**
-         * Search for dependent (node with dependences) nodes 
-         * with no reference (which has not been referenced by any other node).
-         */
-        foreach ($nodes as $node) {
-            
-            if (FALSE == $node->hasChildren('dependences')) continue;
-            
-            if ($this->getReferences($node)->length === 0) $this->execute($node, 'drop');
-        }
-
-        $nodes = collection($nodes)->filter(fn(XDTNodeList $node) => !$this->isDroped($node))->toArray();
-
-        /**
-         * Search for nodes with no dependency but with reference.
-         */
-        foreach ($nodes as $node) {
-            
-            if ($node->hasChildren('dependences')) continue;
-
-            if ($this->getReferences($node)->length > 0) $this->execute($node, 'drop');
-        }
-
-        $nodes = collection($nodes)->filter(fn(XDTNodeList $node) => !$this->isDroped($node))->toArray();
-
-        /**
-         * Search for nodes both with dependency and reference.
-         */
-        foreach ($nodes as $node) {
-
-            $refs = $this->getReferences($node);
-            
-            if (FALSE == $node->hasChildren('dependences') || $refs->length === 0) continue;
-
-            foreach ($refs as $ref) {
-                $ref = xdt()->parse($ref);
-                $this->execute($ref, 'drop');
+        foreach (array_reverse($this->topologicalOrder($nodes)) as $node) {
+            if (!$this->isDroped($node)) {
+                $this->execute($node, 'drop');
             }
         }
 
         DB::getInstance()->getPdo()->query('SET FOREIGN_KEY_CHECKS = 1');
-
-        return collection($nodes)->filter(fn(XDTNodeList $node) => !$this->isDroped($node))->toArray();;
     }
 
     /**
-     * Verify if a node is droped.
+     * Verify if a node table has been dropped.
      * 
      * @param \Clicalmani\XPower\XDTNodeList $node
      * @return bool TRUE on success, FALSE otherwise.
@@ -875,7 +925,7 @@ class Console
     }
 
     /**
-     * May be generate manifeste
+     * Generate manifest file if it does not already exist.
      * 
      * @param string $filename
      * @return void

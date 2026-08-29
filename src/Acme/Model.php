@@ -15,7 +15,7 @@ use Clicalmani\Database\Factory\Models\ScopeInterface;
  * @method static \Clicalmani\Foundation\Collection\CollectionInterface filter(array $exclude = [], array $options = []) Filter the query result by using the request parameters.
  * @method static \Clicalmani\Database\Factory\FactoryInterface seed() Override: Create a seed for the model.
  * @method static \Clicalmani\Database\Factory\Models\ModelInterface on(?string $connection = null) Switch model connection.
- * @method static static where(mixed ...$args) Add a where clause to the query. 
+ * @method static static|null where(mixed ...$args) Add a where clause to the query. 
  */
 abstract class Model extends \Clicalmani\Database\Factory\Models\Elegant
 {
@@ -39,7 +39,16 @@ abstract class Model extends \Clicalmani\Database\Factory\Models\Elegant
 
     public function __call($name, $arguments)
     {
-        return static::__callStatic($name, $arguments);
+        if (static::isScope($name)) {
+            $class = static::getScopeClass($name);
+            /** @var ScopeInterface */
+            $scope = new $class(...$arguments);
+            return $scope->apply($this->query, $this);
+        }
+
+        throw new \BadMethodCallException(
+            sprintf('Call to undefined method %s::%s()', static::class, $name)
+        );
     }
 
     /**

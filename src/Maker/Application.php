@@ -668,6 +668,7 @@ class Application
             '*.resource'  => new ServiceDefinition('*.resource', \Clicalmani\Foundation\Http\Controllers\InjectResource::class, type: ServiceType::Namespace),
             '*.mailer'    => new ServiceDefinition('*.mailer', \Clicalmani\Foundation\Mail\InjectMailer::class, type: ServiceType::Namespace),
             '*.messenger' => new ServiceDefinition('*.messenger', \Clicalmani\Foundation\Messenger\Inject::class, \Clicalmani\Foundation\Providers\Config\MessengerConfig::class, type: ServiceType::Namespace),
+            // '*.event-dispatch' => new ServiceDefinition('*.event-dispatcher', \Clicalmani\Foundation\Events\InjectDispatcher::class, \Clicalmani\Foundation\Providers\Config\MessengerConfig::class, type: ServiceType::Namespace),
         ];
     }
 }
