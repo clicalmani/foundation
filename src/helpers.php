@@ -149,7 +149,7 @@ if ( ! function_exists( 'client_url' ) ) {
      * @return string
      */
     function client_url() : string {
-        return \Clicalmani\Foundation\Support\Facades\Route::uri();
+        return \Clicalmani\Foundation\Support\Facades\Route::uri() ?? $_SERVER['REQUEST_URI'] ?? '';
     }
 }
 
@@ -463,7 +463,7 @@ if ( ! function_exists('isConsoleMode') ) {
      * @return bool
      */
     function isConsoleMode() : bool {
-        return defined('CONSOLE_MODE_ACTIVE') && CONSOLE_MODE_ACTIVE;
+        return defined('TEST_ENV') || (defined('CONSOLE_MODE_ACTIVE') && CONSOLE_MODE_ACTIVE);
     }
 }
 
@@ -738,7 +738,7 @@ if (! function_exists('get_data')) {
 
 if ( ! function_exists('set_data') ) {
     /**
-     * Définit une valeur dans un tableau en utilisant la notation par points.
+     * Définit une valeur dans un tableau (ou un objet) en utilisant la notation par points.
      *
      * @param  mixed  &$target  Le tableau (ou l'objet) à modifier (passé par référence)
      * @param  string|array|null  $key  La clé (ex: 'users.{first}.name')
@@ -752,15 +752,17 @@ if ( ! function_exists('set_data') ) {
             return;
         }
 
-        $keys = is_array($key) ? $key : explode('.', $key);
+        $keys = is_array($key) ? $key : explode('.', (string) $key);
 
-        // On récupère le segment actuel
+        if (empty($keys)) {
+            $target = $value;
+            return;
+        }
+
         $segment = array_shift($keys);
-        
+
         // --- LOGIQUE DU WILDCARD (*) ---
         if ($segment === '*') {
-            // Si la cible est itérable (tableau ou collection), on parcourt chaque élément
-            // et on appelle set_data récursivement sur chacun.
             if (is_iterable($target)) {
                 foreach ($target as &$item) {
                     set_data($item, $keys, $value);
@@ -771,7 +773,6 @@ if ( ! function_exists('set_data') ) {
         }
 
         // --- LOGIQUE DES CLÉS DYNAMIQUES ({first}, {last}) ---
-        // On ne résout ces clés que si $target est un tableau (pour avoir les clés)
         if (is_array($target)) {
             if ($segment === '{first}') {
                 $segment = array_key_first($target);
@@ -780,30 +781,47 @@ if ( ! function_exists('set_data') ) {
             }
         }
 
-        // --- AFFECTATION FINALE OU DESCENTE ---
+        // --- AFFECTATION FINALE ---
         if (empty($keys)) {
-            // C'est le dernier segment de la chaîne, on affecte la valeur
             if (is_array($target)) {
                 $target[$segment] = $value;
             } elseif (is_object($target)) {
                 $target->$segment = $value;
             }
-        } else {
-            // Il reste des segments, on doit descendre d'un niveau.
-            // Si le chemin n'existe pas encore, on initialise un tableau vide.
-            if (is_array($target)) {
-                if (!isset($target[$segment]) || !is_array($target[$segment])) {
-                    $target[$segment] = [];
-                }
-                set_data($target[$segment], $keys, $value);
-            } elseif (is_object($target)) {
-                // Pour les objets, on doit vérifier si la propriété existe ou est publique.
-                // Note: C'est plus délicat avec les objets, on préfère souvent forcer en tableau.
-                if (!isset($target->$segment) || !is_array($target->$segment)) {
-                    $target->$segment = [];
-                }
-                set_data($target->$segment, $keys, $value);
+            return;
+        }
+
+        // --- DESCENTE : cas tableau ---
+        if (is_array($target)) {
+            // Les éléments d'un tableau PHP natif sont de vrais emplacements
+            // mémoire : la récursion par référence y est fiable.
+            if (!isset($target[$segment]) || !is_array($target[$segment])) {
+                $target[$segment] = [];
             }
+            set_data($target[$segment], $keys, $value);
+            return;
+        }
+
+        // --- DESCENTE : cas objet ---
+        if (is_object($target)) {
+            // ATTENTION : on ne peut PAS recurser par référence directement sur
+            // $target->$segment si la propriété est virtuelle (résolue via
+            // __get()/__set()/__isset() — le cas de tout modèle Elegant/Entity
+            // de cet ORM). PHP ne sait prendre une vraie référence que sur un
+            // emplacement mémoire réel ; sur une propriété magique, la
+            // "référence" porterait sur une copie déconnectée, et la mutation
+            // ne serait jamais réécrite via __set(). On lit donc explicitement,
+            // on mute une variable locale, puis on réécrit explicitement — fiable
+            // que la propriété soit réelle ou magique.
+            $nested = isset($target->$segment) ? $target->$segment : null;
+
+            if (!is_array($nested)) {
+                $nested = [];
+            }
+
+            set_data($nested, $keys, $value);
+
+            $target->$segment = $nested;
         }
     }
 }

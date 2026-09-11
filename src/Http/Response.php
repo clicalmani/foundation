@@ -88,12 +88,11 @@ class Response extends \Clicalmani\Psr\Response implements ResponseInterface
         }
     }
 
-    public function sendBody(?string $content = null) : never
+    public function sendBody(?string $content = null)
     {
         if ($this->body instanceof NonBufferedBody) {
-            if ($content) {
-                $this->body->write($content);
-            }
+            if ( ! defined('TEST_ENV') ) $this->body->write($content);
+            else $this->body->setContents($content);
         } elseif ($this->body instanceof \Clicalmani\Psr\Stream) {
 
             $size = $this->body->getSize();
@@ -137,8 +136,8 @@ class Response extends \Clicalmani\Psr\Response implements ResponseInterface
                 echo $this->body->read($length);
             }
         }
-
-        exit;
+        
+        if ( ! defined('TEST_ENV') ) exit;
     }
 
     public function send(string $content = '') : never
@@ -150,7 +149,7 @@ class Response extends \Clicalmani\Psr\Response implements ResponseInterface
             $this->sendHeaders();
             $this->sendBody($content);
         }
-
+        
         exit;
     }
 

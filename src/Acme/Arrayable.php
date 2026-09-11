@@ -16,7 +16,7 @@ class Arrayable
      */
     public function accessible($value)
     {
-        return is_array($value) || $value instanceof \ArrayAccess;
+        return is_array($value) || ($value instanceof \ArrayAccess);
     }
 
     /**

@@ -98,7 +98,7 @@ class RequestController
 	 * 
 	 * @return mixed
 	 */
-    private function getAction() : mixed
+    public function getAction() : mixed
 	{
 		if ( isset( $this->action ) ) {
 			return $this->action;

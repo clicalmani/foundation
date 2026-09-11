@@ -15,7 +15,7 @@ interface TestInterface
      * @param int $num Counter
      * @return static
      */
-    public function count(int $num) : static;
+    public function repeat(int $num) : static;
 
     /**
      * Manipulate the test state. It allows to provide a new data set for each instance.
@@ -31,5 +31,5 @@ interface TestInterface
      * 
      * @return void
      */
-    public static function test() : void;
+    // public static function test() : void;
 }

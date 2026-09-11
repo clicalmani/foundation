@@ -132,9 +132,8 @@ abstract class HttpRequest extends \Clicalmani\Psr\Request
      * @return string
      */
     public function getMethod() : string
-    { 
-        if ( isConsoleMode() ) return '@console';
-        return strtolower( (string) @ $_SERVER['REQUEST_METHOD'] );
+    {
+        return strtolower( $_SERVER['REQUEST_METHOD'] ?? '' );
     }
 
     /**

@@ -5,29 +5,37 @@ trait JsonResponse
 {
     public function json(mixed $data) : self
     {
-        $this->sendBody($this->__json($data));
-        return $this;
+        return $this->sendJson($this->__json($data));
     }
 
     public function success(mixed $message = null) : self
     {
-        $this->body->write(
+        return $this->sendJson(
             $this->__json([
                 'success' => true,
                 'data'    => $message
             ])
         );
-        return $this;
     }
 
     public function error(mixed $message = null) : self
     {
-        $this->body->write(
+        return $this->sendJson(
             $this->__json([
                 'success' => false,
                 'data'    => $message
             ])
         );
+    }
+
+    private function sendJson(mixed $message) : self
+    {
+        if ( defined('TEST_ENV') ) {
+            $this->body->setContents($message);
+        } else {
+            $this->body->write($message);
+        }
+
         return $this;
     }
 }

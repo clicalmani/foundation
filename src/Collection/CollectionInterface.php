@@ -106,9 +106,9 @@ interface CollectionInterface
     /**
      * Do a shallow copy of the storage.
      * 
-     * @return array The copy
+     * @return self The copy
      */
-    public function copy() : array;
+    public function copy() : self;
 
     /**
      * Populate storage with new elements by replacing the old ones.
@@ -232,7 +232,7 @@ interface CollectionInterface
      * @param string $key The key to sort by
      * @return self
      */
-    public function sortBy(string $key) : self;
+    public function sortBy(string $key): CollectionInterface;
 
     /**
      * Sorts the collection by a specific key in descending order.
@@ -319,4 +319,12 @@ interface CollectionInterface
     public function slice(int $offset, ?int $length = null) : iterable;
 
     public function remove(mixed $element) : mixed;
+
+    public function values(): self;
+
+    public function push(mixed $value) : self;
+
+    public function search(mixed $value, bool $strict = true): int|string|false;
+
+    public function flatMap(callable $callback, int $depth = 1): self;
 }

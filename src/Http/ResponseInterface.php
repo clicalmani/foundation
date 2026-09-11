@@ -58,7 +58,7 @@ interface ResponseInterface extends Responses\StatusErrorInterface, Responses\Js
      * @param ?string $content
      * @return never
      */
-    public function sendBody(?string $content = null) : never;
+    public function sendBody(?string $content = null);
 
     /**
      * Send a response

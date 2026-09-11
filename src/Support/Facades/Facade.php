@@ -78,7 +78,7 @@ abstract class Facade
         if ($service instanceof \Clicalmani\Foundation\Acme\Configure) {
             return static::callConfigure($service, $method, $args);
         }
-
+        
         return null;
     }
 

@@ -201,6 +201,14 @@ class Application
         $this->console->run();
     }
 
+    public function handleTest(): void
+    {
+        $console = new \Clicalmani\Console\Application($this);
+        $console->test();
+        $this->boot();
+        $console->run();
+    }
+
     /**
      * Retrieves the active service container instance with strict PSR-11 typing.
      * 

@@ -18,10 +18,11 @@ class Collection extends SPLCollection implements CollectionInterface, \JsonSeri
         $this->add( ...$elements );
     }
 
-    public function add(mixed ...$elements) : \Clicalmani\Foundation\Collection\CollectionInterface
+    public function add(mixed ...$elements): CollectionInterface
     {
-        foreach ($elements as $element) $this[] = $element;
-
+        foreach ($elements as $element) {
+            $this[] = $element;
+        }
         return $this;
     }
 
@@ -32,16 +33,14 @@ class Collection extends SPLCollection implements CollectionInterface, \JsonSeri
 
     public function get(int|string $index) : mixed
     {
-        return @ $this[$index];
+        return $this[$index] ?? null;
     }
 
     public function index(mixed $value) : int
     {
         foreach ($this as $k => $v) {
-            if (is_callable($value) && FALSE === is_callable($value) && Func::isInternal($value) && FALSE != $value($v, $k)) return $k;
-            elseif ($value === $v) return $k;
+            if ($value === $v) return $k;
         }
-
         return -1;
     }
 
@@ -91,9 +90,9 @@ class Collection extends SPLCollection implements CollectionInterface, \JsonSeri
         return $this->exchange($new);
     }
 
-    public function merge(mixed $value) : \Clicalmani\Foundation\Collection\CollectionInterface
+    public function merge(mixed $value) : CollectionInterface
     {
-        if ( $value instanceof \Clicalmani\Foundation\Collection\CollectionInterface ) $value = $value->toArray();
+        if ( $value instanceof CollectionInterface ) $value = $value->toArray();
         elseif ( !is_array($value) ) $value = [$value];
 
         $this->exchange(
@@ -103,19 +102,39 @@ class Collection extends SPLCollection implements CollectionInterface, \JsonSeri
         return $this;
     }
 
+    public function push(mixed $value) : self
+    {
+        $this[] = $value;
+        return $this;
+    }
+
     public function isEmpty() : bool
     {
         return $this->count() === 0;
     }
 
-    public function exists(int $index) : bool
+    public function exists(mixed $index) : bool
     {
-        return isset($this[$index]);
+        if (is_int($index)) return isset($this[$index]);
+
+        if (is_callable($index)) {
+            foreach ($this as $key => $element) {
+                if (call_user_func($index, $element, $key)) return true;
+            }
+            return false;
+        }
+
+        foreach ($this as $element) {
+            if (is_array($element) && array_key_exists($index, $element)) return true;
+            if (is_object($element) && isset($element->{$index})) return true;
+        }
+
+        return false;
     }
 
-    public function copy() : array
+    public function copy() : self
     {
-        return $this->getArrayCopy();
+        return new self($this->getArrayCopy());
     }
 
     public function exchange(array $new_elements) : \Clicalmani\Foundation\Collection\CollectionInterface
@@ -245,17 +264,23 @@ class Collection extends SPLCollection implements CollectionInterface, \JsonSeri
         return $this;
     } 
 
-    public function sortBy(string $key) : \Clicalmani\Foundation\Collection\CollectionInterface
+    public function sortBy(string $key): CollectionInterface
     {
-        $this->uasort(function ($a, $b) use ($key) { 
-            if ((is_array($a) && is_array($b)) || (is_object($a) && is_object($b))) return $a[$key] <=> $b[$key];
-            throw new TypeError("Both elements must be arrays or objects to sort by key '$key'.");
+        $this->uasort(function ($a, $b) use ($key) {
+            $va = $this->getItemValue($a, $key);
+            $vb = $this->getItemValue($b, $key);
+            
+            if ($va === null || $vb === null) {
+                return 0;
+            }
+            
+            return $va <=> $vb;
         });
 
         return $this;
     }
 
-    public function sortByDesc(string $key) : \Clicalmani\Foundation\Collection\CollectionInterface
+    public function sortByDesc(string $key) : CollectionInterface
     {
         $this->uasort(function ($a, $b) use ($key) { 
             if ((is_array($a) && is_array($b)) || (is_object($a) && is_object($b))) return -1*($a[$key] <=> $b[$key]);
@@ -338,9 +363,95 @@ class Collection extends SPLCollection implements CollectionInterface, \JsonSeri
         return null;
     }
 
+    public function values(): self
+    {
+        return new self(array_values($this->toArray()));
+    }
+
+    public function search(mixed $value, bool $strict = true): int|string|false
+    {
+        // 1. Si c'est un callback, on l'utilise pour la recherche
+        if (is_callable($value) && !is_string($value)) {
+            foreach ($this as $key => $item) {
+                if (call_user_func($value, $item, $key)) {
+                    return $key;
+                }
+            }
+            return false;
+        }
+        
+        // 2. Recherche standard avec comparaison
+        foreach ($this as $key => $item) {
+            if ($strict) {
+                // Comparaison stricte (===)
+                if ($value === $item) {
+                    return $key;
+                }
+            } else {
+                // Comparaison non stricte (==)
+                if ($value == $item) {
+                    return $key;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    public function flatMap(callable $callback, int $depth = 1): self
+    {
+        $result = [];
+        
+        foreach ($this as $key => $value) {
+            $mapped = $callback($value, $key);
+            
+            // Si le résultat est une collection, on la convertit en tableau
+            if ($mapped instanceof self) {
+                $mapped = $mapped->toArray();
+            } elseif ($mapped instanceof \Traversable) {
+                $mapped = iterator_to_array($mapped);
+            }
+            
+            // Si c'est un tableau et qu'on doit l'aplatir
+            if (is_array($mapped) && $depth > 0) {
+                $result = array_merge($result, $this->flattenArray($mapped, $depth));
+            } else {
+                $result[] = $mapped;
+            }
+        }
+        
+        return new self($result);
+    }
+
     #[Override]
     public function jsonSerialize(): mixed
     {
         return $this->toArray();
+    }
+
+    private function getItemValue(mixed $item, string $key): mixed
+    {
+        if (is_array($item) && isset($item[$key])) {
+            return $item[$key];
+        }
+        if (is_object($item) && isset($item->{$key})) {
+            return $item->{$key};
+        }
+        return null;
+    }
+
+    private function flattenArray(array $array, int $depth): array
+    {
+        $result = [];
+        
+        foreach ($array as $value) {
+            if (is_array($value) && $depth > 1) {
+                $result = array_merge($result, $this->flattenArray($value, $depth - 1));
+            } else {
+                $result[] = $value;
+            }
+        }
+        
+        return $result;
     }
 }

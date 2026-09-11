@@ -10,32 +10,32 @@ class Configure implements \ArrayAccess, \JsonSerializable
 
     public function app(?string $key = null)
     {
-        return $key ? Arr::get(@ static::$storage['app'] ?? [], $key): static::$storage['app'];
+        return $key ? Arr::get(static::$storage['app'] ?? [], $key): static::$storage['app'];
     }
 
     public function mail(?string $key = null)
     {
-        return $key ? Arr::get(@ static::$storage['mail'] ?? [], $key): static::$storage['mail'];
+        return $key ? Arr::get(static::$storage['mail'] ?? [], $key): static::$storage['mail'];
     }
 
     public function http(?string $key = null)
     {
-        return $key ? Arr::get(@ static::$storage['http'] ?? [], $key): static::$storage['http'];
+        return $key ? Arr::get(static::$storage['http'] ?? [], $key): static::$storage['http'];
     }
 
     public function bootstrap(?string $key = null)
     {
-        return $key ? Arr::get(@ static::$storage['bootstrap'] ?? [], $key): static::$storage['bootstrap'];
+        return $key ? Arr::get(static::$storage['bootstrap'] ?? [], $key): static::$storage['bootstrap'];
     }
 
     public function route(?string $key = null)
     {
-        return $key ? Arr::get(@ static::$storage['route'] ?? [], $key): static::$storage['route'];
+        return $key ? Arr::get(static::$storage['route'] ?? [], $key): static::$storage['route'];
     }
 
     public function database(?string $key = null)
     {
-        return $key ? Arr::get(@ static::$storage['database'] ?? [], $key): static::$storage['database'];
+        return $key ? Arr::get(static::$storage['database'] ?? [], $key): static::$storage['database'];
     }
 
     public function env(?string $key = null, ?string $default = null)
@@ -63,7 +63,7 @@ class Configure implements \ArrayAccess, \JsonSerializable
 
     public function offsetGet(mixed $offset): mixed
     {
-        return @ static::$storage[$offset];
+        return static::$storage[$offset] ?? null;
     }
 
     public function offsetSet(mixed $offset, mixed $value): void

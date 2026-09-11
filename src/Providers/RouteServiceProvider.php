@@ -144,6 +144,8 @@ class RouteServiceProvider extends ServiceProvider
      */
     public function setHeaders(): void
     {
+        if (defined('TEST_ENV')) return;
+        
         if (isset(static::$cors_settings['allowed_origin'])) {
             header("Access-Control-Allow-Origin: " . static::$cors_settings['allowed_origin']);
         }
@@ -281,9 +283,11 @@ class RouteServiceProvider extends ServiceProvider
     #[Override]
     public function boot(): void
     {
-        static::$route_settings = require_once config_path('/routing.php');
-        static::$cors_settings = require_once config_path('/cors.php');
-
+        if ( ! defined('TEST_ENV') ) {
+            static::$route_settings = require_once config_path('/routing.php');
+            static::$cors_settings = require_once config_path('/cors.php');
+        }
+        
         // Capture properties explicitly to respect downstream local overrides
         $provider = new \App\Providers\RouteServiceProvider();
         

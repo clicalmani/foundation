@@ -6,7 +6,7 @@ use Clicalmani\Database\Factory\Models\ScopeInterface;
 /**
  * @method static void resolveRouteBindingUsing(\Closure $callback) Resolve route binding using a callback.
  * @method static void preventSilentlyDiscardingAttributes() Prevent silent discard attribute setting
- * @method static bool destroy() Destroy all records in the table
+ * @method static bool destroy(string|int|array $keys) Destroy all records in the table
  * @method static static create(array $attributes = [], bool $update = false) Create a new record and return the instance.
  * @method static createOrFail(array $fields = [], ?bool $replace = false) Create a new record or fail.
  * @method static static|null find(string|array|null $id) Returns a specified row defined by a specified primary key.

@@ -90,10 +90,11 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
     public function __get($name)
     {
         $inputs = array_merge($this->attributes, $this->uploadedFiles);
+        
         if ($this->validator->sanitize($inputs, $this->signatures ?? [])) \Clicalmani\Validation\Validator::passed($name);
 
         if ( array_key_exists($name, $this->attributes) ) {
-            $this->attributes[$name] = $inputs[$name] ?? 'Attributes';
+            $this->attributes[$name] = $inputs[$name] ?? null;
         }
         
         return @ $this->attributes[$name];
@@ -204,18 +205,18 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
             /** @var \Clicalmani\Foundation\Auth\Authenticate */
             $authenticator = new $authenticatorClass;
             
-            if ($user_id = $authenticator->getConnectedUserID($this)) {
-                /**
-                 * |----------------------------------------------------
-                 * | Test User
-                 * |----------------------------------------------------
-                 * | To interact with the app as a normal user when testing, a user ID
-                 * | may be specified.
-                 */
-                if ( isConsoleMode() ) $user_id = $this->test_user_id;
-                
-                return $authenticator->createUser($user_id);
-            }
+            $user_id = $authenticator->getConnectedUserID($this);
+
+            /**
+             * |----------------------------------------------------
+             * | Test User
+             * |----------------------------------------------------
+             * | To interact with the app as a normal user when testing, a user ID
+             * | may be specified.
+             */
+            if ( isConsoleMode() ) $user_id = $this?->test_user_id ?? null;
+
+            if ($user_id) return $authenticator->createUser($user_id);
         }
 
         return null;
