@@ -43,10 +43,7 @@ class AuthServiceProvider
             'exp' => time() + ($config ? $config['expire']: 0) // Expiration time claim
         ];
 
-        if (empty($_ENV['APP_KEY'])) {
-            throw new \RuntimeException('APP_KEY environment variable is not set.');
-        }
-        $this->secret = $_ENV['APP_KEY'];
+        $this->secret = $_ENV['APP_KEY'] ?? '';
     }
 
     /**

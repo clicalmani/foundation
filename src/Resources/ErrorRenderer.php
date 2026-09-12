@@ -44,8 +44,10 @@ class ErrorRenderer
         foreach ($snippetLines as $num => $codeLine) {
             $xdt->load(\highlight_string("<?php " . $codeLine, true), true, true);
             $first = $xdt->select('code > span:first');
-            $first->html(str_replace('&lt;?php', '', $first->html()));
-            $result[$num + 1] = $xdt->getDocumentRootElement()->html();
+            if ($first->length) {
+                $first->html(str_replace('&lt;?php', '', $first->html()));
+                $result[$num + 1] = $xdt->getDocumentRootElement()->html();
+            }
         }
 
         return $result;
