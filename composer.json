@@ -13,7 +13,8 @@
         "league/flysystem": "^3.33",
         "symfony/event-dispatcher": "^7.4",
         "symfony/filesystem": "^7.4",
-        "symfony/uid": "^7.4"
+        "symfony/uid": "^7.4",
+        "illuminate/collections": "^13.31"
     },
     "license": "MIT",
     "autoload": {
