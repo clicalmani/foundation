@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Foundation\Maker;
+namespace Clicalmani\Core\Maker;
 
 /**
  * Class Kernel
@@ -7,7 +7,7 @@ namespace Clicalmani\Foundation\Maker;
  * Provides a foundational blueprint for handling the initialization, configuration,
  * and component registration layers of specific application execution cycles (such as HTTP or CLI).
  * 
- * @package Clicalmani\Foundation\Maker
+ * @package Clicalmani\Core\Maker
  * @author @clicalmani
  */
 abstract class Kernel
@@ -15,9 +15,9 @@ abstract class Kernel
     /**
      * Kernel constructor.
      * 
-     * @param \Clicalmani\Foundation\Maker\Application $app The central framework application instance.
+     * @param \Clicalmani\Core\Maker\Application $app The central framework application instance.
      */
-    public function __construct(protected \Clicalmani\Foundation\Maker\Application $app)
+    public function __construct(protected \Clicalmani\Core\Maker\Application $app)
     {
         //
     }

@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Foundation\Routing\Exceptions;
+namespace Clicalmani\Core\Routing\Exceptions;
 
 /**
  * Class RouteNotFoundException

@@ -1,7 +1,7 @@
 <?php
-namespace Clicalmani\Foundation\Http\Session;
+namespace Clicalmani\Core\Http\Session;
 
-use Clicalmani\Foundation\Auth\EncryptionServiceProvider;
+use Clicalmani\Core\Auth\EncryptionServiceProvider;
 
 /**
  * SessionHandler Class

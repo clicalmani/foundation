@@ -1,7 +1,7 @@
 <?php
-namespace Clicalmani\Foundation\Events;
+namespace Clicalmani\Core\Events;
 
-use Clicalmani\Foundation\Mail\SystemMailableListener;
+use Clicalmani\Core\Mail\SystemMailableListener;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
 class MailableEventDispatcher implements EventDispatcherDelegate

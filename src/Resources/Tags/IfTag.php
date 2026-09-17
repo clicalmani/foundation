@@ -1,7 +1,7 @@
 <?php
-namespace Clicalmani\Foundation\Resources\Tags;
+namespace Clicalmani\Core\Resources\Tags;
 
-use Clicalmani\Foundation\Resources\TemplateTag;
+use Clicalmani\Core\Resources\TemplateTag;
 
 class IfTag extends TemplateTag
 {

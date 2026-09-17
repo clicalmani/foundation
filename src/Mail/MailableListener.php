@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Foundation\Mail;
+namespace Clicalmani\Core\Mail;
 
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\Mailer\MailerInterface;
@@ -17,7 +17,7 @@ class MailableListener
             throw new \RuntimeException('Mailable event must have a template defined.');
         }
 
-        $email = (new \Clicalmani\Foundation\Mail\Email($event->subject, view("/{$event->template}", $event->data)->render()))
+        $email = (new \Clicalmani\Core\Mail\Email($event->subject, view("/{$event->template}", $event->data)->render()))
                     ->to(...array_map(fn(array $recipient) => new \Symfony\Component\Mime\Address($recipient[0], $recipient[1] ?? ''), $event->to));
         foreach ($event->pathAttachments as $attachment) {
             $email->attachFromPath(...$attachment);

@@ -1,6 +1,6 @@
 <?php
 
-namespace Clicalmani\Foundation\Messenger\Stamp;
+namespace Clicalmani\Core\Messenger\Stamp;
 
 use Symfony\Component\Messenger\Stamp\StampInterface;
 
@@ -11,7 +11,7 @@ use Symfony\Component\Messenger\Stamp\StampInterface;
  * Preserves the underlying persistent database row identifier throughout the 
  * consumer lifecycle inside active queue workers.
  * 
- * @package Clicalmani\Foundation\Messenger\Stamp
+ * @package Clicalmani\Core\Messenger\Stamp
  * @author @clicalmani
  */
 class ElegantTransportStamp implements StampInterface

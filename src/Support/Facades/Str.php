@@ -1,13 +1,13 @@
 <?php
-namespace Clicalmani\Foundation\Support\Facades;
+namespace Clicalmani\Core\Support\Facades;
 
-use Clicalmani\Foundation\Support\Facades\Facade;
+use Clicalmani\Core\Support\Facades\Facade;
 
 /**
  * Class Str
  * 
- * @package Clicalmani\Foundation
- * @author @Clicalmani\Foundation
+ * @package Clicalmani\Core
+ * @author @Clicalmani\Core
  * 
  * @method static string slug(mixed $value, ?string $fallback_value = '' )
  * @method static string singularize(string $word)

@@ -1,12 +1,12 @@
 <?php
 
-namespace Clicalmani\Foundation\Events;
+namespace Clicalmani\Core\Events;
 
 use Broadcaster\BroadcastManager;
 use Broadcaster\Event\ShouldBroadcastInterface;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Clicalmani\Foundation\Filesystem\RecursiveFilter;
+use Clicalmani\Core\Filesystem\RecursiveFilter;
 use ReflectionClass;
 
 class ListenerDiscovery

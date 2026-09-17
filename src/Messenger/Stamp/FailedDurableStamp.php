@@ -1,6 +1,6 @@
 <?php
 
-namespace Clicalmani\Foundation\Messenger\Stamp;
+namespace Clicalmani\Core\Messenger\Stamp;
 
 use Symfony\Component\Messenger\Stamp\StampInterface;
 
@@ -12,7 +12,7 @@ use Symfony\Component\Messenger\Stamp\StampInterface;
  * transports that an envelope has exhausted all configured retry processing thresholds 
  * and is being isolated into permanent quarantine containment.
  * 
- * @package Clicalmani\Foundation\Messenger\Stamp
+ * @package Clicalmani\Core\Messenger\Stamp
  * @author @clicalmani
  */
 class FailedDurableStamp implements StampInterface

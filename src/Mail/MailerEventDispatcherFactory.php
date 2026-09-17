@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Foundation\Mail;
+namespace Clicalmani\Core\Mail;
 
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;

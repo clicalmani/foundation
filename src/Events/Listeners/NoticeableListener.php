@@ -1,11 +1,11 @@
 <?php
-namespace Clicalmani\Foundation\Events\Listeners;
+namespace Clicalmani\Core\Events\Listeners;
 
 use App\Models\Comment;
 use App\Models\Commentable;
 use App\Models\User;
-use Clicalmani\Foundation\Events\NoticeableInterface;
-use Clicalmani\Foundation\Support\Facades\DB;
+use Clicalmani\Core\Events\NoticeableInterface;
+use Clicalmani\Core\Support\Facades\DB;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class NoticeableListener

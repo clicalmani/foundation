@@ -1,11 +1,11 @@
 <?php
-namespace Clicalmani\Foundation\Auth;
+namespace Clicalmani\Core\Auth;
 
 /**
  * AuthServiceProvider Class
  * 
- * @package Clicalmani\Foundation
- * @author @Clicalmani\Foundation
+ * @package Clicalmani\Core
+ * @author @Clicalmani\Core
  */
 class AuthServiceProvider
 {
@@ -43,7 +43,10 @@ class AuthServiceProvider
             'exp' => time() + ($config ? $config['expire']: 0) // Expiration time claim
         ];
 
-        $this->secret = $_ENV['APP_KEY'] ?? '';
+        if (empty($_ENV['APP_KEY'])) {
+            throw new \RuntimeException('APP_KEY environment variable is not set.');
+        }
+        $this->secret = $_ENV['APP_KEY'];
     }
 
     /**

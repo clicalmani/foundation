@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Foundation\Providers;
+namespace Clicalmani\Core\Providers;
 
 /**
  * Class HelpersServiceProvider
@@ -7,8 +7,8 @@ namespace Clicalmani\Foundation\Providers;
  * Boots and registers the framework's native global utility function wrappers,
  * establishing foundational procedural APIs across the active runtime lifecycle.
  * 
- * @package Clicalmani\Foundation\Providers
- * @author Clicalmani\Foundation
+ * @package Clicalmani\Core\Providers
+ * @author Clicalmani\Core
  */
 class HelpersServiceProvider extends ServiceProvider
 {
@@ -28,6 +28,6 @@ class HelpersServiceProvider extends ServiceProvider
          * Imports global helper functions into scope to ensure universal access 
          * to quick structural framework shortcuts (e.g., app(), config(), root_path()).
          */
-        \Clicalmani\Foundation\Support\Helper::include();
+        \Clicalmani\Core\Support\Helper::include();
     }
 }

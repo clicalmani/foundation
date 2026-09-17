@@ -1,9 +1,9 @@
 <?php
-namespace Clicalmani\Foundation\Events;
+namespace Clicalmani\Core\Events;
 
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Broadcaster\SystemBroadcastListener;
-use Clicalmani\Foundation\Mail\SystemMailableListener;
+use Clicalmani\Core\Mail\SystemMailableListener;
 
 class BroadcastAwareEventDispatcher extends EventDispatcher
 {

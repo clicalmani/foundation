@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Foundation\Mail;
+namespace Clicalmani\Core\Mail;
 
 use Symfony\Component\Mailer\Envelope;
 use Symfony\Component\Mime\Email;
@@ -9,7 +9,7 @@ class Mailer implements MailerInterface
     /**
      * Mailer transport instance
      * 
-     * @var \Clicalmani\Foundation\Acme\MailerTransport
+     * @var \Clicalmani\Core\Acme\MailerTransport
      */
     private $transport;
 

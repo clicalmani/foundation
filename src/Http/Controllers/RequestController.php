@@ -1,21 +1,21 @@
 <?php
-namespace Clicalmani\Foundation\Http\Controllers;
+namespace Clicalmani\Core\Http\Controllers;
 
-use Clicalmani\Foundation\Http\Request;
-use Clicalmani\Foundation\Exceptions\ModelNotFoundException;
+use Clicalmani\Core\Http\Request;
+use Clicalmani\Core\Exceptions\ModelNotFoundException;
 use Clicalmani\Database\Factory\Models\Elegant;
-use Clicalmani\Foundation\Acme\Container;
-use Clicalmani\Foundation\Providers\RouteServiceProvider;
-use Clicalmani\Foundation\Routing\Exceptions\RouteNotFoundException;
-use Clicalmani\Foundation\Support\Facades\Route;
-use Clicalmani\Foundation\Test\Controllers\TestController;
+use Clicalmani\Core\Acme\Container;
+use Clicalmani\Core\Providers\RouteServiceProvider;
+use Clicalmani\Core\Routing\Exceptions\RouteNotFoundException;
+use Clicalmani\Core\Support\Facades\Route;
+use Clicalmani\Core\Test\Controllers\TestController;
 use Clicalmani\Routing\Memory;
 
 /**
  * RequestController class
  * 
- * @package Clicalmani\Foundation/flesco 
- * @author @Clicalmani\Foundation
+ * @package Clicalmani\Core/flesco 
+ * @author @Clicalmani\Core
  */
 class RequestController
 {
@@ -43,7 +43,7 @@ class RequestController
 	/**
 	 * Application container instance
 	 * 
-	 * @var \Clicalmani\Foundation\Acme\Container
+	 * @var \Clicalmani\Core\Acme\Container
 	 */
 	protected Container $container;
 
@@ -105,7 +105,7 @@ class RequestController
 		}
 		
 		$request = new Request;
-		$builder = \Clicalmani\Foundation\Support\Facades\Config::route('default_builder');
+		$builder = \Clicalmani\Core\Support\Facades\Config::route('default_builder');
 		
 		/** @var \Clicalmani\Routing\Route $route */
 		if ($route = (new $builder)->build()) {
@@ -134,9 +134,9 @@ class RequestController
 	/**
 	 * Get request response
 	 * 
-	 * @return \Psr\Http\Message\ResponseInterface|\Clicalmani\Foundation\Http\RedirectInterface
+	 * @return \Psr\Http\Message\ResponseInterface|\Clicalmani\Core\Http\RedirectInterface
 	 */
-	protected function getResponse() : \Psr\Http\Message\ResponseInterface|\Clicalmani\Foundation\Http\ResponseInterface|\Clicalmani\Foundation\Http\RedirectInterface
+	protected function getResponse() : \Psr\Http\Message\ResponseInterface|\Clicalmani\Core\Http\ResponseInterface|\Clicalmani\Core\Http\RedirectInterface
 	{
 		$action = $this->getAction();
 		
@@ -157,10 +157,10 @@ class RequestController
 	/**
 	 * Invoke the method with the given reflector.
 	 * 
-	 * @param \Clicalmani\Foundation\Http\Controllers\ReflectorInterface $reflector
-	 * @return \Psr\Http\Message\ResponseInterface|\Clicalmani\Foundation\Http\RedirectInterface
+	 * @param \Clicalmani\Core\Http\Controllers\ReflectorInterface $reflector
+	 * @return \Psr\Http\Message\ResponseInterface|\Clicalmani\Core\Http\RedirectInterface
 	 */
-	public function invokeMethod(ReflectorInterface $reflector) : \Psr\Http\Message\ResponseInterface|\Clicalmani\Foundation\Http\ResponseInterface|\Clicalmani\Foundation\Http\RedirectInterface
+	public function invokeMethod(ReflectorInterface $reflector) : \Psr\Http\Message\ResponseInterface|\Clicalmani\Core\Http\ResponseInterface|\Clicalmani\Core\Http\RedirectInterface
 	{
 		$request = Request::current();
 		if (!$request) {
@@ -187,7 +187,7 @@ class RequestController
 
 				try {
 					foreach ($services ?? [] as $id) {
-						/** @var \Clicalmani\Foundation\Http\Controllers\InjectionLocator */
+						/** @var \Clicalmani\Core\Http\Controllers\InjectionLocator */
 						$obj = $this->container->get($id);
 						$obj->setType($listedType);
 						$obj->setReflection($reflector);
@@ -210,7 +210,7 @@ class RequestController
 			return $this->handleMissingResource($e->getMessage());
 		} catch (\Throwable $e) {
 			if ( ! app()->environment('production') ) {
-				(new \Clicalmani\Foundation\Resources\ErrorRenderer)->render($e);
+				(new \Clicalmani\Core\Resources\ErrorRenderer)->render($e);
 			}
 
 			exit;
@@ -244,9 +244,9 @@ class RequestController
 	 * Controller test
 	 * 
 	 * @param string $action Test action
-	 * @return \Clicalmani\Foundation\Test\Controllers\TestController
+	 * @return \Clicalmani\Core\Test\Controllers\TestController
 	 */
-	public function test(string $action) : \Clicalmani\Foundation\Test\Controllers\TestController
+	public function test(string $action) : \Clicalmani\Core\Test\Controllers\TestController
 	{
 		return with( new TestController )->new($action);
 	}

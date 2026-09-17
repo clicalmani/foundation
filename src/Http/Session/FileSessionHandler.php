@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Foundation\Http\Session;
+namespace Clicalmani\Core\Http\Session;
 
 /**
  * @see https://www.php.net/manual/en/class.sessionhandlerinterface.php

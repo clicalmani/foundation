@@ -1,20 +1,20 @@
 <?php
-namespace Clicalmani\Foundation\Http\Middlewares;
+namespace Clicalmani\Core\Http\Middlewares;
 
-use Clicalmani\Foundation\Http\RequestInterface;
-use Clicalmani\Foundation\Http\ResponseInterface;
+use Clicalmani\Core\Http\RequestInterface;
+use Clicalmani\Core\Http\ResponseInterface;
 
 class Web extends Middleware
 {
     /**
      * Handler
      * 
-     * @param \Clicalmani\Foundation\Http\RequestInterface $request Request object
-     * @param \Clicalmani\Foundation\Http\ResponseInterface $response Response object
+     * @param \Clicalmani\Core\Http\RequestInterface $request Request object
+     * @param \Clicalmani\Core\Http\ResponseInterface $response Response object
      * @param \Closure $next Next middleware function
-     * @return \Clicalmani\Foundation\Http\ResponseInterface|\Clicalmani\Foundation\Http\RedirectInterface
+     * @return \Clicalmani\Core\Http\ResponseInterface|\Clicalmani\Core\Http\RedirectInterface
      */
-    public function handle(RequestInterface $request, ResponseInterface $response, \Closure $next) : \Clicalmani\Foundation\Http\ResponseInterface|\Clicalmani\Foundation\Http\RedirectInterface
+    public function handle(RequestInterface $request, ResponseInterface $response, \Closure $next) : \Clicalmani\Core\Http\ResponseInterface|\Clicalmani\Core\Http\RedirectInterface
     {
         if (!in_array($request->getMethod(), ['get', 'options']) AND FALSE === $request->checkCSRFToken()) {
             return $response->forbidden();
@@ -30,7 +30,7 @@ class Web extends Middleware
      */
     public function boot() : void
     {
-        include_once root_path(\Clicalmani\Foundation\Support\Facades\Config::route('web_handler'));
+        include_once root_path(\Clicalmani\Core\Support\Facades\Config::route('web_handler'));
     }
 
     public function append(string $middleware): void

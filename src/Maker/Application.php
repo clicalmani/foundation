@@ -1,17 +1,17 @@
 <?php
-namespace Clicalmani\Foundation\Maker;
+namespace Clicalmani\Core\Maker;
 
-use Clicalmani\Foundation\Acme\Container;
-use Clicalmani\Foundation\Http\Request;
-use Clicalmani\Foundation\Http\Response;
-use Clicalmani\Foundation\Support\Facades\Arr;
+use Clicalmani\Core\Acme\Container;
+use Clicalmani\Core\Http\Request;
+use Clicalmani\Core\Http\Response;
+use Clicalmani\Core\Support\Facades\Arr;
 use Clicalmani\Psr\NonBufferedBody;
 use Clicalmani\Psr\StatusCodeInterface;
 use Composer\Autoload\ClassLoader;
 use Symfony\Component\DependencyInjection\Loader\Configurator\DefaultsConfigurator;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ServiceConfigurator;
 
-use function Clicalmani\Foundation\Acme\reference;
+use function Clicalmani\Core\Acme\reference;
 use function Symfony\Component\DependencyInjection\Loader\Configurator\param;
 use function Symfony\Component\DependencyInjection\Loader\Configurator\service;
 
@@ -22,7 +22,7 @@ use function Symfony\Component\DependencyInjection\Loader\Configurator\service;
  * Manages the application lifecycle (HTTP requests, CLI commands), global configuration,
  * physical path resolution, and dependency injection via Symfony DI.
  * 
- * @package Clicalmani\Foundation
+ * @package Clicalmani\Core
  * @author @clicalmani
  */
 class Application
@@ -44,7 +44,7 @@ class Application
     /**
      * Application configuration manager.
      * 
-     * @var \Clicalmani\Foundation\Acme\Configure
+     * @var \Clicalmani\Core\Acme\Configure
      */
     protected $config;
 
@@ -58,7 +58,7 @@ class Application
     /**
      * Filesystem management component.
      * 
-     * @var \Clicalmani\Foundation\Filesystem\FileSystem
+     * @var \Clicalmani\Core\Filesystem\FileSystem
      */
     protected $filesystem;
 
@@ -100,7 +100,7 @@ class Application
     /**
      * Application dependency injection container instance.
      * 
-     * @var \Clicalmani\Foundation\Acme\Container|null
+     * @var \Clicalmani\Core\Acme\Container|null
      */
     private $container;
 
@@ -127,7 +127,7 @@ class Application
     protected function __construct(private ?string $rootPath = null)
     {
         // Initialize configuration and register fundamental paths
-        $this->config  = new \Clicalmani\Foundation\Acme\Configure;
+        $this->config  = new \Clicalmani\Core\Acme\Configure;
         $paths         = $this->config['paths'];
         $paths['root'] = $this->rootPath;
         $this->config['paths'] = $paths;
@@ -161,7 +161,7 @@ class Application
      * Automatically infers the root path and boots required Kernels.
      *
      * @param  string|null  $rootPath
-     * @return \Clicalmani\Foundation\Maker\ApplicationBuilder
+     * @return \Clicalmani\Core\Maker\ApplicationBuilder
      */
     public static function setup(?string $rootPath = null) : ApplicationBuilder
     {
@@ -184,7 +184,7 @@ class Application
     {
         $this->config->set('database', require_once config_path( '/database.php' ));
         $this->boot();
-        return \Clicalmani\Foundation\Support\Facades\RequestController::render();
+        return \Clicalmani\Core\Support\Facades\RequestController::render();
     }
 
     /**
@@ -216,7 +216,7 @@ class Application
      */
     public function getContainer()
     {
-        return \Clicalmani\Foundation\Providers\ContainerServiceProvider::get();
+        return \Clicalmani\Core\Providers\ContainerServiceProvider::get();
     }
 
     /**
@@ -410,9 +410,9 @@ class Application
     /**
      * Retrieves the active HTTP session handler instance.
      * 
-     * @return \Clicalmani\Foundation\Http\Session\SessionHandler
+     * @return \Clicalmani\Core\Http\Session\SessionHandler
      */
-    public function session(): \Clicalmani\Foundation\Http\Session\SessionHandler
+    public function session(): \Clicalmani\Core\Http\Session\SessionHandler
     {
         return \App\Providers\SessionServiceProvider::getDriver()::getInstance();
     }
@@ -426,7 +426,7 @@ class Application
     public function boot() : void
     {
         $this->addKernel(\App\Http\Kernel::class);
-        \Clicalmani\Foundation\Providers\ServiceProvider::provideServices($this->config['app']['providers']);
+        \Clicalmani\Core\Providers\ServiceProvider::provideServices($this->config['app']['providers']);
     }
 
     /**
@@ -526,10 +526,10 @@ class Application
     /**
      * Immediately boots and registers a specific third-party ServiceProvider instance.
      * 
-     * @param \Clicalmani\Foundation\Providers\ServiceProviderInterface $service
+     * @param \Clicalmani\Core\Providers\ServiceProviderInterface $service
      * @return void
      */
-    public function register(\Clicalmani\Foundation\Providers\ServiceProviderInterface $service)
+    public function register(\Clicalmani\Core\Providers\ServiceProviderInterface $service)
     {
         $service->boot();
         $service->register();
@@ -626,7 +626,7 @@ class Application
             }
         }
 
-        $this->services->set('view', \Clicalmani\Foundation\Resources\View::class);
+        $this->services->set('view', \Clicalmani\Core\Resources\View::class);
     }
 
     /**
@@ -657,26 +657,26 @@ class Application
     private function defaultServiceDefinitions(): array
     {
         return [
-            'logger'     => new ServiceDefinition('logger', \Clicalmani\Foundation\Acme\Logger::class, type: ServiceType::Core),
-            'str'        => new ServiceDefinition('str', \Clicalmani\Foundation\Acme\Stringable::class, type: ServiceType::Core),
-            'router'     => new ServiceDefinition('router', \Clicalmani\Foundation\Acme\Router::class, type: ServiceType::Core),
-            'array'      => new ServiceDefinition('array', \Clicalmani\Foundation\Acme\Arrayable::class, type: ServiceType::Core),
-            'env'        => new ServiceDefinition('env', \Clicalmani\Foundation\Acme\Environment::class, type: ServiceType::Core),
-            'config'     => new ServiceDefinition('config', \Clicalmani\Foundation\Acme\Configure::class, type: ServiceType::Core),
-            'console'    => new ServiceDefinition('console', \Clicalmani\Foundation\Acme\Console::class, type: ServiceType::Core),
-            'response'   => new ServiceDefinition('response', \Clicalmani\Foundation\Http\Response::class, \Clicalmani\Foundation\Providers\Config\ResponseConfig::class, type: ServiceType::Core),
-            'storage'    => new ServiceDefinition('storage', \Clicalmani\Foundation\Acme\StorageManager::class, type: ServiceType::Core),
-            'controller' => new ServiceDefinition('controller', \Clicalmani\Foundation\Acme\Controller::class, type: ServiceType::Core),
-            'func'       => new ServiceDefinition('func', \Clicalmani\Foundation\Acme\Invokable::class, type: ServiceType::Core),
-            'database'   => new ServiceDefinition('database', \Clicalmani\Foundation\Acme\Database::class, type: ServiceType::Core),
-            'view'       => new ServiceDefinition('view', \Clicalmani\Foundation\Resources\View::class, type: ServiceType::Core),
+            'logger'     => new ServiceDefinition('logger', \Clicalmani\Core\Acme\Logger::class, type: ServiceType::Core),
+            'str'        => new ServiceDefinition('str', \Clicalmani\Core\Acme\Stringable::class, type: ServiceType::Core),
+            'router'     => new ServiceDefinition('router', \Clicalmani\Core\Acme\Router::class, type: ServiceType::Core),
+            'array'      => new ServiceDefinition('array', \Clicalmani\Core\Acme\Arrayable::class, type: ServiceType::Core),
+            'env'        => new ServiceDefinition('env', \Clicalmani\Core\Acme\Environment::class, type: ServiceType::Core),
+            'config'     => new ServiceDefinition('config', \Clicalmani\Core\Acme\Configure::class, type: ServiceType::Core),
+            'console'    => new ServiceDefinition('console', \Clicalmani\Core\Acme\Console::class, type: ServiceType::Core),
+            'response'   => new ServiceDefinition('response', \Clicalmani\Core\Http\Response::class, \Clicalmani\Core\Providers\Config\ResponseConfig::class, type: ServiceType::Core),
+            'storage'    => new ServiceDefinition('storage', \Clicalmani\Core\Acme\StorageManager::class, type: ServiceType::Core),
+            'controller' => new ServiceDefinition('controller', \Clicalmani\Core\Acme\Controller::class, type: ServiceType::Core),
+            'func'       => new ServiceDefinition('func', \Clicalmani\Core\Acme\Invokable::class, type: ServiceType::Core),
+            'database'   => new ServiceDefinition('database', \Clicalmani\Core\Acme\Database::class, type: ServiceType::Core),
+            'view'       => new ServiceDefinition('view', \Clicalmani\Core\Resources\View::class, type: ServiceType::Core),
 
             // Namespace-based fallback structural shortcuts: Resolved dynamically depending on the suffix of the dependency.
-            '*.request'   => new ServiceDefinition('*.request', \Clicalmani\Foundation\Http\Controllers\InjectRequest::class, type: ServiceType::Namespace),
-            '*.resource'  => new ServiceDefinition('*.resource', \Clicalmani\Foundation\Http\Controllers\InjectResource::class, type: ServiceType::Namespace),
-            '*.mailer'    => new ServiceDefinition('*.mailer', \Clicalmani\Foundation\Mail\InjectMailer::class, type: ServiceType::Namespace),
-            '*.messenger' => new ServiceDefinition('*.messenger', \Clicalmani\Foundation\Messenger\Inject::class, \Clicalmani\Foundation\Providers\Config\MessengerConfig::class, type: ServiceType::Namespace),
-            // '*.event-dispatch' => new ServiceDefinition('*.event-dispatcher', \Clicalmani\Foundation\Events\InjectDispatcher::class, \Clicalmani\Foundation\Providers\Config\MessengerConfig::class, type: ServiceType::Namespace),
+            '*.request'   => new ServiceDefinition('*.request', \Clicalmani\Core\Http\Controllers\InjectRequest::class, type: ServiceType::Namespace),
+            '*.resource'  => new ServiceDefinition('*.resource', \Clicalmani\Core\Http\Controllers\InjectResource::class, type: ServiceType::Namespace),
+            '*.mailer'    => new ServiceDefinition('*.mailer', \Clicalmani\Core\Mail\InjectMailer::class, type: ServiceType::Namespace),
+            '*.messenger' => new ServiceDefinition('*.messenger', \Clicalmani\Core\Messenger\Inject::class, \Clicalmani\Core\Providers\Config\MessengerConfig::class, type: ServiceType::Namespace),
+            // '*.event-dispatch' => new ServiceDefinition('*.event-dispatcher', \Clicalmani\Core\Events\InjectDispatcher::class, \Clicalmani\Core\Providers\Config\MessengerConfig::class, type: ServiceType::Namespace),
         ];
     }
 }

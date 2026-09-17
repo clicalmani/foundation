@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Foundation\Http\Controllers;
+namespace Clicalmani\Core\Http\Controllers;
 
 class FunctionReflector extends Reflector implements ReflectorInterface
 {

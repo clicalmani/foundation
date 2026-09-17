@@ -1,8 +1,8 @@
 <?php
-namespace Clicalmani\Foundation\Http\Controllers;
+namespace Clicalmani\Core\Http\Controllers;
 
-use Clicalmani\Foundation\Http\RequestInterface;
-use Clicalmani\Foundation\Mail\MailerInterface;
+use Clicalmani\Core\Http\RequestInterface;
+use Clicalmani\Core\Mail\MailerInterface;
 
 interface ReflectorInterface
 {

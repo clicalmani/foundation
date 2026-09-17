@@ -1,8 +1,8 @@
 <?php
-namespace Clicalmani\Foundation\Http;
+namespace Clicalmani\Core\Http;
 
-use Clicalmani\Foundation\Collection\CollectionInterface;
-use Clicalmani\Foundation\Http\Requests\FileInterface;
+use Clicalmani\Core\Collection\CollectionInterface;
+use Clicalmani\Core\Http\Requests\FileInterface;
 
 interface RequestInterface extends \Psr\Http\Message\ServerRequestInterface
 {
@@ -199,9 +199,9 @@ interface RequestInterface extends \Psr\Http\Message\ServerRequestInterface
      * Collect input data as an array.
      * 
      * @param string $name The name of the input parameter.
-     * @return \Clicalmani\Foundation\Collection\CollectionInterface
+     * @return \Clicalmani\Core\Collection\CollectionInterface
      */
-    public function collect(string $name) : \Clicalmani\Foundation\Collection\CollectionInterface;
+    public function collect(string $name) : \Clicalmani\Core\Collection\CollectionInterface;
 
     /**
      * Get the value of a specific query parameter.
@@ -214,9 +214,9 @@ interface RequestInterface extends \Psr\Http\Message\ServerRequestInterface
     /**
      * Get the request data as a JSON collection.
      * 
-     * @return \Clicalmani\Foundation\Collection\CollectionInterface
+     * @return \Clicalmani\Core\Collection\Collection
      */
-    public function json() : \Clicalmani\Foundation\Collection\CollectionInterface;
+    public function json() : \Clicalmani\Core\Collection\Collection;
 
     /**
      * Check if the request has a specific parameter.
@@ -354,9 +354,9 @@ interface RequestInterface extends \Psr\Http\Message\ServerRequestInterface
     /**
      * Manage the session instance.
      * 
-     * @return \Clicalmani\Foundation\Http\Session\SessionInterface
+     * @return \Clicalmani\Core\Http\Session\SessionInterface
      */
-    public function session(?string $key = null, ?string $value = null) : \Clicalmani\Foundation\Http\Session\SessionInterface;
+    public function session(?string $key = null, ?string $value = null) : \Clicalmani\Core\Http\Session\SessionInterface;
 
     /**
      * Check if the request is trustworthy.

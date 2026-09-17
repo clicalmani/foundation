@@ -1,8 +1,8 @@
 <?php
-namespace Clicalmani\Foundation\Acme;
+namespace Clicalmani\Core\Acme;
 
-use Clicalmani\Foundation\Filesystem\DirectoryScanner;
-use Clicalmani\Foundation\Support\Facades\DB;
+use Clicalmani\Core\Filesystem\DirectoryScanner;
+use Clicalmani\Core\Support\Facades\DB;
 use Clicalmani\XPower\XDTNodeList;
 
 /**
@@ -11,7 +11,7 @@ use Clicalmani\XPower\XDTNodeList;
  * Manages framework database operations including topological migrations,
  * table drops, database seeding, SQL exports, and routine creation.
  * 
- * @package Clicalmani\Foundation\Acme
+ * @package Clicalmani\Core\Acme
  * @author @clicalmani
  */
 class Console

@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Foundation\Http\Requests;
+namespace Clicalmani\Core\Http\Requests;
 
 interface RequestControllerInterface
 {
@@ -23,7 +23,7 @@ interface RequestControllerInterface
 	 * Controller test
 	 * 
 	 * @param string $action Test action
-	 * @return \Clicalmani\Foundation\Test\Controllers\TestController
+	 * @return \Clicalmani\Core\Test\Controllers\TestController
 	 */
-	public function test(string $action) : \Clicalmani\Foundation\Test\Controllers\TestController;
+	public function test(string $action) : \Clicalmani\Core\Test\Controllers\TestController;
 }

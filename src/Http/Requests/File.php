@@ -1,7 +1,7 @@
 <?php
-namespace Clicalmani\Foundation\Http\Requests;
+namespace Clicalmani\Core\Http\Requests;
 
-use Clicalmani\Foundation\Support\Facades\Storage;
+use Clicalmani\Core\Support\Facades\Storage;
 use Clicalmani\Psr\Stream;
 use Override;
 use Psr\Http\Message\StreamInterface;
@@ -16,7 +16,7 @@ class File implements FileInterface, \JsonSerializable
     protected bool $sapi = false;
     protected bool $moved = false;
 
-    private \Clicalmani\Foundation\Filesystem\StorageManager $manager;
+    private \Clicalmani\Core\Filesystem\StorageManager $manager;
     private ?string $disk = null;
 
     public function __construct(
@@ -35,7 +35,7 @@ class File implements FileInterface, \JsonSerializable
         $this->error = $error;
         $this->sapi = $sapi;
 
-        /** @var \Clicalmani\Foundation\Filesystem\StorageManager */
+        /** @var \Clicalmani\Core\Filesystem\StorageManager */
         $this->manager = container()->get('storage.manager');
         $this->disk = $this->manager->getConfig()['default'] ?? null;
     }

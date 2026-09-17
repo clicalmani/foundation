@@ -1,8 +1,8 @@
 <?php
-namespace Clicalmani\Foundation\Http;
+namespace Clicalmani\Core\Http;
 
-use Clicalmani\Foundation\Exceptions\ResourceNotFoundException;
-use Clicalmani\Foundation\Support\Facades\Route;
+use Clicalmani\Core\Exceptions\ResourceNotFoundException;
+use Clicalmani\Core\Support\Facades\Route;
 use Clicalmani\Psr\Header;
 use Clicalmani\Psr\NonBufferedBody;
 use Clicalmani\Psr\Stream;
@@ -11,8 +11,8 @@ use Psr\Http\Message\StreamInterface;
 /**
  * Class Response
  * 
- * @package Clicalmani\Foundation
- * @author @Clicalmani\Foundation
+ * @package Clicalmani\Core
+ * @author @Clicalmani\Core
  */
 class Response extends \Clicalmani\Psr\Response implements ResponseInterface
 {
@@ -153,13 +153,13 @@ class Response extends \Clicalmani\Psr\Response implements ResponseInterface
         exit;
     }
 
-    public function status(int $code) : \Clicalmani\Foundation\Http\ResponseInterface
+    public function status(int $code) : \Clicalmani\Core\Http\ResponseInterface
     {
         http_response_code($this->status = $code);
         return $this;
     }
 
-    public function header(string $name, string|array $value) : \Clicalmani\Foundation\Http\ResponseInterface
+    public function header(string $name, string|array $value) : \Clicalmani\Core\Http\ResponseInterface
     {
         $this->headers[] = new Header($name, (array)$value);
         return $this;
@@ -215,7 +215,7 @@ class Response extends \Clicalmani\Psr\Response implements ResponseInterface
         string $domain = '', 
         bool $secure = false, 
         bool $httponly = false
-    ) : \Clicalmani\Foundation\Http\ResponseInterface {
+    ) : \Clicalmani\Core\Http\ResponseInterface {
         (new \Clicalmani\Cookie\Cookie(
             $name,
             $value,
@@ -228,7 +228,7 @@ class Response extends \Clicalmani\Psr\Response implements ResponseInterface
         return $this;
     }
 
-    public function deleteCookie(string $name, string $path = '', string $domain = '') : \Clicalmani\Foundation\Http\ResponseInterface
+    public function deleteCookie(string $name, string $path = '', string $domain = '') : \Clicalmani\Core\Http\ResponseInterface
     {
         setcookie($name, '', time() - 3600, $path, $domain);
         return $this;
@@ -239,7 +239,7 @@ class Response extends \Clicalmani\Psr\Response implements ResponseInterface
         $this->send(view($view, $data)->render());
     }
 
-    public function withHeaders(array $headers) : \Clicalmani\Foundation\Http\ResponseInterface
+    public function withHeaders(array $headers) : \Clicalmani\Core\Http\ResponseInterface
     {
         foreach ($headers as $name => $value) {
             $this->header($name, $value);

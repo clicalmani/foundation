@@ -1,7 +1,7 @@
 <?php
-namespace Clicalmani\Foundation\Providers\Config;
+namespace Clicalmani\Core\Providers\Config;
 
-use Clicalmani\Foundation\Providers\RouteService;
+use Clicalmani\Core\Providers\RouteService;
 
 final class RedirectService extends RouteService
 {
@@ -27,7 +27,7 @@ final class RedirectService extends RouteService
                 $this->route->redirect = $this->route->redirect ?? self::traceBack();
             }
             
-            if (!\Clicalmani\Foundation\Support\Facades\Route::isApi() && $this->route->isGettable()) {
+            if (!\Clicalmani\Core\Support\Facades\Route::isApi() && $this->route->isGettable()) {
                 session()->storeBackTrace(client_url());
             }
         }

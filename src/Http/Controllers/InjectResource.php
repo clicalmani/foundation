@@ -1,10 +1,10 @@
 <?php
-namespace Clicalmani\Foundation\Http\Controllers;
+namespace Clicalmani\Core\Http\Controllers;
 
 use Clicalmani\Database\Factory\Models\Elegant;
-use Clicalmani\Foundation\Exceptions\ModelNotFoundException;
-use Clicalmani\Foundation\Http\Request;
-use Clicalmani\Foundation\Support\Facades\Str;
+use Clicalmani\Core\Exceptions\ModelNotFoundException;
+use Clicalmani\Core\Http\Request;
+use Clicalmani\Core\Support\Facades\Str;
 use Clicalmani\Routing\Memory;
 use Clicalmani\Validation\AsValidator;
 
@@ -54,7 +54,7 @@ class InjectResource extends InjectionLocator
 
 		$resource = $this->reflector->getResource()['name'];
 		$nested_resource = @$this->reflector->getNestedResource()['name'];
-		/** @var \Clicalmani\Foundation\Http\Request */
+		/** @var \Clicalmani\Core\Http\Request */
 		$request = Request::current();
 		
 		if ($this->reflector instanceof MethodReflector) {

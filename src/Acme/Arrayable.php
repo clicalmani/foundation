@@ -1,10 +1,10 @@
 <?php
-namespace Clicalmani\Foundation\Acme;
+namespace Clicalmani\Core\Acme;
 
-use Clicalmani\Foundation\Collection\CollectionInterface;
-use Clicalmani\Foundation\Sandbox\Sandbox;
-use Clicalmani\Foundation\Support\Facades\Arr;
-use Clicalmani\Foundation\Support\Facades\Log;
+use Clicalmani\Core\Collection\CollectionInterface;
+use Clicalmani\Core\Sandbox\Sandbox;
+use Clicalmani\Core\Support\Facades\Arr;
+use Clicalmani\Core\Support\Facades\Log;
 
 class Arrayable
 {

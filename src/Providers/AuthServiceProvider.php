@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Foundation\Providers;
+namespace Clicalmani\Core\Providers;
 
 /**
  * Class AuthServiceProvider
@@ -7,7 +7,7 @@ namespace Clicalmani\Foundation\Providers;
  * Provides an abstract foundation for security authentication services,
  * mapping structural authentication parameters from the application runtime configuration.
  * 
- * @package Clicalmani\Foundation\Providers
+ * @package Clicalmani\Core\Providers
  * @author @clicalmani
  */
 abstract class AuthServiceProvider extends ServiceProvider

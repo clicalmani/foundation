@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Foundation\Http;
+namespace Clicalmani\Core\Http;
 
 trait StatusErrors
 {

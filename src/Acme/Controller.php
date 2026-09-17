@@ -1,10 +1,10 @@
 <?php
-namespace Clicalmani\Foundation\Acme;
+namespace Clicalmani\Core\Acme;
 
-use Clicalmani\Foundation\Exceptions\MiddlewareException;
-use Clicalmani\Foundation\Http\Request;
-use Clicalmani\Foundation\Http\Response;
-use Clicalmani\Foundation\Providers\ServiceProvider;
+use Clicalmani\Core\Exceptions\MiddlewareException;
+use Clicalmani\Core\Http\Request;
+use Clicalmani\Core\Http\Response;
+use Clicalmani\Core\Providers\ServiceProvider;
 
 /**
  * Handles HTTP requests for the application.
@@ -12,8 +12,8 @@ use Clicalmani\Foundation\Providers\ServiceProvider;
  * This controller is responsible for processing incoming HTTP requests
  * and returning appropriate responses.
  * 
- * @package Clicalmani\Foundation/flesco 
- * @author @Clicalmani\Foundation
+ * @package Clicalmani\Core/flesco 
+ * @author @Clicalmani\Core
  */
 class Controller
 {
@@ -54,13 +54,13 @@ class Controller
      * 
      * @param string $name_or_class
      * @return int
-     * @throws \Clicalmani\Foundation\Exceptions\MiddlewareException
+     * @throws \Clicalmani\Core\Exceptions\MiddlewareException
      */
     public function isAuthorized(string $name_or_class) : int
     {
         $middleware = null;
 
-        if ($middleware = ServiceProvider::getProvidedMiddleware(\Clicalmani\Foundation\Support\Facades\Route::gateway(), $name_or_class)) ;
+        if ($middleware = ServiceProvider::getProvidedMiddleware(\Clicalmani\Core\Support\Facades\Route::gateway(), $name_or_class)) ;
         else {
             if ( class_exists($name_or_class) ) $middleware = $name_or_class;
             else throw new MiddlewareException(
@@ -112,7 +112,7 @@ class Controller
      */
     private function sendStatus(int $code, string $status_code, string $message) : never
 	{
-		if (\Clicalmani\Foundation\Support\Facades\Route::isApi()) response()->status($code, $status_code, $message);
+		if (\Clicalmani\Core\Support\Facades\Route::isApi()) response()->status($code, $status_code, $message);
 		else response()->send($code);
 
 		exit;

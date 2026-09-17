@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Foundation\Acme;
+namespace Clicalmani\Core\Acme;
 
 use Dotenv\Dotenv;
 use Dotenv\Repository\Adapter\EnvConstAdapter;

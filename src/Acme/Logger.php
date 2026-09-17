@@ -1,7 +1,7 @@
 <?php
-namespace Clicalmani\Foundation\Acme;
+namespace Clicalmani\Core\Acme;
 
-use Clicalmani\Foundation\Providers\LogServiceProvider;
+use Clicalmani\Core\Providers\LogServiceProvider;
 
 class Logger extends LogServiceProvider
 {

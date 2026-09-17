@@ -1,12 +1,12 @@
 <?php 
-namespace Clicalmani\Foundation\Collection;
+namespace Clicalmani\Core\Collection;
 
 /**
  * Class Map
  * 
  * A Map is a collection of key-value pairs, where each key is unique.
  * 
- * @package Clicalmani\Foundation\Collection
+ * @package Clicalmani\Core\Collection
  * @author @clicalmani
  */
 class Map extends Collection
@@ -113,7 +113,7 @@ class Map extends Collection
         return $this;
     }
 
-    public function filter(callable $closure) : \Clicalmani\Foundation\Collection\CollectionInterface
+    public function filter(callable $closure) : \Clicalmani\Core\Collection\CollectionInterface
     {
         return $this->exchange(
             array_filter($this->toArray(), $closure, ARRAY_FILTER_USE_BOTH)

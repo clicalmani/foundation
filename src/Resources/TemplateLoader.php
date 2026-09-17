@@ -1,7 +1,7 @@
 <?php
-namespace Clicalmani\Foundation\Resources;
+namespace Clicalmani\Core\Resources;
 
-use Clicalmani\Foundation\Exceptions\ResourceNotFoundException;
+use Clicalmani\Core\Exceptions\ResourceNotFoundException;
 use Twig\Loader\LoaderInterface;
 use Twig\Source;
 
@@ -107,6 +107,6 @@ class TemplateLoader implements LoaderInterface
 
     private function getavailableTemplateTags(): array
     {
-        return \Clicalmani\Foundation\Resources\Kernel::$template_tags;
+        return \Clicalmani\Core\Resources\Kernel::$template_tags;
     }
 }

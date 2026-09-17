@@ -1,17 +1,17 @@
 <?php
-namespace Clicalmani\Foundation\Http;
+namespace Clicalmani\Core\Http;
 
-use Clicalmani\Foundation\Auth\EncryptionServiceProvider;
-use Clicalmani\Foundation\Collection\Collection;
-use Clicalmani\Foundation\Collection\CollectionInterface;
-use Clicalmani\Foundation\Http\Requests\Cookie;
-use Clicalmani\Foundation\Http\Requests\HttpOutputStream;
-use Clicalmani\Foundation\Http\Requests\HttpRequest;
-use Clicalmani\Foundation\Http\Requests\Redirect;
-use Clicalmani\Foundation\Http\RequestInterface;
-use Clicalmani\Foundation\Http\Session;
-use Clicalmani\Foundation\Providers\AuthServiceProvider;
-use Clicalmani\Foundation\Support\Facades\Arr;
+use Clicalmani\Core\Auth\EncryptionServiceProvider;
+use Clicalmani\Core\Collection\Collection;
+use Clicalmani\Core\Collection\CollectionInterface;
+use Clicalmani\Core\Http\Requests\Cookie;
+use Clicalmani\Core\Http\Requests\HttpOutputStream;
+use Clicalmani\Core\Http\Requests\HttpRequest;
+use Clicalmani\Core\Http\Requests\Redirect;
+use Clicalmani\Core\Http\RequestInterface;
+use Clicalmani\Core\Http\Session;
+use Clicalmani\Core\Providers\AuthServiceProvider;
+use Clicalmani\Core\Support\Facades\Arr;
 use Clicalmani\Psr\Headers;
 use Clicalmani\Psr\Stream;
 use Clicalmani\Psr\Uri;
@@ -25,24 +25,24 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
     /**
      * Current request object
      * 
-     * @var \Clicalmani\Foundation\Http\RequestInterface
+     * @var \Clicalmani\Core\Http\RequestInterface
      */
     protected static $current_request;
 
     /**
      * Validator
      * 
-     * @var \Clicalmani\Foundation\Fundation\Validation\Validator
+     * @var \Clicalmani\Core\Fundation\Validation\Validator
      */
     private $validator;
     
     /**
      * Get or set the current request
      * 
-     * @param ?\Clicalmani\Foundation\Http\RequestInterface $request
-     * @return ?\Clicalmani\Foundation\Http\RequestInterface
+     * @param ?\Clicalmani\Core\Http\RequestInterface $request
+     * @return ?\Clicalmani\Core\Http\RequestInterface
      */
-    public static function current(?RequestInterface $request = null) : ?\Clicalmani\Foundation\Http\RequestInterface
+    public static function current(?RequestInterface $request = null) : ?\Clicalmani\Core\Http\RequestInterface
     {
         if ($request) return self::$current_request = $request;
         return self::$current_request;
@@ -169,7 +169,7 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
     {
         return tap(
             EncryptionServiceProvider::createParametersHash($params), 
-            fn(string $hash) => $this->attributes[\Clicalmani\Foundation\Auth\EncryptionServiceProvider::hashParameter()] = $hash
+            fn(string $hash) => $this->attributes[\Clicalmani\Core\Auth\EncryptionServiceProvider::hashParameter()] = $hash
         );
     }
 
@@ -202,11 +202,11 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
     public function user() : mixed
     {
         if ($authenticatorClass = AuthServiceProvider::userAuthenticator()) {
-            /** @var \Clicalmani\Foundation\Auth\Authenticate */
+            /** @var \Clicalmani\Core\Auth\Authenticate */
             $authenticator = new $authenticatorClass;
             
             $user_id = $authenticator->getConnectedUserID($this);
-
+            
             /**
              * |----------------------------------------------------
              * | Test User
@@ -215,7 +215,7 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
              * | may be specified.
              */
             if ( isConsoleMode() ) $user_id = $this?->test_user_id ?? null;
-
+            
             if ($user_id) return $authenticator->createUser($user_id);
         }
 
@@ -239,7 +239,7 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
 
     public function where(?array $exclude = []) : array
     {
-        $exclude[] = \Clicalmani\Foundation\Auth\EncryptionServiceProvider::hashParameter(); // Default
+        $exclude[] = \Clicalmani\Core\Auth\EncryptionServiceProvider::hashParameter(); // Default
         $filters = [];
 
         if ( request() ) {
@@ -261,7 +261,7 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
 
     public function route() : ?\Clicalmani\Routing\Route
     {
-        return \Clicalmani\Foundation\Support\Facades\Route::current();
+        return \Clicalmani\Core\Support\Facades\Route::current();
     }
 
     public function url() : string
@@ -501,7 +501,7 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
         }
     }
 
-    public function session(?string $key = null, ?string $value = null) : \Clicalmani\Foundation\Http\Session\SessionInterface
+    public function session(?string $key = null, ?string $value = null) : \Clicalmani\Core\Http\Session\SessionInterface
     {
         $session_instance = new Session($key, $value);
 

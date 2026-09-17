@@ -1,9 +1,9 @@
 <?php
-namespace Clicalmani\Foundation\Events;
+namespace Clicalmani\Core\Events;
 
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
-class InjectDispatcher extends \Clicalmani\Foundation\Http\Controllers\InjectionLocator
+class InjectDispatcher extends \Clicalmani\Core\Http\Controllers\InjectionLocator
 {
     /**
      * InjectDispatcher constructor.

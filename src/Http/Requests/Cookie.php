@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Foundation\Http\Requests;
+namespace Clicalmani\Core\Http\Requests;
 
 trait Cookie
 {

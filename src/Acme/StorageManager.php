@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Foundation\Acme;
+namespace Clicalmani\Core\Acme;
 
 class StorageManager
 {
@@ -43,6 +43,6 @@ class StorageManager
      */
     public static function link() : mixed
     {
-        return \Clicalmani\Foundation\Support\Facades\Tonka::link(storage_path(), root_path('public'));
+        return \Clicalmani\Core\Support\Facades\Tonka::link(storage_path(), root_path('public'));
     }
 }

@@ -1,22 +1,22 @@
 <?php
-namespace Clicalmani\Foundation\Http\Controllers;
+namespace Clicalmani\Core\Http\Controllers;
 
-use Clicalmani\Foundation\Http\Request;
+use Clicalmani\Core\Http\Request;
 use Clicalmani\Validation\AsValidator;
 
 class InjectRequest extends InjectionLocator
 {
     public function handle(): ?object
     {
-        if (is_subclass_of($this->class, \Clicalmani\Foundation\Http\Request::class) ||
-					$this->class === \Clicalmani\Foundation\Http\Request::class || $this->class === \Clicalmani\Foundation\Http\RequestInterface::class) {
+        if (is_subclass_of($this->class, \Clicalmani\Core\Http\Request::class) ||
+					$this->class === \Clicalmani\Core\Http\Request::class || $this->class === \Clicalmani\Core\Http\RequestInterface::class) {
 
 			$this->createInstance();
 
             $request = Request::current();
 		
             $data = $request->all();
-            /** @var \Clicalmani\Foundation\Http\Request */
+            /** @var \Clicalmani\Core\Http\Request */
             $request = $this->instance;
             $request->extend($data);
 
@@ -38,7 +38,7 @@ class InjectRequest extends InjectionLocator
     /**
 	 * Validate request
 	 * 
-	 * @param \Clicalmani\Foundation\Http\Request
+	 * @param \Clicalmani\Core\Http\Request
 	 * @return mixed
 	 */
 	public static function validateRequest(Request $request) : mixed

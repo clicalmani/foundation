@@ -1,11 +1,11 @@
 <?php
-namespace Clicalmani\Foundation\Support;
+namespace Clicalmani\Core\Support;
 
 /**
  * Class Helper
  * 
- * @package Clicalmani\Foundation
- * @author @Clicalmani\Foundation
+ * @package Clicalmani\Core
+ * @author @Clicalmani\Core
  */
 class Helper 
 {

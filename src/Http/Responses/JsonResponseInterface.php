@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Foundation\Http\Responses;
+namespace Clicalmani\Core\Http\Responses;
 
 interface JsonResponseInterface
 {

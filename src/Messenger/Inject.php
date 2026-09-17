@@ -1,7 +1,7 @@
 <?php
-namespace Clicalmani\Foundation\Messenger;
+namespace Clicalmani\Core\Messenger;
 
-use Clicalmani\Foundation\Http\Controllers\InjectionLocator;
+use Clicalmani\Core\Http\Controllers\InjectionLocator;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Override;
 
@@ -11,7 +11,7 @@ use Override;
  * Custom injection locator responsible for resolving and provisioning the active 
  * MessageBusInterface instance during dynamic application controller and service injection workflows.
  * 
- * @package Clicalmani\Foundation\Messenger
+ * @package Clicalmani\Core\Messenger
  * @author @clicalmani
  */
 class Inject extends InjectionLocator

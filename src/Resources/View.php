@@ -1,7 +1,7 @@
 <?php
-namespace Clicalmani\Foundation\Resources;
+namespace Clicalmani\Core\Resources;
 
-use Clicalmani\Foundation\Acme\Container;
+use Clicalmani\Core\Acme\Container;
 use Clicalmani\Psr\NonBufferedBody;
 use Clicalmani\Psr\Response;
 
@@ -31,8 +31,8 @@ class View extends Response implements ViewInterface
         $this->sharedData = array_merge(app()->viewSharedData() ?? [], $context);
         $this->context = $this->sharedData;
         $this->body = new NonBufferedBody;
-        $this->twig = new \Twig\Environment(new \Clicalmani\Foundation\Resources\TemplateLoader, []);
-        $this->twig->addExtension(new \Clicalmani\Foundation\Resources\TonkaTwigExtension);
+        $this->twig = new \Twig\Environment(new \Clicalmani\Core\Resources\TemplateLoader, []);
+        $this->twig->addExtension(new \Clicalmani\Core\Resources\TonkaTwigExtension);
         $this->runComposers();
     }
 

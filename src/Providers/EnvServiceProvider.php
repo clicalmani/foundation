@@ -1,8 +1,8 @@
 <?php
-namespace Clicalmani\Foundation\Providers;
+namespace Clicalmani\Core\Providers;
 
-use Clicalmani\Foundation\Acme\Environment;
-use Clicalmani\Foundation\Support\Facades\Env;
+use Clicalmani\Core\Acme\Environment;
+use Clicalmani\Core\Support\Facades\Env;
 
 /**
  * Class EnvServiceProvider
@@ -10,7 +10,7 @@ use Clicalmani\Foundation\Support\Facades\Env;
  * Boots the environment infrastructure layer, processing runtime parameters 
  * and initializing configuration fallbacks for terminal runtime interfaces.
  * 
- * @package Clicalmani\Foundation\Providers
+ * @package Clicalmani\Core\Providers
  * @author @clicalmani
  */
 class EnvServiceProvider extends ServiceProvider
@@ -18,7 +18,7 @@ class EnvServiceProvider extends ServiceProvider
     /**
      * The environment controller backend engine instance.
      * 
-     * @var \Clicalmani\Foundation\Acme\Environment
+     * @var \Clicalmani\Core\Acme\Environment
      */
     private Environment $environment;
 

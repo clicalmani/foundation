@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Foundation\Maker;
+namespace Clicalmani\Core\Maker;
 
 /**
  * Class BootstrapKernel
@@ -7,7 +7,7 @@ namespace Clicalmani\Foundation\Maker;
  * Handles the loading and registration of the core application bootstrapping configuration
  * from the environment initialization scripts.
  * 
- * @package Clicalmani\Foundation\Maker
+ * @package Clicalmani\Core\Maker
  * @author @clicalmani
  */
 class BootstrapKernel extends Kernel

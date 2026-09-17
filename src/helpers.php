@@ -1,13 +1,13 @@
 <?php
 
 use Carbon\Carbon;
-use Clicalmani\Foundation\Collection\Collection;
-use Clicalmani\Foundation\Resources\ViewInterface;
-use Clicalmani\Foundation\Support\Facades\Arr;
+use Clicalmani\Core\Collection\Collection;
+use Clicalmani\Core\Resources\ViewInterface;
+use Clicalmani\Core\Support\Facades\Arr;
 
 if ( ! function_exists('app') ) {
-    function app() : \Clicalmani\Foundation\Maker\Application {
-        return \Clicalmani\Foundation\Maker\Application::getInstance();
+    function app() : \Clicalmani\Core\Maker\Application {
+        return \Clicalmani\Core\Maker\Application::getInstance();
     }
 }
 
@@ -134,10 +134,10 @@ if ( ! function_exists( 'view' ) ) {
      * 
      * @param string $template Template name
      * @param ?array $vars Variables
-     * @return \Clicalmani\Foundation\Resources\ViewInterface
+     * @return \Clicalmani\Core\Resources\ViewInterface
      */
-    function view(string $template, ?array $vars = []) : \Clicalmani\Foundation\Resources\ViewInterface {
-        return new \Clicalmani\Foundation\Resources\View($template, $vars);
+    function view(string $template, ?array $vars = []) : \Clicalmani\Core\Resources\ViewInterface {
+        return new \Clicalmani\Core\Resources\View($template, $vars);
     }
 }
 
@@ -149,7 +149,7 @@ if ( ! function_exists( 'client_url' ) ) {
      * @return string
      */
     function client_url() : string {
-        return \Clicalmani\Foundation\Support\Facades\Route::uri() ?? $_SERVER['REQUEST_URI'] ?? '';
+        return \Clicalmani\Core\Support\Facades\Route::uri() ?? $_SERVER['REQUEST_URI'] ?? '';
     }
 }
 
@@ -206,7 +206,7 @@ if ( ! function_exists( 'password' ) ) {
      * @return string
      */
     function password(string $password) : string {
-        return \Clicalmani\Foundation\Auth\EncryptionServiceProvider::password($password);
+        return \Clicalmani\Core\Auth\EncryptionServiceProvider::password($password);
     }
 }
 
@@ -219,7 +219,7 @@ if ( ! function_exists( 'create_parameters_hash' ) ) {
      * @return string
      */
     function create_parameters_hash(array $parameters) : string {
-        return (new \Clicalmani\Foundation\Http\Request)->createParametersHash($parameters);
+        return (new \Clicalmani\Core\Http\Request)->createParametersHash($parameters);
     }
 }
 
@@ -260,26 +260,26 @@ if ( ! function_exists('request') ) {
      * @param ?string $param
      * @return mixed
      */
-    function request(): ?\Clicalmani\Foundation\Http\RequestInterface {
-        return \Clicalmani\Foundation\Http\Request::current();
+    function request(): ?\Clicalmani\Core\Http\RequestInterface {
+        return \Clicalmani\Core\Http\Request::current();
     }
 }
 
 /**
  * Do a redirect
  * 
- * @return \Clicalmani\Foundation\Http\RedirectInterface
+ * @return \Clicalmani\Core\Http\RedirectInterface
  */
-function redirect(string $uri = '/', int $status = 302) : \Clicalmani\Foundation\Http\RedirectInterface {
-    return new \Clicalmani\Foundation\Http\Redirect($uri, $status);
+function redirect(string $uri = '/', int $status = 302) : \Clicalmani\Core\Http\RedirectInterface {
+    return new \Clicalmani\Core\Http\Redirect($uri, $status);
 }
 
 /**
  * Do a redirect back
  * 
- * @return \Clicalmani\Foundation\Http\RedirectInterface
+ * @return \Clicalmani\Core\Http\RedirectInterface
  */
-function back() : \Clicalmani\Foundation\Http\RedirectInterface {
+function back() : \Clicalmani\Core\Http\RedirectInterface {
     return redirect()->back();
 }
 
@@ -288,9 +288,9 @@ if ( ! function_exists('response') ) {
     /**
      * Returns the response instance
      * 
-     * @return \Clicalmani\Foundation\Http\ResponseInterface
+     * @return \Clicalmani\Core\Http\ResponseInterface
      */
-    function response(?string $message = '', int $status = 200) : \Clicalmani\Foundation\Http\ResponseInterface
+    function response(?string $message = '', int $status = 200) : \Clicalmani\Core\Http\ResponseInterface
     {
         $response = app()->response;
 
@@ -315,7 +315,7 @@ if ( ! function_exists('route') ) {
      * @return mixed
      */
     function route(mixed ...$args) : mixed {
-        return \Clicalmani\Foundation\Support\Facades\Route::resolve(...$args);
+        return \Clicalmani\Core\Support\Facades\Route::resolve(...$args);
     }
 }
 
@@ -324,10 +324,10 @@ if ( ! function_exists('collection') ) {
     /**
      * Create a collection
      * 
-     * @return \Clicalmani\Foundation\Collection\CollectionInterface
+     * @return \Clicalmani\Core\Collection\Collection
      */
-    function collection($items = []) : \Clicalmani\Foundation\Collection\CollectionInterface {
-        return new \Clicalmani\Foundation\Collection\Collection( $items );
+    function collection($items = []) : \Clicalmani\Core\Collection\Collection {
+        return new \Clicalmani\Core\Collection\Collection( $items );
     }
 }
 
@@ -336,7 +336,7 @@ if ( ! function_exists('collect') ) {
     /**
      * Alias of collection
      * 
-     * @return \Clicalmani\Foundation\Collection\CollectionInterface
+     * @return \Clicalmani\Core\Collection\CollectionInterface
      */
     function collect($items = []) {
         return collection($items);
@@ -379,7 +379,7 @@ if ( ! function_exists('slugify') ) {
      * @return string
      */
     function slugify(string $str, string $default = '') : string {
-        return \Clicalmani\Foundation\Support\Facades\Str::slug($str, $default);
+        return \Clicalmani\Core\Support\Facades\Str::slug($str, $default);
     }
 }
 
@@ -553,7 +553,7 @@ if ( ! function_exists('token') ) {
      * @return string
      */
     function token(mixed $jti, ?int $seconds = null) : string {
-        $auth = new \Clicalmani\Foundation\Auth\AuthServiceProvider;
+        $auth = new \Clicalmani\Core\Auth\AuthServiceProvider;
         $auth->setJti($jti);
         if ($seconds) $auth->setExpiration($seconds);
         return $auth->generateToken();
@@ -569,7 +569,7 @@ if ( ! function_exists('get_payload') ) {
      * @return mixed
      */
     function get_payload(string $token) : mixed {
-        return with ( new \Clicalmani\Foundation\Auth\AuthServiceProvider )->verifyToken($token);
+        return with ( new \Clicalmani\Core\Auth\AuthServiceProvider )->verifyToken($token);
     }
 }
 
@@ -582,7 +582,7 @@ if ( ! function_exists('bearerToken') ) {
      * @return mixed
      */
     function bearerToken() : mixed {
-        return with ( new \Clicalmani\Foundation\Http\Request )->bearerToken();
+        return with ( new \Clicalmani\Core\Http\Request )->bearerToken();
     }
 }
 
@@ -595,7 +595,7 @@ if ( ! function_exists('tree') ) {
      * @param callable $callback
      * @return mixed
      */
-    function tree(iterable|\Clicalmani\Foundation\Collection\CollectionInterface $iterable, callable $callback) : mixed {
+    function tree(iterable|\Clicalmani\Core\Collection\CollectionInterface $iterable, callable $callback) : mixed {
         $ret = [];
         foreach ($iterable as $item) {
             $ret[] = $item;
@@ -613,10 +613,10 @@ if ( ! function_exists('jwt') ) {
      * 
      * @param ?string $jti
      * @param mixed $expiry
-     * @return \Clicalmani\Foundation\Auth\JWT
+     * @return \Clicalmani\Core\Auth\JWT
      */
     function jwt(?string $jti = null, mixed $expiry = 1) {
-        return new \Clicalmani\Foundation\Auth\AuthServiceProvider($jti, $expiry);
+        return new \Clicalmani\Core\Auth\AuthServiceProvider($jti, $expiry);
     }
 }
 
@@ -629,7 +629,7 @@ if ( ! function_exists('encrypt') ) {
      * @return mixed
      */
     function encrypt(string $value) : mixed {
-        return \Clicalmani\Foundation\Auth\EncryptionServiceProvider::encrypt($value);
+        return \Clicalmani\Core\Auth\EncryptionServiceProvider::encrypt($value);
     }
 }
 
@@ -642,28 +642,28 @@ if ( ! function_exists('decrypt') ) {
      * @return mixed
      */
     function decrypt(string $value) : mixed {
-        return \Clicalmani\Foundation\Auth\EncryptionServiceProvider::decrypt($value);
+        return \Clicalmani\Core\Auth\EncryptionServiceProvider::decrypt($value);
     }
 }
 
 if ( ! function_exists('verify_token') ) {
     function verify_token(string $token) : mixed 
     {
-        return with (new \Clicalmani\Foundation\Auth\AuthServiceProvider)->verifyToken($token);
+        return with (new \Clicalmani\Core\Auth\AuthServiceProvider)->verifyToken($token);
     }
 }
 
 if ( ! function_exists('logger') ) {
     function logger() 
     {
-        return new \Clicalmani\Foundation\Acme\Logger;
+        return new \Clicalmani\Core\Acme\Logger;
     }
 }
 
 if ( ! function_exists('config') ) {
     function config(?string $key = null, $default = null) : mixed
     {
-        return \Clicalmani\Foundation\Support\Facades\Config::get($key, $default);
+        return \Clicalmani\Core\Support\Facades\Config::get($key, $default);
     }
 }
 
@@ -827,13 +827,13 @@ if ( ! function_exists('set_data') ) {
 }
 
 function session(?string $name = null, mixed $value = null) {
-    return new \Clicalmani\Foundation\Http\Session($name, $value);
+    return new \Clicalmani\Core\Http\Session($name, $value);
 }
 
 if (!function_exists('auth')) {
     function auth()
     {
-        return \Clicalmani\Foundation\Http\Request::current()?->user() ?? null;
+        return \Clicalmani\Core\Http\Request::current()?->user() ?? null;
     }
 }
 
@@ -851,7 +851,7 @@ if ( !function_exists('cookie') ) {
 
 if ( ! function_exists('mailer') ) {
     function mailer(string $name) {
-        return \Clicalmani\Foundation\Acme\Container::getInstance()->get("{$name}.mailer");
+        return \Clicalmani\Core\Acme\Container::getInstance()->get("{$name}.mailer");
     }
 }
 
@@ -872,11 +872,11 @@ if ( ! function_exists('container') ) {
     /**
      * Application container
      * 
-     * @return \Clicalmani\Foundation\Acme\Container
+     * @return \Clicalmani\Core\Acme\Container
      */
     function container()
     {
-        return \Clicalmani\Foundation\Acme\Container::getInstance();
+        return \Clicalmani\Core\Acme\Container::getInstance();
     }
 }
 
@@ -915,7 +915,7 @@ if (! function_exists('storage')) {
      */
     function storage(?string $disk = null)
     {
-        /** @var \Clicalmani\Foundation\Filesystem\StorageManager $manager */
+        /** @var \Clicalmani\Core\Filesystem\StorageManager $manager */
         $manager = container()->get('storage.manager');
         return $manager->disk($disk);
     }

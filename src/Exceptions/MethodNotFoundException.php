@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Foundation\Exceptions;
+namespace Clicalmani\Core\Exceptions;
 
 class MethodNotFoundException extends \Exception {
 	function __construct($method = ''){

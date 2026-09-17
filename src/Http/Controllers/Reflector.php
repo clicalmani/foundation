@@ -1,11 +1,11 @@
 <?php
-namespace Clicalmani\Foundation\Http\Controllers;
+namespace Clicalmani\Core\Http\Controllers;
 
-use Clicalmani\Foundation\Acme\Container;
-use Clicalmani\Foundation\Http\Request;
-use Clicalmani\Foundation\Http\RequestInterface;
-use Clicalmani\Foundation\Mail\Mailer;
-use Clicalmani\Foundation\Mail\MailerInterface;
+use Clicalmani\Core\Acme\Container;
+use Clicalmani\Core\Http\Request;
+use Clicalmani\Core\Http\RequestInterface;
+use Clicalmani\Core\Mail\Mailer;
+use Clicalmani\Core\Mail\MailerInterface;
 use Clicalmani\Validation\AsValidator;
 use ReflectionClass;
 use ReflectionEnum;
@@ -231,8 +231,8 @@ class Reflector
     {
         foreach ($this->parameters as $index => $parameter) {
             foreach (self::listTypes($parameter) as $class) {
-                if (is_subclass_of($class, \Clicalmani\Foundation\Http\Request::class) ||
-                    $class === \Clicalmani\Foundation\Http\Request::class) return ['name' => $class, 'pos' => $index];
+                if (is_subclass_of($class, \Clicalmani\Core\Http\Request::class) ||
+                    $class === \Clicalmani\Core\Http\Request::class) return ['name' => $class, 'pos' => $index];
             }
         }
 
@@ -241,13 +241,13 @@ class Reflector
 
     public function handleRequest(object $instance) : ?RequestInterface
     {
-        if (is_subclass_of($instance, \Clicalmani\Foundation\Http\Request::class) ||
-					$instance::class === \Clicalmani\Foundation\Http\Request::class) {
+        if (is_subclass_of($instance, \Clicalmani\Core\Http\Request::class) ||
+					$instance::class === \Clicalmani\Core\Http\Request::class) {
 
             $request = isConsoleMode() ? Request::current() : new Request; // Fallback to default request
 		
             $data = $request->all();
-            /** @var \Clicalmani\Foundation\Http\Request */
+            /** @var \Clicalmani\Core\Http\Request */
             $request = $instance;
             $request->extend($data);
 
@@ -275,7 +275,7 @@ class Reflector
             foreach ($mailers as $name => $mailer) {
                 if ($container->has("$name.mailer")) {
 
-                    /** @var ?\Clicalmani\Foundation\Mail\MailerInterface */
+                    /** @var ?\Clicalmani\Core\Mail\MailerInterface */
                     $instance = $container->get("$name.mailer");
 
                     if ($instance instanceof $class) {

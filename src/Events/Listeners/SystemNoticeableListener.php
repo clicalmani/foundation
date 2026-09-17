@@ -1,7 +1,7 @@
 <?php
-namespace Clicalmani\Foundation\Events\Listeners;
+namespace Clicalmani\Core\Events\Listeners;
 
-use Clicalmani\Foundation\Events\NoticeableInterface;
+use Clicalmani\Core\Events\NoticeableInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Mailer\MailerInterface;
 

@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Foundation\Providers;
+namespace Clicalmani\Core\Providers;
 
 use Clicalmani\Container\Application;
 use Lcobucci\JWT\Configuration;
@@ -15,7 +15,7 @@ use Override;
  * Provisions JSON Web Token (JWT) capabilities into the framework container,
  * specifically setting up symmetric signing configurations for the Mercure hub protocol.
  * 
- * @package Clicalmani\Foundation\Providers
+ * @package Clicalmani\Core\Providers
  * @author @clicalmani
  */
 class JwtServiceProvider implements ServiceProviderInterface
@@ -29,6 +29,11 @@ class JwtServiceProvider implements ServiceProviderInterface
     #[Override]
     public function register(): void
     {
+        // Enforce structural application-wide crypt key requirement upfront
+        if ( ! isset($_ENV['APP_KEY']) || ! $_ENV['APP_KEY'] ) {
+            throw new \RuntimeException('The APP_KEY environment variable is missing. Please run the "key:generate" command to generate an API key.');
+        }
+
         // Register the Sha256 Signer engine as an independent service
         app()->addService(Sha256::class, 
             Sha256::class,
@@ -41,11 +46,11 @@ class JwtServiceProvider implements ServiceProviderInterface
         app()->addService('mercure.jwt.key', 
             InMemory::class,
             static function(ServiceConfigurator|DefaultsConfigurator $config) {
-                // $secret = $_ENV['MERCURE_JWT_SECRET']
-                //     ?? throw new \RuntimeException('MERCURE_JWT_SECRET environment variable is missing.');
+                $secret = $_ENV['MERCURE_JWT_SECRET']
+                    ?? throw new \RuntimeException('MERCURE_JWT_SECRET environment variable is missing.');
                 
                 $config->factory([InMemory::class, 'plainText'])
-                    ->args([$_ENV['MERCURE_JWT_SECRET'] ?? '']);
+                    ->args([$secret]);
             }
         );
 

@@ -1,21 +1,21 @@
 <?php
-namespace Clicalmani\Foundation\Http;
+namespace Clicalmani\Core\Http;
 
 interface RedirectInterface
 {
     /**
      * Redirect back to the previous route.
      * 
-     * @return \Clicalmani\Foundation\Http\RedirectInterface
+     * @return \Clicalmani\Core\Http\RedirectInterface
      */
-    public function back() : \Clicalmani\Foundation\Http\RedirectInterface;
+    public function back() : \Clicalmani\Core\Http\RedirectInterface;
 
     /**
      * Flash a status message to the session.
      * 
      * @param string $status
      * @param string $value
-     * @return \Clicalmani\Foundation\Http\RedirectInterface
+     * @return \Clicalmani\Core\Http\RedirectInterface
      */
     public function with(string $status, string $value): RedirectInterface;
 
@@ -23,7 +23,7 @@ interface RedirectInterface
      * Flash an error message to the session.
      * 
      * @param string $message
-     * @return \Clicalmani\Foundation\Http\RedirectInterface
+     * @return \Clicalmani\Core\Http\RedirectInterface
      */
     public function withError(string $message = ''): RedirectInterface;
 
@@ -31,7 +31,7 @@ interface RedirectInterface
      * Flash a success message to the session.
      * 
      * @param string $message
-     * @return \Clicalmani\Foundation\Http\RedirectInterface
+     * @return \Clicalmani\Core\Http\RedirectInterface
      */
     public function withSuccess(string $message = ''): RedirectInterface;
 
@@ -39,7 +39,7 @@ interface RedirectInterface
      * Flash input data to the session for the next request.
      * 
      * @param array $input
-     * @return \Clicalmani\Foundation\Http\RedirectInterface
+     * @return \Clicalmani\Core\Http\RedirectInterface
      */
     public function withInput(array $input): RedirectInterface;
 
@@ -47,9 +47,9 @@ interface RedirectInterface
      * Set the HTTP status code for the redirect.
      * 
      * @param int $code
-     * @return \Clicalmani\Foundation\Http\RedirectInterface
+     * @return \Clicalmani\Core\Http\RedirectInterface
      */
-    public function status(int $code) : \Clicalmani\Foundation\Http\RedirectInterface;
+    public function status(int $code) : \Clicalmani\Core\Http\RedirectInterface;
 
     /**
      * Returns the status code.
@@ -62,23 +62,23 @@ interface RedirectInterface
      * Redirect to a specific route.
      * 
      * @param mixed ...$args
-     * @return \Clicalmani\Foundation\Http\RedirectInterface
+     * @return \Clicalmani\Core\Http\RedirectInterface
      */
-    public function route(mixed ...$args) : \Clicalmani\Foundation\Http\RedirectInterface;
+    public function route(mixed ...$args) : \Clicalmani\Core\Http\RedirectInterface;
 
     /**
      * Redirect to a specific action.
      * 
      * @param string|array $action
-     * @return \Clicalmani\Foundation\Http\RedirectInterface
+     * @return \Clicalmani\Core\Http\RedirectInterface
      */
-    public function action(string|array $action) : \Clicalmani\Foundation\Http\RedirectInterface;
+    public function action(string|array $action) : \Clicalmani\Core\Http\RedirectInterface;
 
     /**
      * Redirect to an external URL.
      * 
      * @param string $url
-     * @return \Clicalmani\Foundation\Http\RedirectInterface
+     * @return \Clicalmani\Core\Http\RedirectInterface
      */
-    public function away(string $url) : \Clicalmani\Foundation\Http\RedirectInterface;
+    public function away(string $url) : \Clicalmani\Core\Http\RedirectInterface;
 }

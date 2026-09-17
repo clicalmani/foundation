@@ -1,6 +1,6 @@
 <?php
 
-namespace Clicalmani\Foundation\Messenger;
+namespace Clicalmani\Core\Messenger;
 
 use Symfony\Component\Messenger\Retry\MultiplierRetryStrategy;
 use Symfony\Component\Messenger\Retry\RetryStrategyInterface;
@@ -12,7 +12,7 @@ use Symfony\Component\Messenger\Retry\RetryStrategyInterface;
  * RetryStrategyInterface instances. Provisions failure fallback rules, linear or exponential 
  * delay backoffs, and processing jitters dynamically per specific transport configurations.
  * 
- * @package Clicalmani\Foundation\Messenger
+ * @package Clicalmani\Core\Messenger
  * @author @clicalmani
  */
 class RetryStrategyFactory

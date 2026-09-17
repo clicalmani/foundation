@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Foundation\Scheduler;
+namespace Clicalmani\Core\Scheduler;
 
 use Symfony\Component\Scheduler\RecurringMessage;
 

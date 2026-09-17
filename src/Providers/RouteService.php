@@ -1,12 +1,12 @@
 <?php 
-namespace Clicalmani\Foundation\Providers;
+namespace Clicalmani\Core\Providers;
 
 /**
  * Class RouteService
  * 
  * Provisioning contract strategies for intercepting or redirecting browser traffic.
  * 
- * @package Clicalmani\Foundation\Providers
+ * @package Clicalmani\Core\Providers
  * @author @clicalmani
  */
 abstract class RouteService 
@@ -21,9 +21,9 @@ abstract class RouteService
     /**
      * Active inbound HTTP request context instance pointer.
      * 
-     * @var \Clicalmani\Foundation\Http\Request
+     * @var \Clicalmani\Core\Http\Request
      */
-    protected ?\Clicalmani\Foundation\Http\Request $request;
+    protected ?\Clicalmani\Core\Http\Request $request;
 
     /**
      * RouteService constructor.
@@ -31,7 +31,7 @@ abstract class RouteService
      */
     public function __construct()
     {
-        $this->request = \Clicalmani\Foundation\Http\Request::current();
+        $this->request = \Clicalmani\Core\Http\Request::current();
     }
 
     /**

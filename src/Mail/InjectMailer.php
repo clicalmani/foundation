@@ -1,7 +1,7 @@
 <?php
-namespace Clicalmani\Foundation\Mail;
+namespace Clicalmani\Core\Mail;
 
-use Clicalmani\Foundation\Http\Controllers\InjectionLocator;
+use Clicalmani\Core\Http\Controllers\InjectionLocator;
 
 class InjectMailer extends InjectionLocator
 {
@@ -19,7 +19,7 @@ class InjectMailer extends InjectionLocator
             foreach ($mailers as $name => $mailer) {
                 if ($this->container->has("$name.mailer")) {
 
-                    /** @var ?\Clicalmani\Foundation\Mail\MailerInterface */
+                    /** @var ?\Clicalmani\Core\Mail\MailerInterface */
                     $instance = $this->container->get("$name.mailer");
 
                     if ($instance instanceof $this->class) {

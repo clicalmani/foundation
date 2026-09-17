@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Foundation\Maker;
+namespace Clicalmani\Core\Maker;
 
 /**
  * Class AppKernel
@@ -7,7 +7,7 @@ namespace Clicalmani\Foundation\Maker;
  * Handles the loading and registration of the core application environment configurations 
  * and explicit mail service blueprints during the framework boot phase.
  * 
- * @package Clicalmani\Foundation\Maker
+ * @package Clicalmani\Core\Maker
  * @author @clicalmani
  */
 class AppKernel extends Kernel

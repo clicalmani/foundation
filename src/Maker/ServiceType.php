@@ -1,12 +1,12 @@
 <?php
-namespace Clicalmani\Foundation\Maker;
+namespace Clicalmani\Core\Maker;
 
 /**
  * Enum ServiceType
  * 
  * Defines the classification types for services registered within the framework's dependency injection container.
  * 
- * @package Clicalmani\Foundation\Maker
+ * @package Clicalmani\Core\Maker
  * @author @clicalmani
  */
 enum ServiceType: string

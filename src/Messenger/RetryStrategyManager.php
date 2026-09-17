@@ -1,6 +1,6 @@
 <?php
 
-namespace Clicalmani\Foundation\Messenger;
+namespace Clicalmani\Core\Messenger;
 
 use Psr\Container\ContainerInterface;
 use Override;
@@ -12,7 +12,7 @@ use Override;
  * Employs lazy-loading strategies to dynamically resolve and initialize specific exponential 
  * backoff configurations from global runtime profiles on a per-transport basis.
  * 
- * @package Clicalmani\Foundation\Messenger
+ * @package Clicalmani\Core\Messenger
  * @author @clicalmani
  */
 class RetryStrategyManager implements ContainerInterface

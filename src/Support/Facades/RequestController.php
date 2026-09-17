@@ -1,10 +1,10 @@
 <?php
-namespace Clicalmani\Foundation\Support\Facades;
+namespace Clicalmani\Core\Support\Facades;
 
 /**
  * @method static never render()
- * @method static mixed invokeMethod(\Clicalmani\Foundation\Http\Controllers\ReflectorInterface $reflector)
- * @method static \Clicalmani\Foundation\Test\Controllers\TestController test(string $action)
+ * @method static mixed invokeMethod(\Clicalmani\Core\Http\Controllers\ReflectorInterface $reflector)
+ * @method static \Clicalmani\Core\Test\Controllers\TestController test(string $action)
  * @method static object getInstance(string $class)
  */
 abstract class RequestController extends Facade

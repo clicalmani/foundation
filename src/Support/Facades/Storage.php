@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Foundation\Support\Facades;
+namespace Clicalmani\Core\Support\Facades;
 
 /**
  * @method static string store(string $source, string $filename, ?string $disk = null)

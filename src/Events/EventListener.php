@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Foundation\Events;
+namespace Clicalmani\Core\Events;
 
 abstract class EventListener
 {

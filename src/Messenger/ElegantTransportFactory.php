@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Foundation\Messenger;
+namespace Clicalmani\Core\Messenger;
 
 use Symfony\Component\Messenger\Transport\TransportFactoryInterface;
 use Symfony\Component\Messenger\Transport\TransportInterface;
@@ -14,7 +14,7 @@ use Override;
  * the framework. Resolves connection DSN architectures and provisions appropriate 
  * Elegant transport structures matching operational configurations (e.g., standard vs. failed queues).
  * 
- * @package Clicalmani\Foundation\Messenger
+ * @package Clicalmani\Core\Messenger
  * @author @clicalmani
  */
 class ElegantTransportFactory implements TransportFactoryInterface

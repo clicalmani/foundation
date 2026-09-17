@@ -1,8 +1,8 @@
 <?php
-namespace Clicalmani\Foundation\Providers\Config;
+namespace Clicalmani\Core\Providers\Config;
 
-use Clicalmani\Foundation\Maker\Application;
-use Clicalmani\Foundation\Maker\ServiceConfiguratorInterface;
+use Clicalmani\Core\Maker\Application;
+use Clicalmani\Core\Maker\ServiceConfiguratorInterface;
 use Symfony\Component\DependencyInjection\Loader\Configurator\DefaultsConfigurator;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ServiceConfigurator;
 
@@ -12,7 +12,7 @@ use Symfony\Component\DependencyInjection\Loader\Configurator\ServiceConfigurato
  * Provides runtime dependency injection wiring for the framework's HTTP Response service,
  * establishing default initialization values for the HTTP status codes.
  * 
- * @package Clicalmani\Foundation\Providers\Config
+ * @package Clicalmani\Core\Providers\Config
  * @author @clicalmani
  */
 class ResponseConfig implements ServiceConfiguratorInterface
@@ -21,7 +21,7 @@ class ResponseConfig implements ServiceConfiguratorInterface
      * Binds default response parameters into the target configurator instance.
      *
      * @param ServiceConfigurator|DefaultsConfigurator $configurator The active Symfony DI builder.
-     * @param \Clicalmani\Foundation\Maker\Application $app The central framework application instance.
+     * @param \Clicalmani\Core\Maker\Application $app The central framework application instance.
      * @return void
      */
     public function __invoke(ServiceConfigurator|DefaultsConfigurator $configurator, Application $app) : void

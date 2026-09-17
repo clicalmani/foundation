@@ -1,8 +1,8 @@
 <?php
 
-namespace Clicalmani\Foundation\Messenger;
+namespace Clicalmani\Core\Messenger;
 
-use Clicalmani\Foundation\Messenger\Stamp\ElegantTransportStamp;
+use Clicalmani\Core\Messenger\Stamp\ElegantTransportStamp;
 use Symfony\Component\Messenger\Transport\TransportInterface;
 use Symfony\Component\Messenger\Transport\Serialization\SerializerInterface;
 use Symfony\Component\Messenger\Transport\Serialization\PhpSerializer;
@@ -17,7 +17,7 @@ use Override;
  * and poison message containment. Leverages your framework's Elegant ORM models to log failure details, 
  * track exception trace markers, and facilitate programmatic message retries or purges.
  * 
- * @package Clicalmani\Foundation\Messenger
+ * @package Clicalmani\Core\Messenger
  * @author @clicalmani
  */
 class FailedTransport implements TransportInterface

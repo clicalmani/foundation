@@ -1,6 +1,6 @@
 <?php
 
-namespace Clicalmani\Foundation\Messenger\Stamp;
+namespace Clicalmani\Core\Messenger\Stamp;
 
 use Symfony\Component\Messenger\Stamp\StampInterface;
 
@@ -11,7 +11,7 @@ use Symfony\Component\Messenger\Stamp\StampInterface;
  * Tracks and increments transient processing attempt counts in real time across
  * individual worker execution cycles.
  * 
- * @package Clicalmani\Foundation\Messenger\Stamp
+ * @package Clicalmani\Core\Messenger\Stamp
  * @author @clicalmani
  */
 class RetryingStamp implements StampInterface

@@ -1,11 +1,11 @@
 <?php
-namespace Clicalmani\Foundation\Support\Facades;
+namespace Clicalmani\Core\Support\Facades;
 
 /**
  * Log Class
  * 
- * @package Clicalmani\Foundation/flesco 
- * @author @Clicalmani\Foundation
+ * @package Clicalmani\Core/flesco 
+ * @author @Clicalmani\Core
  * 
  * @method static mixed app(?string $key = null)
  * @method static mixed route(?string $key = null)

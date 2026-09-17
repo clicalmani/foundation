@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Foundation\Resources;
+namespace Clicalmani\Core\Resources;
 
 interface ViewInterface
 {

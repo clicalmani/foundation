@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Foundation\Resources;
+namespace Clicalmani\Core\Resources;
 
 class ErrorRenderer
 {
@@ -19,8 +19,8 @@ class ErrorRenderer
             'request'  => $this->getRequestContext(),
         ];
 
-        if ( ! \Clicalmani\Foundation\Support\Facades\Route::isApi() ) {
-            return \Clicalmani\Foundation\Support\Facades\Response::status(500)->view('500', ['error' => $data]);
+        if ( ! \Clicalmani\Core\Support\Facades\Route::isApi() ) {
+            return \Clicalmani\Core\Support\Facades\Response::status(500)->view('500', ['error' => $data]);
         }
 
         return response()->status(500)->json($data);

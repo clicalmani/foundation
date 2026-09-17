@@ -1,9 +1,9 @@
 <?php
-namespace Clicalmani\Foundation\Auth;
+namespace Clicalmani\Core\Auth;
 
 use Clicalmani\Database\Factory\Models\Elegant;
-use Clicalmani\Foundation\Http\RequestInterface;
-use Clicalmani\Foundation\Providers\ServiceProvider;
+use Clicalmani\Core\Http\RequestInterface;
+use Clicalmani\Core\Providers\ServiceProvider;
 
 abstract class Authenticate extends ServiceProvider implements \JsonSerializable
 {
@@ -54,7 +54,7 @@ abstract class Authenticate extends ServiceProvider implements \JsonSerializable
 	/**
 	 * Get connected user ID
 	 * 
-	 * @param ?\Clicalmani\Foundation\Http\RequestInterface $request
+	 * @param ?\Clicalmani\Core\Http\RequestInterface $request
 	 * @return mixed
 	 */
 	public function getConnectedUserID(?RequestInterface $request) : mixed

@@ -1,5 +1,5 @@
 <?php 
-namespace Clicalmani\Foundation\Test;
+namespace Clicalmani\Core\Test;
 
 /**
  * TestInterface Interface

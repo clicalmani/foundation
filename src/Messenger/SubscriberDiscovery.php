@@ -1,8 +1,8 @@
 <?php
 
-namespace Clicalmani\Foundation\Messenger;
+namespace Clicalmani\Core\Messenger;
 
-use Clicalmani\Foundation\Filesystem\DirectoryScanner;
+use Clicalmani\Core\Filesystem\DirectoryScanner;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
@@ -12,7 +12,7 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
  * subscribers across application directory trees. Validates class inheritance 
  * structures and lazily provisions subscriber instances via the core framework container.
  * 
- * @package Clicalmani\Foundation\Messenger
+ * @package Clicalmani\Core\Messenger
  * @author @clicalmani
  */
 class SubscriberDiscovery

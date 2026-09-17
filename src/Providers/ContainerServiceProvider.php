@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Foundation\Providers;
+namespace Clicalmani\Core\Providers;
 
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -11,7 +11,7 @@ use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
  * Sets up, bootstraps, and exposes the underlying Symfony dependency injection container 
  * by parsing native configuration service manifests.
  * 
- * @package Clicalmani\Foundation\Providers
+ * @package Clicalmani\Core\Providers
  * @author @clicalmani
  */
 class ContainerServiceProvider extends ServiceProvider

@@ -1,7 +1,7 @@
 <?php 
-namespace Clicalmani\Foundation\Support\Facades;
+namespace Clicalmani\Core\Support\Facades;
 
-use Clicalmani\Foundation\Support\Facades\Facade;
+use Clicalmani\Core\Support\Facades\Facade;
 
 /**
  * @method static mixed get(string $key, $default = null) Get the value of the environment variable.

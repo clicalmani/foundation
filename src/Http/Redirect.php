@@ -1,8 +1,8 @@
 <?php
-namespace Clicalmani\Foundation\Http;
+namespace Clicalmani\Core\Http;
 
-use Clicalmani\Foundation\Http\Controllers\MethodReflector;
-use Clicalmani\Foundation\Support\Facades\RequestController;
+use Clicalmani\Core\Http\Controllers\MethodReflector;
+use Clicalmani\Core\Support\Facades\RequestController;
 use Clicalmani\Psr\NonBufferedBody;
 use Clicalmani\Routing\Memory;
 use Inertia\Inertia;
@@ -62,7 +62,7 @@ class Redirect implements RedirectInterface
 
     public function back(): RedirectInterface
     {
-        if (NULL !== $uri = \Clicalmani\Foundation\Providers\Config\RedirectService::traceBack()) {
+        if (NULL !== $uri = \Clicalmani\Core\Providers\Config\RedirectService::traceBack()) {
             $this->uri = $uri;
             return $this;
         }

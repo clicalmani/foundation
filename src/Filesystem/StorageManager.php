@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Foundation\Filesystem;
+namespace Clicalmani\Core\Filesystem;
 
 use League\Flysystem\Filesystem;
 use League\Flysystem\Local\LocalFilesystemAdapter;

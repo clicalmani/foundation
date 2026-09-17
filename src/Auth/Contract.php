@@ -1,7 +1,7 @@
 <?php
-namespace Clicalmani\Foundation\Auth;
+namespace Clicalmani\Core\Auth;
 
-use Clicalmani\Foundation\Support\Facades\DB;
+use Clicalmani\Core\Support\Facades\DB;
 
 abstract class Contract
 {

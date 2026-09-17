@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Foundation\Maker;
+namespace Clicalmani\Core\Maker;
 
 use Symfony\Component\DependencyInjection\Loader\Configurator\DefaultsConfigurator;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ServiceConfigurator;
@@ -10,7 +10,7 @@ use Symfony\Component\DependencyInjection\Loader\Configurator\ServiceConfigurato
  * Implements a fluent interface (Builder Pattern) to configure, orchestrate,
  * and bootstrap framework core kernels and optional plugin service providers.
  * 
- * @package Clicalmani\Foundation\Maker
+ * @package Clicalmani\Core\Maker
  * @author @clicalmani
  */
 class ApplicationBuilder
@@ -18,36 +18,36 @@ class ApplicationBuilder
     /**
      * Stack of core framework kernels to load sequentially during initialization.
      * 
-     * @var array<class-string<\Clicalmani\Foundation\Maker\Kernel>>
+     * @var array<class-string<\Clicalmani\Core\Maker\Kernel>>
      */
     private array $kernels = [
-        \Clicalmani\Foundation\Maker\AppKernel::class,
-        \Clicalmani\Foundation\Maker\BootstrapKernel::class,
-        \Clicalmani\Foundation\Maker\HttpKernel::class,
-        \Clicalmani\Foundation\Resources\Kernel::class,
+        \Clicalmani\Core\Maker\AppKernel::class,
+        \Clicalmani\Core\Maker\BootstrapKernel::class,
+        \Clicalmani\Core\Maker\HttpKernel::class,
+        \Clicalmani\Core\Resources\Kernel::class,
     ];
 
     /**
      * ApplicationBuilder Constructor.
      * 
-     * @param \Clicalmani\Foundation\Maker\Application $app The core application instance to configure.
+     * @param \Clicalmani\Core\Maker\Application $app The core application instance to configure.
      */
     public function __construct(private Application $app)
     {
         // Include core helpers and initialize the console ecosystem mapping
-        \Clicalmani\Foundation\Support\Helper::include();
+        \Clicalmani\Core\Support\Helper::include();
         $this->app->console = new \Clicalmani\Console\Application($this->app);
 
         // Immediately boot and register the core storage infrastructure service
         $this->app->register(
-            new \Clicalmani\Foundation\Providers\StorageServiceProvider
+            new \Clicalmani\Core\Providers\StorageServiceProvider
         );
     }
 
     /**
      * Completes the builder sequence and returns the fully configured application container instance.
      * 
-     * @return \Clicalmani\Foundation\Maker\Application
+     * @return \Clicalmani\Core\Maker\Application
      */
     public function run()
     {
@@ -62,8 +62,8 @@ class ApplicationBuilder
      */
     public function withKernels() : static
     {
-        \Clicalmani\Foundation\Providers\ServiceProvider::provideServices([
-            \Clicalmani\Foundation\Providers\EnvServiceProvider::class
+        \Clicalmani\Core\Providers\ServiceProvider::provideServices([
+            \Clicalmani\Core\Providers\EnvServiceProvider::class
         ]);
         
         foreach ($this->kernels as $kernel) {
@@ -79,7 +79,7 @@ class ApplicationBuilder
 
         // Register the built-in JSON Web Token service layer
         $this->app->register(
-            new \Clicalmani\Foundation\Providers\JwtServiceProvider
+            new \Clicalmani\Core\Providers\JwtServiceProvider
         );
         
         return $this;
@@ -94,7 +94,7 @@ class ApplicationBuilder
     public function withMiddleware(\Closure $callback) : static
     {
         \Closure::bind($callback, null);
-        $callback(new \Clicalmani\Foundation\Http\Middlewares\Web);
+        $callback(new \Clicalmani\Core\Http\Middlewares\Web);
         return $this;
     }
 
@@ -118,7 +118,7 @@ class ApplicationBuilder
      */
     public function withMailer()
     {
-        $this->app->register(new \Clicalmani\Foundation\Providers\MailerServiceProvider);
+        $this->app->register(new \Clicalmani\Core\Providers\MailerServiceProvider);
         return $this;
     }
 
@@ -130,7 +130,7 @@ class ApplicationBuilder
      */
     public function withInertia()
     {
-        $middleware = new \Clicalmani\Foundation\Http\Middlewares\Web;
+        $middleware = new \Clicalmani\Core\Http\Middlewares\Web;
         $this->app->addService('inertia', \Inertia\Response::class);
         $middleware->web(append: [\Inertia\Middleware::class]);
         return $this;
@@ -146,7 +146,7 @@ class ApplicationBuilder
      */
     public function withMessenger(?string $transport = "elegant://default", ?string $handlersPath = "app/Handlers", ?string $namespace = "\\App\\Handlers\\")
     {
-        $messengerService = new \Clicalmani\Foundation\Providers\MessengerServiceProvider;
+        $messengerService = new \Clicalmani\Core\Providers\MessengerServiceProvider;
         $messengerService->setTransport($transport);
         $messengerService->setHandlersPath($handlersPath);
         $messengerService->setNamespace($namespace);
@@ -164,7 +164,7 @@ class ApplicationBuilder
      */
     public function withScheduler(?string $tasksPath = 'app/Tasks', ?string $namespace = 'App\\Tasks', ?bool $statefull = false)
     {
-        $scheduleService = new \Clicalmani\Foundation\Providers\ScheduleServiceProvider;
+        $scheduleService = new \Clicalmani\Core\Providers\ScheduleServiceProvider;
         $scheduleService->setPaths($tasksPath);
         $scheduleService->setNamespaces($namespace);
         $scheduleService->setStatefull($statefull);
@@ -179,7 +179,7 @@ class ApplicationBuilder
      */
     public function withCache(): static
     {
-        $cacheService = new \Clicalmani\Foundation\Providers\CacheServiceProvider;
+        $cacheService = new \Clicalmani\Core\Providers\CacheServiceProvider;
         $this->app->register($cacheService);
         return $this;
     }
@@ -193,7 +193,7 @@ class ApplicationBuilder
      */
     public function withEvents(string $listenersPath = 'app/Listeners', string $namespace = '\\App\\Listeners'): static
     {
-        $eventService = new \Clicalmani\Foundation\Providers\EventServiceProvider; 
+        $eventService = new \Clicalmani\Core\Providers\EventServiceProvider; 
         $eventService->setPath($listenersPath);
         $eventService->setNamespace($namespace);
         $this->app->register($eventService);

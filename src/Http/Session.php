@@ -1,8 +1,8 @@
 <?php
-namespace Clicalmani\Foundation\Http;
+namespace Clicalmani\Core\Http;
 
-use Clicalmani\Foundation\Http\Session\SessionInterface;
-use Clicalmani\Foundation\Support\Facades\Arr;
+use Clicalmani\Core\Http\Session\SessionInterface;
+use Clicalmani\Core\Support\Facades\Arr;
 
 class Session implements SessionInterface
 {
@@ -85,12 +85,12 @@ class Session implements SessionInterface
 
     public function storeBackTrace(string $back_trace) : void
     {
-        $this->set(\Clicalmani\Foundation\Providers\SessionStorageServiceProvider::backTraceIndex(), $back_trace);
+        $this->set(\Clicalmani\Core\Providers\SessionStorageServiceProvider::backTraceIndex(), $back_trace);
     }
 
     public function retrieveBackTrace() : ?string
     {
-        return $this->get(\Clicalmani\Foundation\Providers\SessionStorageServiceProvider::backTraceIndex());
+        return $this->get(\Clicalmani\Core\Providers\SessionStorageServiceProvider::backTraceIndex());
     }
 
     public function __get($name)

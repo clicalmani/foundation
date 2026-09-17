@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Foundation\Traits;
+namespace Clicalmani\Core\Traits;
 
 trait HasMiddleware
 {

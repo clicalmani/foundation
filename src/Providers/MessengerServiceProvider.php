@@ -1,10 +1,10 @@
 <?php
 
-namespace Clicalmani\Foundation\Providers;
+namespace Clicalmani\Core\Providers;
 
-use Clicalmani\Foundation\Messenger\ElegantTransportFactory;
-use Clicalmani\Foundation\Providers\ServiceProviderInterface;
-use Clicalmani\Foundation\Filesystem\RecursiveFilter;
+use Clicalmani\Core\Messenger\ElegantTransportFactory;
+use Clicalmani\Core\Providers\ServiceProviderInterface;
+use Clicalmani\Core\Filesystem\RecursiveFilter;
 use Symfony\Component\DependencyInjection\Loader\Configurator\DefaultsConfigurator;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ServiceConfigurator;
 use Symfony\Component\DependencyInjection\Reference;
@@ -17,7 +17,7 @@ use Override;
  * handles automatic runtime class discovery of custom invokable handlers, and configures
  * middleware stacks alongside specialized asynchronous transport layers.
  * 
- * @package Clicalmani\Foundation\Providers
+ * @package Clicalmani\Core\Providers
  * @author @clicalmani
  */
 class MessengerServiceProvider implements ServiceProviderInterface
@@ -113,7 +113,7 @@ class MessengerServiceProvider implements ServiceProviderInterface
 
         // Map which specific operational transports route unexpected failures into storage
         app()->addService('messenger.failure_transports', 
-            \Clicalmani\Foundation\Messenger\FailureTransportLocator::class,
+            \Clicalmani\Core\Messenger\FailureTransportLocator::class,
             function(ServiceConfigurator|DefaultsConfigurator $config) {
                 $config->args([
                     $this->config['failure_transports'] ?? []

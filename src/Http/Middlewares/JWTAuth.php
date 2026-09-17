@@ -1,16 +1,16 @@
 <?php
-namespace Clicalmani\Foundation\Http\Middlewares;
+namespace Clicalmani\Core\Http\Middlewares;
 
-use Clicalmani\Foundation\Auth\AuthServiceProvider;
-use Clicalmani\Foundation\Http\RedirectInterface;
-use Clicalmani\Foundation\Http\RequestInterface;
-use Clicalmani\Foundation\Http\ResponseInterface;
+use Clicalmani\Core\Auth\AuthServiceProvider;
+use Clicalmani\Core\Http\RedirectInterface;
+use Clicalmani\Core\Http\RequestInterface;
+use Clicalmani\Core\Http\ResponseInterface;
 
 /**
  * Class JWTAuth
  * 
- * @package Clicalmani\Foundation
- * @author @Clicalmani\Foundation
+ * @package Clicalmani\Core
+ * @author @Clicalmani\Core
  */
 abstract class JWTAuth extends AuthServiceProvider
 {
@@ -22,10 +22,10 @@ abstract class JWTAuth extends AuthServiceProvider
     /**
      * Handler
      * 
-     * @param \Clicalmani\Foundation\Http\RequestInterface $request Request object
-     * @param \Clicalmani\Foundation\Http\ResponseInterface $response Response object
+     * @param \Clicalmani\Core\Http\RequestInterface $request Request object
+     * @param \Clicalmani\Core\Http\ResponseInterface $response Response object
      * @param \Closure $next Next middleware function
-     * @return \Clicalmani\Foundation\Http\ResponseInterface|\Clicalmani\Foundation\Http\RedirectInterface
+     * @return \Clicalmani\Core\Http\ResponseInterface|\Clicalmani\Core\Http\RedirectInterface
      */
     public abstract function handle(RequestInterface $request, ResponseInterface $response, \Closure $next) : ResponseInterface|RedirectInterface;
 

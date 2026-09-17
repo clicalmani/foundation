@@ -1,13 +1,13 @@
 <?php 
-namespace Clicalmani\Foundation\Test;
+namespace Clicalmani\Core\Test;
 
 use Clicalmani\Database\Factory\Sequence;
-use Clicalmani\Foundation\Auth\EncryptionServiceProvider;
-use Clicalmani\Foundation\Http\Request;
-use Clicalmani\Foundation\Test\TestInterface;
-use Clicalmani\Foundation\Maker\Application;
-use Clicalmani\Foundation\Support\Facades\DB;
-use Clicalmani\Foundation\Support\Facades\Config;
+use Clicalmani\Core\Auth\EncryptionServiceProvider;
+use Clicalmani\Core\Http\Request;
+use Clicalmani\Core\Test\TestInterface;
+use Clicalmani\Core\Maker\Application;
+use Clicalmani\Core\Support\Facades\DB;
+use Clicalmani\Core\Support\Facades\Config;
 use Clicalmani\Validation\AsValidator;
 use Clicalmani\Validation\Validator;
 use PHPUnit\Framework\TestCase as BaseTestCase;
@@ -28,7 +28,7 @@ abstract class TestCase extends BaseTestCase implements TestInterface
     /**
      * Request controller
      * 
-     * @var \Clicalmani\Foundation\Http\RequestController
+     * @var \Clicalmani\Core\Http\RequestController
      */
     protected $controller;
 
@@ -89,6 +89,7 @@ abstract class TestCase extends BaseTestCase implements TestInterface
         parent::setUp();
         $this->faker = new \Clicalmani\Database\Faker\Faker;
         $this->request = Request::current() ?? new Request;
+        Request::current($this->request);
     }
 
     protected function callDriftQL(
@@ -283,9 +284,9 @@ abstract class TestCase extends BaseTestCase implements TestInterface
             }
             
             print_r( $this->controller::invokeMethod(
-                    new \Clicalmani\Foundation\Http\Controllers\MethodReflector(
+                    new \Clicalmani\Core\Http\Controllers\MethodReflector(
                         new \ReflectionMethod(
-                            \Clicalmani\Foundation\Support\Facades\RequestController::getInstance($this->controller), 
+                            \Clicalmani\Core\Support\Facades\RequestController::getInstance($this->controller), 
                             $this->action
                         )
                     )

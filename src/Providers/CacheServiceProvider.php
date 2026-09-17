@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Foundation\Providers;
+namespace Clicalmani\Core\Providers;
 
 use Override;
 use Symfony\Component\DependencyInjection\Loader\Configurator\DefaultsConfigurator;
@@ -11,7 +11,7 @@ use Symfony\Component\DependencyInjection\Loader\Configurator\ServiceConfigurato
  * Provisions and configures the application cache components, managing pool setup 
  * and persistent storage allocation within the dependency injection container.
  * 
- * @package Clicalmani\Foundation\Providers
+ * @package Clicalmani\Core\Providers
  * @author @clicalmani
  */
 class CacheServiceProvider implements ServiceProviderInterface

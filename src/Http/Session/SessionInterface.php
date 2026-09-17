@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Foundation\Http\Session;
+namespace Clicalmani\Core\Http\Session;
 
 interface SessionInterface
 {

@@ -1,17 +1,17 @@
 <?php
-namespace Clicalmani\Foundation\Providers;
+namespace Clicalmani\Core\Providers;
 
 use Broadcaster\BroadcastManager;
 use Broadcaster\Event\ShouldBroadcastInterface;
 use Broadcaster\SystemBroadcastListener;
-use Clicalmani\Foundation\Events\BroadcastEventDispatcher;
-use Clicalmani\Foundation\Events\CoreEventDispatcher;
-use Clicalmani\Foundation\Events\Listeners\NoticeableListener;
-use Clicalmani\Foundation\Events\Listeners\SystemNoticeableListener;
-use Clicalmani\Foundation\Events\MailableEventDispatcher;
-use Clicalmani\Foundation\Events\NoticeableEventDispatcher;
-use Clicalmani\Foundation\Mail\MailableListener;
-use Clicalmani\Foundation\Mail\SystemMailableListener;
+use Clicalmani\Core\Events\BroadcastEventDispatcher;
+use Clicalmani\Core\Events\CoreEventDispatcher;
+use Clicalmani\Core\Events\Listeners\NoticeableListener;
+use Clicalmani\Core\Events\Listeners\SystemNoticeableListener;
+use Clicalmani\Core\Events\MailableEventDispatcher;
+use Clicalmani\Core\Events\NoticeableEventDispatcher;
+use Clicalmani\Core\Mail\MailableListener;
+use Clicalmani\Core\Mail\SystemMailableListener;
 use Symfony\Component\DependencyInjection\Loader\Configurator\DefaultsConfigurator;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ServiceConfigurator;
 use Override;
@@ -22,7 +22,7 @@ use Override;
  * Provisions and bootstraps the application event infrastructure, handling listener 
  * discovery, internal core dispatchers, and external mailable/broadcasting event hooks.
  * 
- * @package Clicalmani\Foundation\Providers
+ * @package Clicalmani\Core\Providers
  * @author @clicalmani
  */
 class EventServiceProvider implements ServiceProviderInterface
@@ -122,7 +122,7 @@ class EventServiceProvider implements ServiceProviderInterface
 
         // Provision the automated scanning mechanics to dynamically resolve app listeners
         app()->addService('events.discovery', 
-            \Clicalmani\Foundation\Events\ListenerDiscovery::class,
+            \Clicalmani\Core\Events\ListenerDiscovery::class,
             function(ServiceConfigurator|DefaultsConfigurator $config) {
                 $config->args([
                     app()->rootPath() . '/' . $this->path,

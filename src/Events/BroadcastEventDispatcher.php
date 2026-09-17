@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Foundation\Events;
+namespace Clicalmani\Core\Events;
 
 use Broadcaster\SystemBroadcastListener as BroadcastListener;
 use Symfony\Component\EventDispatcher\EventDispatcher;

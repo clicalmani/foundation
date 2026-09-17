@@ -1,9 +1,9 @@
 <?php
-namespace Clicalmani\Foundation\Http\Requests;
+namespace Clicalmani\Core\Http\Requests;
 
-use Clicalmani\Foundation\Collection\Collection;
-use Clicalmani\Foundation\Collection\CollectionInterface;
-use Clicalmani\Foundation\Support\Facades\Log;
+use Clicalmani\Core\Collection\Collection;
+use Clicalmani\Core\Collection\CollectionInterface;
+use Clicalmani\Core\Support\Facades\Log;
 use Clicalmani\Psr\Header;
 use Clicalmani\Psr\HeadersInterface;
 use Psr\Http\Message\StreamInterface;
@@ -16,7 +16,7 @@ use Psr\Http\Message\UriInterface;
  * within the application. It provides methods to retrieve request data,
  * validate input, and handle various request types.
  *
- * @package Clicalmani\Foundation\Http
+ * @package Clicalmani\Core\Http
  */
 abstract class HttpRequest extends \Clicalmani\Psr\Request
 {

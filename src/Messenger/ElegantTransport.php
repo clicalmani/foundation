@@ -1,9 +1,9 @@
 <?php
 
-namespace Clicalmani\Foundation\Messenger;
+namespace Clicalmani\Core\Messenger;
 
-use Clicalmani\Foundation\Messenger\Stamp\ElegantTransportStamp;
-use Clicalmani\Foundation\Messenger\Stamp\RetryingStamp;
+use Clicalmani\Core\Messenger\Stamp\ElegantTransportStamp;
+use Clicalmani\Core\Messenger\Stamp\RetryingStamp;
 use Symfony\Component\Messenger\Transport\TransportInterface;
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\Transport\Serialization\SerializerInterface;
@@ -19,7 +19,7 @@ use Symfony\Component\Messenger\Stamp\DelayStamp;
  * your framework's Elegant ORM models. Manages advanced message queuing pipelines 
  * including delayed delivery, conditional retries, and failure state handling.
  * 
- * @package Clicalmani\Foundation\Messenger
+ * @package Clicalmani\Core\Messenger
  * @author @clicalmani
  */
 class ElegantTransport implements TransportInterface

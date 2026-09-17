@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Foundation\Providers;
+namespace Clicalmani\Core\Providers;
 
 use Override;
 
@@ -10,7 +10,7 @@ use Override;
  * validation constraint mechanics with user-configured custom rule structures, provisioning 
  * global lookup strategies for input sanitization runs.
  * 
- * @package Clicalmani\Foundation\Providers
+ * @package Clicalmani\Core\Providers
  * @author @clicalmani
  */
 class ValidationServiceProvider extends ServiceProvider
@@ -31,7 +31,7 @@ class ValidationServiceProvider extends ServiceProvider
     #[Override]
     public function boot(): void
     {
-        $rules = collection(\Clicalmani\Foundation\Support\Facades\Config::http('custom_rules') ?? [])
+        $rules = collection(\Clicalmani\Core\Support\Facades\Config::http('custom_rules') ?? [])
                     ->unique();
                     
         $arguments = collection($rules)->map(fn(string $validator) => $validator::getArgument());

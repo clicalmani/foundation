@@ -1,5 +1,5 @@
 <?php 
-namespace Clicalmani\Foundation\Filesystem;
+namespace Clicalmani\Core\Filesystem;
 
 class RecursiveFilter extends \RecursiveFilterIterator
 {

@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Foundation\Exceptions;
+namespace Clicalmani\Core\Exceptions;
 
 class ClassNotFoundException extends \Exception {
 	function __construct($class = ''){

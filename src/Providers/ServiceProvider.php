@@ -1,7 +1,7 @@
 <?php
-namespace Clicalmani\Foundation\Providers;
+namespace Clicalmani\Core\Providers;
 
-use Clicalmani\Foundation\Support\Facades\Config;
+use Clicalmani\Core\Support\Facades\Config;
 use Override;
 
 /**
@@ -11,7 +11,7 @@ use Override;
  * Manages the sequential bootstrap runtime execution context, handles contract service bridging, 
  * and controls dynamic service registration across discrete application middleware layers.
  * 
- * @package Clicalmani\Foundation\Providers
+ * @package Clicalmani\Core\Providers
  * @author @clicalmani
  */
 abstract class ServiceProvider implements ServiceProviderInterface

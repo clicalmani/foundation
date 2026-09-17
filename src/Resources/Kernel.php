@@ -1,7 +1,7 @@
 <?php
-namespace Clicalmani\Foundation\Resources;
+namespace Clicalmani\Core\Resources;
 
-use Clicalmani\Foundation\Maker\Kernel as BaseKernel;
+use Clicalmani\Core\Maker\Kernel as BaseKernel;
 
 class Kernel extends BaseKernel
 {
@@ -16,7 +16,7 @@ class Kernel extends BaseKernel
     public static array $creators = [];
 
     /**
-     * @var \Clicalmani\Foundation\Resources\TonkaTwigExtension
+     * @var \Clicalmani\Core\Resources\TonkaTwigExtension
      */
     private $extension;
 
@@ -27,9 +27,9 @@ class Kernel extends BaseKernel
      * 
      */
     public static $template_tags = [
-        \Clicalmani\Foundation\Resources\Tags\CSRFTokenField::class,
-        \Clicalmani\Foundation\Resources\Tags\IfTag::class,
-        \Clicalmani\Foundation\Resources\Tags\EndIfTag::class,
+        \Clicalmani\Core\Resources\Tags\CSRFTokenField::class,
+        \Clicalmani\Core\Resources\Tags\IfTag::class,
+        \Clicalmani\Core\Resources\Tags\EndIfTag::class,
     ];
 
     /**

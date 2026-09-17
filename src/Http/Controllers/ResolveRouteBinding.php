@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Foundation\Http\Controllers;
+namespace Clicalmani\Core\Http\Controllers;
 
 use Clicalmani\Database\Factory\Models\Elegant;
 
@@ -14,8 +14,8 @@ use Clicalmani\Database\Factory\Models\Elegant;
  * Utilisé par les classes qui portent une propriété $route
  * (\Clicalmani\Routing\Route) : RequestController, InjectResource, etc.
  *
- * @package Clicalmani\Foundation\Http\Controllers
- * @author Clicalmani\Foundation
+ * @package Clicalmani\Core\Http\Controllers
+ * @author Clicalmani\Core
  */
 trait ResolveRouteBinding
 {

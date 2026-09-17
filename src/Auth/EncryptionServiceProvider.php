@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Foundation\Auth;
+namespace Clicalmani\Core\Auth;
 
 class EncryptionServiceProvider 
 {

@@ -1,8 +1,8 @@
 <?php
-namespace Clicalmani\Foundation\Acme;
+namespace Clicalmani\Core\Acme;
 
-use Clicalmani\Foundation\Exceptions\ContainerDepencyException;
-use Clicalmani\Foundation\Maker\Application;
+use Clicalmani\Core\Exceptions\ContainerDepencyException;
+use Clicalmani\Core\Maker\Application;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ServiceConfigurator;
 
@@ -54,7 +54,7 @@ class Container extends Application implements ContainerInterface
 
     public function builder()
     {
-        return \Clicalmani\Foundation\Providers\ContainerServiceProvider::get();
+        return \Clicalmani\Core\Providers\ContainerServiceProvider::get();
     }
 
     public function resolve(string $class) : void

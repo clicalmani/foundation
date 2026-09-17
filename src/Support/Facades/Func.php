@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Foundation\Support\Facades;
+namespace Clicalmani\Core\Support\Facades;
 
 /**
  * @method bool isInternal(string $func_name)

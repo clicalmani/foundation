@@ -1,6 +1,6 @@
 <?php
 
-namespace Clicalmani\Foundation\Mail;
+namespace Clicalmani\Core\Mail;
 
 /**
  * Class Mailable
@@ -9,7 +9,7 @@ namespace Clicalmani\Foundation\Mail;
  * transaction-driven application outbound emails, structural templates, attachments, 
  * and routing recipient envelopes.
  * 
- * @package Clicalmani\Foundation\Mail
+ * @package Clicalmani\Core\Mail
  * @author @clicalmani
  */
 abstract class Mailable implements MailableInterface

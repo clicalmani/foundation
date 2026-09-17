@@ -1,8 +1,8 @@
 <?php
-namespace Clicalmani\Foundation\Mail;
+namespace Clicalmani\Core\Mail;
 
-use Clicalmani\Foundation\Support\Facades\Arr;
-use Clicalmani\Foundation\Support\Facades\Env;
+use Clicalmani\Core\Support\Facades\Arr;
+use Clicalmani\Core\Support\Facades\Env;
 use Clicalmani\Psr\Uri;
 
 class MailerTransport implements TransportInterface

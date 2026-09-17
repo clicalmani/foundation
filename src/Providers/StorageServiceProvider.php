@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Foundation\Providers;
+namespace Clicalmani\Core\Providers;
 
 use Symfony\Component\DependencyInjection\Loader\Configurator\DefaultsConfigurator;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ServiceConfigurator;
@@ -12,7 +12,7 @@ use Override;
  * Registers the global storage manager factory and injects configuration profiles 
  * governing physical disks, cloud objects, and local volume streams.
  * 
- * @package Clicalmani\Foundation\Providers
+ * @package Clicalmani\Core\Providers
  * @author @clicalmani
  */
 class StorageServiceProvider implements ServiceProviderInterface
@@ -30,7 +30,7 @@ class StorageServiceProvider implements ServiceProviderInterface
         
         // Primary management service engine coordinating custom filesystem disk actions
         app()->addService('storage.manager', 
-            \Clicalmani\Foundation\Filesystem\StorageManager::class,
+            \Clicalmani\Core\Filesystem\StorageManager::class,
             fn(ServiceConfigurator|DefaultsConfigurator $config) => $config->args([
                 [
                     'default' => $app_config['default'] ?? 'local',

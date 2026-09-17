@@ -1,6 +1,6 @@
 <?php
 
-namespace Clicalmani\Foundation\Support\Facades;
+namespace Clicalmani\Core\Support\Facades;
 
 use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 
@@ -56,26 +56,26 @@ abstract class Facade
     protected static function dispatch(mixed $service, string $method, array $args) : mixed
     {
         if (method_exists($service, $method)) {
-            if ($service instanceof \Clicalmani\Foundation\Resources\View) {
+            if ($service instanceof \Clicalmani\Core\Resources\View) {
                 return static::callView($method, $args);
             }
 
-            if ($service instanceof \Clicalmani\Foundation\Acme\Model) {
+            if ($service instanceof \Clicalmani\Core\Acme\Model) {
                 logger()->info('Elegant');
             }
 
             return $service->{$method}(...$args);
         }
 
-        if ($service instanceof \Clicalmani\Foundation\Acme\Controller) {
+        if ($service instanceof \Clicalmani\Core\Acme\Controller) {
             return static::callController($method, $args);
         }
 
-        if ($service instanceof \Clicalmani\Foundation\Http\Response) {
+        if ($service instanceof \Clicalmani\Core\Http\Response) {
             return response();
         }
 
-        if ($service instanceof \Clicalmani\Foundation\Acme\Configure) {
+        if ($service instanceof \Clicalmani\Core\Acme\Configure) {
             return static::callConfigure($service, $method, $args);
         }
         
@@ -107,7 +107,7 @@ abstract class Facade
      */
     protected static function callController(string $method, array $args) : mixed
     {
-        $controller = new \Clicalmani\Foundation\Http\Controllers\RequestController;
+        $controller = new \Clicalmani\Core\Http\Controllers\RequestController;
 
         if (method_exists($controller, $method)) {
             return $controller->{$method}(...$args);

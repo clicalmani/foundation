@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Foundation\Filesystem;
+namespace Clicalmani\Core\Filesystem;
 
 /**
  * Class DirectoryScanner
@@ -10,8 +10,8 @@ namespace Clicalmani\Foundation\Filesystem;
  * listes de fichiers/classes pour de l'auto-discovery (modèles, providers,
  * commandes, événements, etc.).
  *
- * @package Clicalmani\Foundation\Filesystem
- * @author Clicalmani\Foundation
+ * @package Clicalmani\Core\Filesystem
+ * @author Clicalmani\Core
  */
 final class DirectoryScanner
 {

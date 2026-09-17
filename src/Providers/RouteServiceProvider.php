@@ -1,9 +1,9 @@
 <?php
-namespace Clicalmani\Foundation\Providers;
+namespace Clicalmani\Core\Providers;
 
-use Clicalmani\Foundation\Http\Request;
-use Clicalmani\Foundation\Support\Facades\Route;
-use Clicalmani\Foundation\Support\Facades\Config;
+use Clicalmani\Core\Http\Request;
+use Clicalmani\Core\Support\Facades\Route;
+use Clicalmani\Core\Support\Facades\Config;
 use Clicalmani\Routing\Memory;
 use Clicalmani\Routing\Record;
 use Override;
@@ -15,7 +15,7 @@ use Override;
  * tracking route discovery sequences, executing CSRF defense states, and managing third-party 
  * navigation redirection handler middleware services.
  * 
- * @package Clicalmani\Foundation\Providers
+ * @package Clicalmani\Core\Providers
  * @author @clicalmani
  */
 class RouteServiceProvider extends ServiceProvider
@@ -182,8 +182,8 @@ class RouteServiceProvider extends ServiceProvider
     {
         // Execute strictly inside real HTTP server lifecycles, bypassing console terminal runs
         if ( false === isConsoleMode() ) {
-            if ( ! isset($_SESSION['csrf_token']) && class_exists('\Clicalmani\Foundation\Auth\CSRF') ) {
-                $_SESSION['csrf_token'] = (new \Clicalmani\Foundation\Auth\CSRF())->getToken(); 
+            if ( ! isset($_SESSION['csrf_token']) && class_exists('\Clicalmani\Core\Auth\CSRF') ) {
+                $_SESSION['csrf_token'] = (new \Clicalmani\Core\Auth\CSRF())->getToken(); 
             }
         }
     }
@@ -220,7 +220,7 @@ class RouteServiceProvider extends ServiceProvider
         $tps = Config::bootstrap('tps')[$service_level] ?? [];
 
         if ($service_level === 0) {
-            $tps[] = \Clicalmani\Foundation\Providers\Config\RedirectService::class;
+            $tps[] = \Clicalmani\Core\Providers\Config\RedirectService::class;
         }
 
         return $tps;

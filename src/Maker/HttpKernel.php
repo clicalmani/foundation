@@ -1,8 +1,8 @@
 <?php
-namespace Clicalmani\Foundation\Maker;
+namespace Clicalmani\Core\Maker;
 
-use Clicalmani\Foundation\Http\Middlewares\Api;
-use Clicalmani\Foundation\Http\Middlewares\Web;
+use Clicalmani\Core\Http\Middlewares\Api;
+use Clicalmani\Core\Http\Middlewares\Web;
 
 /**
  * Class HttpKernel
@@ -10,7 +10,7 @@ use Clicalmani\Foundation\Http\Middlewares\Web;
  * Handles the HTTP execution lifecycle context, configuring web and API middleware stacks
  * alongside custom validation rules within the application core.
  * 
- * @package Clicalmani\Foundation\Maker
+ * @package Clicalmani\Core\Maker
  * @author @clicalmani
  */
 class HttpKernel extends Kernel
@@ -74,11 +74,11 @@ class HttpKernel extends Kernel
              * The core Web middleware enforces state protection routines such as CSRF verification 
              * on non-safe HTTP methods (e.g., POST, PUT, DELETE).
              * 
-             * @var class-string<\Clicalmani\Foundation\Http\Middlewares\Web>
+             * @var class-string<\Clicalmani\Core\Http\Middlewares\Web>
              */
             'web' => array_merge(
                 [
-                    'web' => \Clicalmani\Foundation\Http\Middlewares\Web::class
+                    'web' => \Clicalmani\Core\Http\Middlewares\Web::class
                 ], 
                 array_merge($this->middleware['web'], Web::getGlobals())
             ), 
@@ -92,11 +92,11 @@ class HttpKernel extends Kernel
              * Requests hitting the automatic '/api' prefix route prefix groups are matched 
              * and processed through this specific layer.
              * 
-             * @var class-string<\Clicalmani\Foundation\Http\Middlewares\Api>
+             * @var class-string<\Clicalmani\Core\Http\Middlewares\Api>
              */
             'api' => array_merge(
                 [
-                    'api' => \Clicalmani\Foundation\Http\Middlewares\Api::class
+                    'api' => \Clicalmani\Core\Http\Middlewares\Api::class
                 ], 
                 array_merge($this->middleware['api'], Api::getGlobals())
             )

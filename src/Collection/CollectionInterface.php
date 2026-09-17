@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Foundation\Collection;
+namespace Clicalmani\Core\Collection;
 
 interface CollectionInterface
 {
@@ -182,14 +182,14 @@ interface CollectionInterface
     /**
      * Create a new set
      * 
-     * @return \Clicalmani\Foundation\Collection\Set
+     * @return \Clicalmani\Core\Collection\Set
      */
     public function asSet() : Set;
 
     /**
      * Create a new map
      * 
-     * @return \Clicalmani\Foundation\Collection\Map
+     * @return \Clicalmani\Core\Collection\Map
      */
     public function asMap() : Map;
 
@@ -229,10 +229,10 @@ interface CollectionInterface
     /**
      * Sorts the collection by a specific key.
      * 
-     * @param string $key The key to sort by
+     * @param string|\Closure $key The key to sort by
      * @return self
      */
-    public function sortBy(string $key): CollectionInterface;
+    public function sortBy(string|callable $key) : CollectionInterface;
 
     /**
      * Sorts the collection by a specific key in descending order.

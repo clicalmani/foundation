@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Foundation\Http;
+namespace Clicalmani\Core\Http;
 
 use Psr\Http\Message\StreamInterface;
 
@@ -100,7 +100,7 @@ interface ResponseInterface extends Responses\StatusErrorInterface, Responses\Js
      * 
      * @param string $url
      * @param int $status
-     * @return \Clicalmani\Foundation\Http\RedirectInterface
+     * @return \Clicalmani\Core\Http\RedirectInterface
      */
     public function redirect(string $uri = '/', int $status = 302) : RedirectInterface;
 

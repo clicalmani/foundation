@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Foundation\Providers;
+namespace Clicalmani\Core\Providers;
 
 /**
  * Interface ServiceProviderInterface
@@ -7,7 +7,7 @@ namespace Clicalmani\Foundation\Providers;
  * Enforces the primary contractual execution sequence for booting and registering 
  * independent service sub-systems within the framework dependency container.
  * 
- * @package Clicalmani\Foundation\Providers
+ * @package Clicalmani\Core\Providers
  * @author @clicalmani
  */
 interface ServiceProviderInterface

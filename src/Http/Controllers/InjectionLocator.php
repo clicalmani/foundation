@@ -1,7 +1,7 @@
 <?php
-namespace Clicalmani\Foundation\Http\Controllers;
+namespace Clicalmani\Core\Http\Controllers;
 
-use Clicalmani\Foundation\Acme\Container;
+use Clicalmani\Core\Acme\Container;
 use Clicalmani\Routing\Route;
 
 abstract class InjectionLocator
@@ -12,12 +12,12 @@ abstract class InjectionLocator
     protected $instance;
 
     /**
-     * @var \Clicalmani\Foundation\Acme\Container
+     * @var \Clicalmani\Core\Acme\Container
      */
     protected $container;
 
     /**
-     * @var \Clicalmani\Foundation\Http\Controllers\ReflectorInterface
+     * @var \Clicalmani\Core\Http\Controllers\ReflectorInterface
      */
     protected $reflector;
 

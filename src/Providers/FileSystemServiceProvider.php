@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Foundation\Providers;
+namespace Clicalmani\Core\Providers;
 
 /**
  * Class FileSystemServiceProvider
@@ -7,7 +7,7 @@ namespace Clicalmani\Foundation\Providers;
  * Configures the framework's physical file handling boundaries, including the 
  * dynamic runtime allocation and initialization of system application error logging.
  * 
- * @package Clicalmani\Foundation\Providers
+ * @package Clicalmani\Core\Providers
  * @author @clicalmani
  */
 class FileSystemServiceProvider extends ServiceProvider
@@ -23,6 +23,6 @@ class FileSystemServiceProvider extends ServiceProvider
         /**
          * Initialize the default framework storage error logging registry.
          */
-        \Clicalmani\Foundation\Support\Facades\Log::init(root_path());
+        \Clicalmani\Core\Support\Facades\Log::init(root_path());
     }
 }

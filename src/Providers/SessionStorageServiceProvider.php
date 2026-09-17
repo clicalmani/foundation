@@ -1,7 +1,7 @@
 <?php
-namespace Clicalmani\Foundation\Providers;
+namespace Clicalmani\Core\Providers;
 
-use Clicalmani\Foundation\Support\Facades\Route;
+use Clicalmani\Core\Support\Facades\Route;
 use Override;
 
 /**
@@ -11,7 +11,7 @@ use Override;
  * enforces token lifetime expirations, handles ID security regenerations, and isolates session 
  * isolation structures across client web requests.
  * 
- * @package Clicalmani\Foundation\Providers
+ * @package Clicalmani\Core\Providers
  * @author @clicalmani
  */
 abstract class SessionStorageServiceProvider extends ServiceProvider
@@ -23,7 +23,7 @@ abstract class SessionStorageServiceProvider extends ServiceProvider
      * 
      * @var string
      */
-    protected static string $driver = \Clicalmani\Foundation\Http\Session\FileSessionHandler::class;
+    protected static string $driver = \Clicalmani\Core\Http\Session\FileSessionHandler::class;
 
     /**
      * Duration threshold in seconds an active session can remain idle before needing ID regeneration.

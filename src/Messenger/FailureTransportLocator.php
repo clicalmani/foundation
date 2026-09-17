@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Foundation\Messenger;
+namespace Clicalmani\Core\Messenger;
 
 use Psr\Container\ContainerInterface;
 use Override;
@@ -11,7 +11,7 @@ use Override;
  * message failure transports. Supports explicitly mapped transport configurations 
  * alongside global dynamic fallbacks within the framework application layer.
  * 
- * @package Clicalmani\Foundation\Messenger
+ * @package Clicalmani\Core\Messenger
  * @author @clicalmani
  */
 class FailureTransportLocator implements ContainerInterface

@@ -1,6 +1,6 @@
 <?php
 
-namespace Clicalmani\Foundation\Maker;
+namespace Clicalmani\Core\Maker;
 
 /**
  * Class ServiceDefinition
@@ -8,7 +8,7 @@ namespace Clicalmani\Foundation\Maker;
  * Represents a normalized service registration metadata wrapper within the DI container framework.
  * Encapsulates service identity, target FQCN, initialization hooks/configurators, aliases, and service types.
  * 
- * @package Clicalmani\Foundation
+ * @package Clicalmani\Core
  * @author @clicalmani
  */
 final class ServiceDefinition

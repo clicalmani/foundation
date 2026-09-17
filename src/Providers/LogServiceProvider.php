@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Foundation\Providers;
+namespace Clicalmani\Core\Providers;
 
 /**
  * Class LogServiceProvider
@@ -7,7 +7,7 @@ namespace Clicalmani\Foundation\Providers;
  * Boots and provisions the framework's native PHP error logging infrastructure, 
  * evaluating environment debug states and initializing persistent file storage targets.
  * 
- * @package Clicalmani\Foundation\Providers
+ * @package Clicalmani\Core\Providers
  * @author @clicalmani
  */
 class LogServiceProvider extends ServiceProvider

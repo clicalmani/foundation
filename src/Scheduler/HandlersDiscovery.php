@@ -1,8 +1,8 @@
 <?php
 
-namespace Clicalmani\Foundation\Scheduler;
+namespace Clicalmani\Core\Scheduler;
 
-use Clicalmani\Foundation\Filesystem\RecursiveFilter;
+use Clicalmani\Core\Filesystem\RecursiveFilter;
 
 class HandlersDiscovery
 {

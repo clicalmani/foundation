@@ -1,6 +1,6 @@
 <?php
 
-namespace Clicalmani\Foundation\Providers;
+namespace Clicalmani\Core\Providers;
 
 use Symfony\Component\DependencyInjection\Loader\Configurator\DefaultsConfigurator;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ServiceConfigurator;
@@ -14,7 +14,7 @@ use Override;
  * Handles automatic runtime discovery of both crontab-like tasks and conditional handlers,
  * and maintains continuous execution checkpoint tracks across stateful runs.
  * 
- * @package Clicalmani\Foundation\Providers
+ * @package Clicalmani\Core\Providers
  * @author @clicalmani
  */
 class ScheduleServiceProvider implements ServiceProviderInterface
@@ -67,7 +67,7 @@ class ScheduleServiceProvider implements ServiceProviderInterface
             \Symfony\Component\Scheduler\Schedule::class,
             function(ServiceConfigurator|DefaultsConfigurator $config) {
                 $config->factory([
-                    \Clicalmani\Foundation\Scheduler\TaskDiscovery::class, 
+                    \Clicalmani\Core\Scheduler\TaskDiscovery::class, 
                     'buildSchedule'
                 ])->args([
                     app()->rootPath() . '/' . $this->tasksPath,
@@ -85,7 +85,7 @@ class ScheduleServiceProvider implements ServiceProviderInterface
 
         // Provision the automated schedule lifecycle event handler map discovery utility
         app()->addService('scheduler.handlers', 
-            \Clicalmani\Foundation\Scheduler\HandlersDiscovery::class,
+            \Clicalmani\Core\Scheduler\HandlersDiscovery::class,
             function(ServiceConfigurator|DefaultsConfigurator $config) {
                 $config->args([
                     $this->handlersPath,

@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Foundation\Support\Facades;
+namespace Clicalmani\Core\Support\Facades;
 
 /**
  * @method static string getPrefix() Returns the default database table prefix.

@@ -1,8 +1,8 @@
 <?php
-namespace Clicalmani\Foundation\Providers;
+namespace Clicalmani\Core\Providers;
 
-use Clicalmani\Foundation\Mail\MailerEventDispatcherFactory;
-use Clicalmani\Foundation\Mail\MailerTransport;
+use Clicalmani\Core\Mail\MailerEventDispatcherFactory;
+use Clicalmani\Core\Mail\MailerTransport;
 use Symfony\Component\Mailer\Mailer;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mailer\Transport\TransportInterface;
@@ -21,7 +21,7 @@ use Override;
  * establishing factories for mailing transports, structural event dispatchers, 
  * and asynchronous background message queue bus delegation.
  * 
- * @package Clicalmani\Foundation\Providers
+ * @package Clicalmani\Core\Providers
  * @author @clicalmani
  */
 class MailerServiceProvider implements ServiceProviderInterface

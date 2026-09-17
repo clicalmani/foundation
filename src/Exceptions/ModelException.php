@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Foundation\Exceptions;
+namespace Clicalmani\Core\Exceptions;
 
 class ModelException extends \Exception 
 {

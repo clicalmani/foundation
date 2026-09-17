@@ -1,9 +1,9 @@
 <?php 
-namespace Clicalmani\Foundation\Sandbox;
+namespace Clicalmani\Core\Sandbox;
 
 use App\Models\Client;
 use Carbon\Carbon;
-use Clicalmani\Foundation\Providers\RouteService;
+use Clicalmani\Core\Providers\RouteService;
 
 /**
  * @package clicalmani/flesco 

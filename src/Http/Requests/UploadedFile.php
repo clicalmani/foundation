@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Foundation\Http\Requests;
+namespace Clicalmani\Core\Http\Requests;
 
 use Clicalmani\Psr\Stream;
 use Psr\Http\Message\StreamInterface;
@@ -7,8 +7,8 @@ use Psr\Http\Message\StreamInterface;
 /**
  * Class UploadedFile
  * 
- * @package Clicalmani\Foundation
- * @author @Clicalmani\Foundation
+ * @package Clicalmani\Core
+ * @author @Clicalmani\Core
  */
 class UploadedFile implements \Psr\Http\Message\UploadedFileInterface
 {
@@ -71,7 +71,7 @@ class UploadedFile implements \Psr\Http\Message\UploadedFileInterface
     /**
      * File storage
      * 
-     * @var \Clicalmani\Foundation\Maker\Logic\Storage
+     * @var \Clicalmani\Core\Maker\Logic\Storage
      */
     protected $storage;
 
