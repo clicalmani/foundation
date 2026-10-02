@@ -665,16 +665,22 @@ class Application
             'config'     => new ServiceDefinition('config', \Clicalmani\Core\Acme\Configure::class, type: ServiceType::Core),
             'console'    => new ServiceDefinition('console', \Clicalmani\Core\Acme\Console::class, type: ServiceType::Core),
             'response'   => new ServiceDefinition('response', \Clicalmani\Core\Http\Response::class, \Clicalmani\Core\Providers\Config\ResponseConfig::class, type: ServiceType::Core),
+            'resolvers'  => new ServiceDefinition('resolvers', \Clicalmani\Core\Http\Response\Resolvers\ResponseResolverRegistry::class, \Clicalmani\Core\Providers\Config\ResponseResolverRegistryConfig::class, type: ServiceType::Core),
             'storage'    => new ServiceDefinition('storage', \Clicalmani\Core\Acme\StorageManager::class, type: ServiceType::Core),
             'controller' => new ServiceDefinition('controller', \Clicalmani\Core\Acme\Controller::class, type: ServiceType::Core),
             'func'       => new ServiceDefinition('func', \Clicalmani\Core\Acme\Invokable::class, type: ServiceType::Core),
             'database'   => new ServiceDefinition('database', \Clicalmani\Core\Acme\Database::class, type: ServiceType::Core),
             'view'       => new ServiceDefinition('view', \Clicalmani\Core\Resources\View::class, type: ServiceType::Core),
+            'encryption' => new ServiceDefinition('encryption', \Clicalmani\Core\Auth\EncryptionServiceProvider::class, type: ServiceType::Core),
+            'resolver'   => new ServiceDefinition('resolver', \Clicalmani\Core\Acme\ControllerResolver::class, \Clicalmani\Core\Providers\Config\ControllerResolverConfig::class, type: ServiceType::Core),
+            'notification' => new ServiceDefinition('notification', \Clicalmani\Notification\NotificationManager::class, type: ServiceType::Core),
+            'mail.simple'  => new ServiceDefinition('mail.simple', \Clicalmani\Core\Mail\Email::class, \Clicalmani\Core\Providers\Config\SimpleMailConfig::class, type: ServiceType::Core),
 
             // Namespace-based fallback structural shortcuts: Resolved dynamically depending on the suffix of the dependency.
             '*.request'   => new ServiceDefinition('*.request', \Clicalmani\Core\Http\Controllers\InjectRequest::class, type: ServiceType::Namespace),
             '*.resource'  => new ServiceDefinition('*.resource', \Clicalmani\Core\Http\Controllers\InjectResource::class, type: ServiceType::Namespace),
             '*.mailer'    => new ServiceDefinition('*.mailer', \Clicalmani\Core\Mail\InjectMailer::class, type: ServiceType::Namespace),
+            '*.mailer.service' => new ServiceDefinition('*.mailer.service', \Clicalmani\Core\Mail\MailerService::class, \Clicalmani\Core\Providers\Config\ControllerResolverConfig::class, type: ServiceType::Namespace),
             '*.messenger' => new ServiceDefinition('*.messenger', \Clicalmani\Core\Messenger\Inject::class, \Clicalmani\Core\Providers\Config\MessengerConfig::class, type: ServiceType::Namespace),
             // '*.event-dispatch' => new ServiceDefinition('*.event-dispatcher', \Clicalmani\Core\Events\InjectDispatcher::class, \Clicalmani\Core\Providers\Config\MessengerConfig::class, type: ServiceType::Namespace),
         ];

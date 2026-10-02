@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Core\Http\Requests;
+namespace Clicalmani\Core\Http\Request;
 
 use Clicalmani\Core\Support\Facades\Storage;
 use Clicalmani\Psr\Stream;
@@ -160,10 +160,10 @@ class File implements FileInterface, \JsonSerializable
         return $this->error === UPLOAD_ERR_OK;
     }
 
-    public function store(?string $disk = null): string
+    public function store(?string $disk = null, ?string $filename): string
     {
         $disk = $disk ?: $this->disk;
-        $name = slugify(pathinfo($this->name, PATHINFO_FILENAME));
+        $name = $filename ?? slugify(pathinfo($this->name, PATHINFO_FILENAME));
         $extension   = pathinfo($this->name, PATHINFO_EXTENSION);
         $config      = $this->manager->getConfig($disk);
         $destination = $config['root'] . DIRECTORY_SEPARATOR . $name . '.' . $extension;

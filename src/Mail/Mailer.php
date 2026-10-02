@@ -2,55 +2,62 @@
 namespace Clicalmani\Core\Mail;
 
 use Symfony\Component\Mailer\Envelope;
+use Symfony\Component\Mailer\Mailer as SymfonyMailer;
+use Symfony\Component\Mailer\MailerInterface as SymfonyMailerInterface;
 use Symfony\Component\Mime\Email;
 
 class Mailer implements MailerInterface
 {
     /**
-     * Mailer transport instance
-     * 
-     * @var \Clicalmani\Core\Acme\MailerTransport
+     * Fabrique de transport (résout un transport Symfony depuis la config).
+     *
+     * @var Factory\TransportFactoryInterface
      */
-    private $transport;
+    private Factory\TransportFactoryInterface $transportFactory;
 
     /**
-     * Mailer instance
-     * 
-     * @var \Symfony\Component\Mailer\MailerInterface
+     * Instances Symfony Mailer déjà construites, mises en cache PAR NOM de
+     * mailer. Un cache unique renverrait systématiquement le premier transport 
+     * construit, même si un mailer différent était demandé ensuite dans le même processus.
+     *
+     * @var array<string, SymfonyMailerInterface>
      */
-    private $mailer;
+    private array $mailers = [];
 
-    public function __construct(TransportInterface $transport)
+    public function __construct(Factory\TransportFactoryInterface $transportFactory)
     {
-        $this->transport = $transport;
+        $this->transportFactory = $transportFactory;
     }
 
     /**
-     * Sends an email.
-     * 
+     * Envoie un email directement via le transport résolu depuis la config
+     * (sans passer par le bus Messenger).
+     *
      * @param \Symfony\Component\Mime\Email $email
+     * @param ?string $mailer Nom du mailer (ex: 'smtp', 'postmark', 'failover'). Null = mail.default.
+     * @param ?\Symfony\Component\Mailer\Envelope $envelope
      * @return void
      */
-    public function send(Email $email, ?Envelope $envelope = null) : void
+    public function send(Email $email, ?string $mailer = null, ?Envelope $envelope = null) : void
     {
-        // Ensure the mailer is initialized before sending
-        if (!$this->mailer) {
-            $this->get();
-        }
-
-        $this->mailer->send($email, $envelope);
+        $this->get($mailer)->send($email, $envelope);
     }
 
     /**
-     * Gets the mailer instance.
-     * 
-     * @return \Symfony\Component\Mailer\MailerInterface
+     * Récupère (ou construit puis met en cache) l'instance Symfony Mailer
+     * correspondant au mailer nommé $name.
+     *
+     * @param ?string $name
+     * @return SymfonyMailerInterface
      */
-    public function get() : \Symfony\Component\Mailer\MailerInterface
+    public function get(?string $name = null) : SymfonyMailerInterface
     {
-        if (!$this->mailer) {
-            $this->mailer = new \Symfony\Component\Mailer\Mailer($this->transport->create());
+        $key = $name ?? '__default__';
+
+        if (!isset($this->mailers[$key])) {
+            $this->mailers[$key] = new SymfonyMailer($this->transportFactory->create($name));
         }
-        return $this->mailer;
+
+        return $this->mailers[$key];
     }
 }

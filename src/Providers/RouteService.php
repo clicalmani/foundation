@@ -1,6 +1,10 @@
 <?php 
 namespace Clicalmani\Core\Providers;
 
+use Clicalmani\Core\Http\Redirectable;
+use Clicalmani\Core\Http\Response\Resolvers\ResponseResolverRegistry;
+use Clicalmani\Core\Http\Response\ResponseContext;
+
 /**
  * Class RouteService
  * 
@@ -9,7 +13,7 @@ namespace Clicalmani\Core\Providers;
  * @package Clicalmani\Core\Providers
  * @author @clicalmani
  */
-abstract class RouteService 
+abstract class RouteService implements Redirectable
 {
     /**
      * Active route model entity matching current application state.
@@ -18,12 +22,24 @@ abstract class RouteService
      */
     protected \Clicalmani\Routing\Route|false $route;
 
+    protected mixed $response;
+
     /**
-     * Active inbound HTTP request context instance pointer.
-     * 
-     * @var \Clicalmani\Core\Http\Request
+     * HTTP status code for the redirect.
      */
-    protected ?\Clicalmani\Core\Http\Request $request;
+    protected int $status = 302;
+
+    /**
+     * Detected response context.
+     */
+    protected ResponseContext $context;
+
+    protected ?string $routeName = null;
+
+    /**
+     * Resolver registry (injected or resolved from container).
+     */
+    protected ResponseResolverRegistry $registry;
 
     /**
      * RouteService constructor.
@@ -31,7 +47,17 @@ abstract class RouteService
      */
     public function __construct()
     {
-        $this->request = \Clicalmani\Core\Http\Request::current();
+        $this->response = app()->response;
+
+        if (isset($this->routeName)) {
+            /** @var Route */
+            $route = $route = \Clicalmani\Core\Support\Facades\Route::findByName($this->routeName);
+            /** @var \Clicalmani\Core\Http\ResponseInterface */
+            $this->response = call_user_func($route->action);
+        }
+
+        $this->context  = ResponseContext::fromResponse($this->response);
+        $this->registry = app()->getContainer()->get('resolvers');
     }
 
     /**
@@ -39,24 +65,59 @@ abstract class RouteService
      * 
      * @return void
      */
-    public function abort(): void
+    protected function abort(): void
     {
         $this->route = false;
     }
 
-    /**
-     * Triggers a specialized HTTP routing redirection execution sweep.
-     * 
-     * This method must be overriden by extending concrete subclasses to detail custom 
-     * application traffic redirection behaviors.
-     * 
-     * @throws \Exception If invoked directly on a child implementation without a strict structural override.
-     * @return void
-     */
-    public function redirect(): void
+    protected function redirectTo(string $routeName, int $status = 302, array $params = []): static
     {
-        throw new \Exception(
-            sprintf("%s::%s must be overriden. Thrown in %s at line %d", __CLASS__, __METHOD__, static::class, __LINE__)
-        );
+        $this->status   = $status;
+        $this->response = $this->registry
+                            ->for($this->context)
+                            ->redirectToRoute($routeName, $status, $params);
+        return $this;
+    }
+
+    protected function redirectToUrl(string $url, int $status = 302) : static
+    {
+        $this->status   = $status;
+        $this->response = $this->registry
+                            ->for($this->context)
+                            ->redirectToUrl($url, $status);
+        return $this;
+    }
+
+    protected function render(string $view, array $data = [], int $status = 503): static
+    {
+        $this->status   = $status;
+        $this->response = $this->registry
+                            ->for($this->context)
+                            ->render($view, $data, $status);
+        return $this;
+    }
+
+    protected function abortWith(int $status, string $message = ''): static
+    {
+        $this->status   = $status;
+        $this->response = $this->registry
+                            ->for($this->context)
+                            ->abort($status, $message);
+        return $this;
+    }
+    
+    public function getResponse(): mixed
+    {
+        return $this->response;
+    }
+
+    public function getStatus(): int
+    {
+        return $this->status;
+    }
+
+    public function getContext(): ResponseContext
+    {
+        return $this->context;
     }
 }

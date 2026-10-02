@@ -5,11 +5,13 @@ use Clicalmani\Core\Http\Request;
 use Clicalmani\Core\Exceptions\ModelNotFoundException;
 use Clicalmani\Database\Factory\Models\Elegant;
 use Clicalmani\Core\Acme\Container;
+use Clicalmani\Core\Http\Middlewares\MiddlewareAccessor;
 use Clicalmani\Core\Providers\RouteServiceProvider;
 use Clicalmani\Core\Routing\Exceptions\RouteNotFoundException;
 use Clicalmani\Core\Support\Facades\Route;
 use Clicalmani\Core\Test\Controllers\TestController;
-use Clicalmani\Routing\Memory;
+use Clicalmani\Routing\Registry;
+use Inertia\Inertia;
 
 /**
  * RequestController class
@@ -73,7 +75,7 @@ class RequestController
 		
 		/**
 		 * |-----------------------------------------------------------------------------------
-		 * |                                After Hook
+		 * | Redirect
 		 * |-----------------------------------------------------------------------------------
 		 * A hook to run after the request has been processed and before the response is sent.
 		 * A hook can be used to modify the response before it is sent.
@@ -82,14 +84,35 @@ class RequestController
 
 		/**
 		 * |-----------------------------------------------------------------------------------
-		 * |                                Response
+		 * | Terminable Middleware
 		 * |-----------------------------------------------------------------------------------
 		 * 
-		 * Fire route service providers before sending response. A service provider can be used to
-		 * redirect the route to a different location or set response headers.
+		 * Call route terminable middlewares
 		 */
-		RouteServiceProvider::fireTPS($response, 1);
+		foreach ($this->route->getMiddlewares() as $name_or_class) {
+			if ($middleware = MiddlewareAccessor::fromName($name_or_class) AND method_exists($middleware, 'terminate')) {
+				$middleware->terminate(Request::current(), $response);
+			}
+		}
 
+		// Session cookie
+		if ($this->route->isProtected()) {
+			$params = array_merge(
+				...collect($this->route->getParameters())
+					->map(fn($seg) => [ltrim($seg->name, '?:') => $seg->value])
+					->toArray()
+			);
+			ksort($params);
+
+			$hash = enc()->createParametersHash($params);
+			$key  = enc()::storageKey($this->route, $params); // même méthode que verifyParameters
+
+			session($key, $hash)->set();
+			cookie($key, $hash, 60 * 60 * 24 * 7)->set();
+
+			logger()->info('RController', ['params' => $params, 'key' => $key, 'hash' => $hash]);
+		}
+		
 		die($response);
 	}
 
@@ -118,7 +141,7 @@ class RequestController
 
 			$this->action = $this->route->action;
 			
-			Memory::currentRoute($route);
+			Registry::currentRoute($route);
 			Request::current($request);
 			
 			if ( $response_code = $this->route->isAuthorized($request) ) {
@@ -268,8 +291,10 @@ class RequestController
 	{
 		if (Route::isApi()) response()->sendStatus($code);
 		else {
-			http_response_code($code);
-			view($code);
+			if (app()->response instanceof \Inertia\Response) {
+				die(app()->response);
+			}
+			app()->response?->sendStatus($code);
 		}
 
 		exit;

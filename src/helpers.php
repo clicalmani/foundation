@@ -319,6 +319,18 @@ if ( ! function_exists('route') ) {
     }
 }
 
+if ( ! function_exists('current_route') ) {
+
+    /**
+     * Current route
+     * 
+     * @return ?\Clicalmani\Routing\Factory\RouteInterface|null
+     */
+    function current_route() : ?\Clicalmani\Routing\Factory\RouteInterface {
+        return \Clicalmani\Core\Support\Facades\Route::current();
+    }
+}
+
 if ( ! function_exists('collection') ) {
 
     /**
@@ -340,6 +352,18 @@ if ( ! function_exists('collect') ) {
      */
     function collect($items = []) {
         return collection($items);
+    }
+}
+
+if ( ! function_exists('db') ) {
+
+    /**
+     * Database
+     * 
+     * @return \Clicalmani\Core\Collection\CollectionInterface
+     */
+    function db() : \Clicalmani\Core\Acme\Database {
+        return container()->get('database');
     }
 }
 
@@ -668,9 +692,9 @@ if ( ! function_exists('config') ) {
 }
 
 if ( ! function_exists('abort') ) {
-    function abort(int $status_code) : never
+    function abort(int $status, ?string $message = '') : never
     {
-        response()->sendStatus($status_code);
+        response($message, $status)->sendStatus();
     }
 }
 
@@ -844,14 +868,14 @@ if ( !function_exists('inertia') ) {
 }
 
 if ( !function_exists('cookie') ) {
-    function cookie(?string $name = null, ?string $value = null, ?int $expiry = 0, ?string $path = '/'): \Clicalmani\Cookie\Cookie {
-        return new \Clicalmani\Cookie\Cookie($name, $value, $expiry, $path);
+    function cookie(?string $name = null, ?string $value = null, ?int $expiry = 0, ?string $path = '/'): \Clicalmani\Core\Http\Cookie {
+        return new \Clicalmani\Core\Http\Cookie($name, $value, $expiry, $path);
     }
 }
 
 if ( ! function_exists('mailer') ) {
-    function mailer(string $name) {
-        return \Clicalmani\Core\Acme\Container::getInstance()->get("{$name}.mailer");
+    function mailer() : ?\Clicalmani\Core\Mail\Email {
+        return \Clicalmani\Core\Acme\Container::getInstance()->get("mail.simple");
     }
 }
 
@@ -928,5 +952,16 @@ if (! function_exists('event')) {
     function event(object $event): object
     {
         return container()->get('events.discovery')->dispatch($event);
+    }
+}
+
+if (! function_exists('enc')) {
+    /**
+     * Encryption provider
+     * 
+     * @return \Clicalmani\Core\Auth\EncryptionServiceProvider
+     */
+    function enc(): \Clicalmani\Core\Auth\EncryptionServiceProvider {
+        return container()->get('encryption');
     }
 }

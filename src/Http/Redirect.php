@@ -4,7 +4,7 @@ namespace Clicalmani\Core\Http;
 use Clicalmani\Core\Http\Controllers\MethodReflector;
 use Clicalmani\Core\Support\Facades\RequestController;
 use Clicalmani\Psr\NonBufferedBody;
-use Clicalmani\Routing\Memory;
+use Clicalmani\Routing\Registry;
 use Inertia\Inertia;
 
 class Redirect implements RedirectInterface
@@ -67,7 +67,7 @@ class Redirect implements RedirectInterface
             return $this;
         }
 
-        $route = Memory::currentRoute();
+        $route = Registry::currentRoute();
         
         if ($route->isGettable()) {
             $this->uri = $route->uri;
@@ -84,9 +84,15 @@ class Redirect implements RedirectInterface
         return $this;
     }
 
-    public function route(mixed ...$args) : static
+    public function route(mixed ...$args) : RedirectInterface
     {
         $this->uri = route( ...$args );
+        return $this;
+    }
+
+    public function to(string $url) : RedirectInterface
+    {
+        $this->uri = $url;
         return $this;
     }
 

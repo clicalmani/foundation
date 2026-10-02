@@ -20,7 +20,7 @@ class ErrorRenderer
         ];
 
         if ( ! \Clicalmani\Core\Support\Facades\Route::isApi() ) {
-            return \Clicalmani\Core\Support\Facades\Response::status(500)->view('500', ['error' => $data]);
+            return response('', 500)->view('500', ['error' => $data]);
         }
 
         return response()->status(500)->json($data);
@@ -130,7 +130,7 @@ class ErrorRenderer
         ];
         
         /** @var \Clicalmani\Routing\Route */
-        if ($route = \Clicalmani\Routing\Memory::currentRoute()) {
+        if ($route = \Clicalmani\Routing\Registry::currentRoute()) {
             $context['routeName'] = $route->name;
             $context['handler'] = $route->action;
             $context['query'] = $_GET;

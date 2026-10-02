@@ -1,9 +1,10 @@
 <?php
 namespace Clicalmani\Core\Providers\Config;
 
+use Clicalmani\Core\Http\Redirectable;
 use Clicalmani\Core\Providers\RouteService;
 
-final class RedirectService extends RouteService
+final class RedirectService extends RouteService implements Redirectable
 {
     /**
      * Constructor
@@ -24,7 +25,7 @@ final class RedirectService extends RouteService
     {
         if ($this->route) {
             if ($this->route->isDirty()) {
-                $this->route->redirect = $this->route->redirect ?? self::traceBack();
+                $this->route->redirect ??= self::traceBack();
             }
             
             if (!\Clicalmani\Core\Support\Facades\Route::isApi() && $this->route->isGettable()) {

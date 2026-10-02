@@ -2,7 +2,7 @@
 namespace Clicalmani\Core\Providers;
 
 use Clicalmani\Core\Mail\MailerEventDispatcherFactory;
-use Clicalmani\Core\Mail\MailerTransport;
+use Clicalmani\Core\Mail\Factory\MailerTransportFactory;
 use Symfony\Component\Mailer\Mailer;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mailer\Transport\TransportInterface;
@@ -34,31 +34,32 @@ class MailerServiceProvider implements ServiceProviderInterface
     #[Override]
     public function register(): void
     {
-        // 1. Load the framework's primary mail configuration blueprints into runtime memory
+        // Load config
+        // Never try to load config from boot
         if (is_file(config_path('/mail.php'))) {
             app()->config->set('mail', require config_path('/mail.php'));
         }
 
-        // 2. Register the custom framework mailer transport factory engine
-        app()->addService(MailerTransport::class, 
-            MailerTransport::class,
+        // Tonka mailer transport factory
+        app()->addService(MailerTransportFactory::class, 
+            MailerTransportFactory::class,
             static function(ServiceConfigurator|DefaultsConfigurator $config) {
                 // Instantiated strictly for initial service visibility inside the container
             }
         );
 
-        // 3. Dynamically resolve and bind the underlying transport driver implementation using the factory
+        // Apply the default transport
         app()->addService(TransportInterface::class, 
             TransportInterface::class,
             static function(ServiceConfigurator|DefaultsConfigurator $config) {
                 $config->factory([
-                    app()->dependency('service', MailerTransport::class), 
+                    app()->dependency('service', MailerTransportFactory::class), 
                     'create'
                 ]);
             }
         );
 
-        // 4. Provision the specialized event dispatcher factory and its contract wrapper
+        // Default sender
         app()->addService(MailerEventDispatcherFactory::class, 
             MailerEventDispatcherFactory::class,
             static function(ServiceConfigurator|DefaultsConfigurator $config) {}
@@ -86,7 +87,7 @@ class MailerServiceProvider implements ServiceProviderInterface
             }
         );
 
-        // 5. Compile and map the primary application-wide Mailer interface service
+        // Compile and map the primary application-wide Mailer interface service
         app()->addService(MailerInterface::class, 
             Mailer::class,
             function(ServiceConfigurator|DefaultsConfigurator $config) {

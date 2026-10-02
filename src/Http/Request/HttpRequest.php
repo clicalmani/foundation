@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Core\Http\Requests;
+namespace Clicalmani\Core\Http\Request;
 
 use Clicalmani\Core\Collection\Collection;
 use Clicalmani\Core\Collection\CollectionInterface;
@@ -182,18 +182,18 @@ abstract class HttpRequest extends \Clicalmani\Psr\Request
 
             $files = new Collection;
 
-            // On récupère la liste des clés internes (ex: [0], ou ["image"])
+            // Retrieve internal keys array (e.g., [0], or ["image"])
             $keys = array_keys($file['name']);
 
             foreach ($keys as $key) {
-                // Si la valeur est encore un tableau, on extrait les données proprement
+                // If nested array structure is detected, extract array values safely
                 $name     = is_array($file['name'][$key]) ? ($file['name'][$key]['image'] ?? current($file['name'][$key])) : $file['name'][$key];
                 $tmpName  = is_array($file['tmp_name'][$key]) ? ($file['tmp_name'][$key]['image'] ?? current($file['tmp_name'][$key])) : $file['tmp_name'][$key];
                 $type     = is_array($file['type'][$key]) ? ($file['type'][$key]['image'] ?? current($file['type'][$key])) : $file['type'][$key];
                 $size     = is_array($file['size'][$key]) ? ($file['size'][$key]['image'] ?? current($file['size'][$key])) : $file['size'][$key];
                 $error    = is_array($file['error'][$key]) ? ($file['error'][$key]['image'] ?? current($file['error'][$key])) : $file['error'][$key];
 
-                // On s'assure qu'on n'ajoute pas un fichier vide ou invalide
+                // Ensure invalid or empty file items are excluded
                 if ($tmpName) {
                     $files->add(
                         new File(

@@ -4,6 +4,7 @@ namespace Clicalmani\Core\Support\Facades;
 /**
  * @method static string[] all()
  * @method static bool isApi()
+ * @method static bool isBroadcasting()
  * @method static string getClientVerb()
  * @method static \Clicalmani\Routing\Factory\RouteInterface|null current() Return the current route.
  * @method static \Clicalmani\Routing\Factory\GroupInterface|null group(mixed ...$parameters)

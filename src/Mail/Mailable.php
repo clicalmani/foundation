@@ -2,179 +2,180 @@
 
 namespace Clicalmani\Core\Mail;
 
+use Override;
+use Symfony\Bridge\Twig\Mime\TemplatedEmail;
+use Symfony\Component\Mime\Address;
+use Symfony\Component\Mime\Part\File;
+use Symfony\Component\Mime\Part\DataPart;
+
 /**
  * Class Mailable
- * 
- * Abstract base class providing a fluent configuration interface for defining 
- * transaction-driven application outbound emails, structural templates, attachments, 
- * and routing recipient envelopes.
- * 
+ *
  * @package Clicalmani\Core\Mail
  * @author @clicalmani
  */
-abstract class Mailable implements MailableInterface
+abstract class Mailable extends TemplatedEmail implements MailableInterface
 {
-    /**
-     * The template view file identifier used to render the electronic body content.
-     * 
-     * @var string
-     */
-    public string $template = '';
+    public ?string $layout = null;
 
-    /**
-     * Associative key-value data container passed down into the rendering engine view scope.
-     * 
-     * @var array<string, mixed>
-     */
-    public array $data = [];
+    public bool $layoutDisabled = false;
 
-    /**
-     * The subject header line text summarizing the message contents.
-     * 
-     * @var string
-     */
-    public string $subject = '(No Subject)';
-
-    /**
-     * The targeted recipient collection detailing each route endpoint address and optional
-     * descriptive name. Accumulates across successive to() calls, so the mailable naturally
-     * supports one or several recipients.
-     * 
-     * @var array<int, array{0: string, 1: string|null}>
-     */
-    public array $to = [];
-
-    /**
-     * Collection containing structural metadata parameters for absolute filesystem attachments.
-     * 
-     * @var array<int, array{0: string, 1: string|null, 2: string|null}>
-     */
-    public array $pathAttachments = [];
-
-    abstract public function send(): void;
+    abstract public function build(): static;
 
     /**
      * Binds a dedicated template layout identity path alongside an associated rendering payload to the instance.
-     * 
+     *
      * @param string $template The relative file path key or reference identifying the template view resource.
      * @param array<string, mixed> $data Dynamic payload context variables mapped to the template scope.
-     * @return self The current configured mailable instance to sustain fluent call chains.
+     * @return static
      */
-    public function view(string $template, array $data = []): self
+    public function view(string $template, array $data = []): static
     {
-        $this->template = $template;
-        $this->data     = $data;
+        $this->htmlTemplate($template);
+        $this->context($data);
+        return $this;
+    }
+
+    public function with(array $data = []): static
+    {
+        $this->context([...$this->getContext(), ...$data]);
+        return $this;
+    }
+
+    public function layout(string $layout): static
+    {
+        $this->layout = $layout;
+        $this->layoutDisabled = false;
+        return $this;
+    }
+
+    public function withoutLayout(): static
+    {
+        $this->layout = null;
+        $this->layoutDisabled = true;
         return $this;
     }
 
     /**
-     * Configures a custom descriptive subject string layout for the outbound message metadata.
-     * 
-     * @param string $subject The clear text description identifying the incoming message intent.
-     * @return self The current configured mailable instance to sustain fluent call chains.
-     */
-    public function subject(string $subject): self
-    {
-        $this->subject = $subject;
-        return $this;
-    }
-
-    /**
-     * Configures the delivery endpoint criteria routing the outbound message to one or several
-     * recipients. Accumulates across successive calls — chain ->to(...)->to(...) to add more
-     * recipients, or pass several at once via un tableau.
+     * Définit le(s) destinataire(s), en acceptant plusieurs formes d'entrée
+     * puis en délégant à Email::to() (qui attend des Address|string natifs).
      *
      * Formes acceptées :
-     *   ->to('a@x.com')                                    // un seul destinataire, sans nom
-     *   ->to('a@x.com', 'Alice')                            // un seul destinataire, avec nom
-     *   ->to(['a@x.com', 'b@x.com'])                        // plusieurs, sans nom
-     *   ->to(['a@x.com' => 'Alice', 'b@x.com' => 'Bob'])    // plusieurs, avec nom (clé => valeur)
-     *   ->to([['a@x.com', 'Alice'], ['b@x.com', null]])     // plusieurs, sous forme de paires explicites
-     * 
-     * @param string|array<int|string, mixed> $email Une adresse, ou une collection de destinataires
-     *   sous l'une des formes ci-dessus.
-     * @param string|null $name Nom du destinataire, utilisé uniquement quand $email est une chaîne unique.
-     * @return self The current configured mailable instance to sustain fluent call chains.
+     *   ->to('a@x.com')
+     *   ->to('a@x.com', 'Alice')
+     *   ->to(['a@x.com', 'b@x.com'])
+     *   ->to(['a@x.com' => 'Alice', 'b@x.com' => 'Bob'])
+     *   ->to([['a@x.com', 'Alice'], ['b@x.com', null]])
+     *
+     * @param string|array<int|string, mixed> $email
+     * @param string|null $name Utilisé uniquement quand $email est une chaîne unique.
+     * @return static
      */
-    public function to(string|array $email, ?string $name = null): self
+    public function to(string|array $email, ?string $name = null): static
     {
-        foreach ($this->normalizeRecipients($email, $name) as $recipient) {
-            $this->to[] = $recipient;
-        }
-        
+        parent::to(...$this->toAddresses($email, $name));
         return $this;
     }
 
     /**
-     * Vide la liste des destinataires courants, pour repartir d'un envelope propre
-     * avant de définir une nouvelle liste via to().
-     * 
-     * @return self
-     */
-    public function clearTo(): self
-    {
-        $this->to = [];
-        return $this;
-    }
-
-    /**
-     * Normalise n'importe laquelle des formes acceptées par to() en une liste plate
-     * de paires [email, name|null], prête à être fusionnée dans $this->to.
+     * Définit l'expéditeur, mêmes formes d'entrée que to().
      *
      * @param string|array<int|string, mixed> $email
      * @param string|null $name
-     * @return array<int, array{0: string, 1: string|null}>
+     * @return static
      */
-    private function normalizeRecipients(string|array $email, ?string $name): array
+    public function from(string|array $email, ?string $name = null): static
     {
-        // Un seul destinataire, passé sous forme de chaîne : ->to('a@x.com', 'Alice')
-        if (is_string($email)) {
-            return [[$email, $name]];
-        }
+        parent::from(...$this->toAddresses($email, $name));
+        return $this;
+    }
 
-        $recipients = [];
+    public function attach(string $path, array $options = []): static
+    {
+        return parent::attach(new File($path), $options['as'] ?? null, $options['mime'] ?? null);
+    }
 
-        foreach ($email as $key => $value) {
-            $recipients[] = match (true) {
-                // Forme paire explicite : [['a@x.com', 'Alice'], ...]
-                is_array($value) => [$value[0], $value[1] ?? null],
+    public function attachStream($stream, array $options = []) : static
+    {
+        return parent::addPart(new DataPart($stream), $options['as'] ?? null, $options['mime'] ?? null);
+    }
 
-                // Forme associative : ['a@x.com' => 'Alice', ...]
-                is_string($key) => [$key, $value],
+    public function attachData(string $data, ?string $as = null, array $options = []) : static
+    {
+        return parent::addPart(new DataPart($data), $as ?? $options['as'] ?? null, $options['mime'] ?? null);
+    }
 
-                // Forme liste simple : ['a@x.com', 'b@x.com', ...]
-                default => [$value, null],
-            };
-        }
-
-        return $recipients;
+    public function embed($body, array $options = []): static
+    {
+        return parent::addPart(((new DataPart($body, $options['as'] ?? null, $options['mime'] ?? null))->asInline()));
     }
 
     /**
-     * Retourne la liste des destinataires sous une forme directement exploitable
-     * par Symfony Mailer, prête pour Address::create() ou new Address($email, $name).
+     * Vide la liste des destinataires courants (en-tête To réel),
+     * pour repartir d'une enveloppe propre avant de rappeler to().
+     *
+     * @return static
+     */
+    public function clearTo(): static
+    {
+        $this->getHeaders()->remove('To');
+        return $this;
+    }
+
+    /**
+     * Retourne les destinataires actuels sous une forme simple [email, name],
+     * en lisant l'état réel de l'Email (pas une structure parallèle) —
+     * pratique pour du logging/debug sans manipuler des objets Address.
      *
      * @return array<int, array{email: string, name: string}>
      */
     public function recipients(): array
     {
         return array_map(
-            fn(array $recipient) => ['email' => $recipient[0], 'name' => $recipient[1] ?? ''],
-            $this->to
+            fn(Address $address) => ['email' => $address->getAddress(), 'name' => $address->getName()],
+            $this->getTo()
         );
     }
 
-    /**
-     * Appends an active local file resource to the outbound email delivery envelope using an absolute filesystem address.
-     * 
-     * @param string $path The absolute storage path locator directing toward the actual file asset.
-     * @param string|null $name An optional alternative descriptive file name display parameter exposed to recipients.
-     * @param string|null $contentType The exact semantic internet media type (MIME type) descriptor matching the asset.
-     * @return self The current configured mailable instance to sustain fluent call chains.
-     */
-    public function attachFromPath(string $path, ?string $name = null, ?string $contentType = null): self
+    public function getLayout() : ?string
     {
-        $this->pathAttachments[] = [$path, $name, $contentType];
-        return $this;
+        return $this->layout;
+    }
+
+    public function layoutDisabled() : bool
+    {
+        return $this->layoutDisabled;
+    }
+
+    /**
+     * Normalise n'importe laquelle des formes acceptées par to()/from() en
+     * une liste d'objets Address, prête pour le parent::to()/from() natif.
+     *
+     * @param string|array<int|string, mixed> $email
+     * @param string|null $name
+     * @return Address[]
+     */
+    private function toAddresses(string|array $email, ?string $name): array
+    {
+        if (is_string($email)) {
+            return [new Address($email, $name ?? '')];
+        }
+
+        $addresses = [];
+
+        foreach ($email as $key => $value) {
+            $addresses[] = match (true) {
+                // Forme paire explicite : [['a@x.com', 'Alice'], ...]
+                is_array($value) => new Address($value[0], $value[1] ?? ''),
+
+                // Forme associative : ['a@x.com' => 'Alice', ...]
+                is_string($key) => new Address($key, $value),
+
+                // Forme liste simple : ['a@x.com', 'b@x.com', ...]
+                default => new Address($value, ''),
+            };
+        }
+
+        return $addresses;
     }
 }

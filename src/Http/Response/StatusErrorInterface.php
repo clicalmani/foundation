@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Core\Http\Responses;
+namespace Clicalmani\Core\Http\Response;
 
 interface StatusErrorInterface
 {

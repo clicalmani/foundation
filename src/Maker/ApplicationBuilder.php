@@ -131,8 +131,8 @@ class ApplicationBuilder
     public function withInertia()
     {
         $middleware = new \Clicalmani\Core\Http\Middlewares\Web;
-        $this->app->addService('inertia', \Inertia\Response::class);
-        $middleware->web(append: [\Inertia\Middleware::class]);
+        $this->app->addService('inertia', \Inertia\Response::class); 
+        $middleware->web(append: [\Inertia\Middleware::class => \Inertia\Middleware::class]);
         return $this;
     }
 
@@ -218,6 +218,17 @@ class ApplicationBuilder
         }
 
         $this->app->register(new \Broadcaster\BroadcastServiceProvider);
+        return $this;
+    }
+
+    public function withNotification(?callable $registry = null): static
+    {
+        $this->app->register(
+            new \Clicalmani\Core\Providers\NotificationServiceProvider
+        );
+
+        if ($registry) call_user_func($registry);
+        
         return $this;
     }
 }

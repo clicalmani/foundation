@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Core\Http\Requests;
+namespace Clicalmani\Core\Http\Request;
 
 trait Redirect
 {
@@ -10,6 +10,6 @@ trait Redirect
      */
     public function redirect() : RequestRedirect
     {
-        return new \Clicalmani\Core\Http\Requests\RequestRedirect;
+        return new \Clicalmani\Core\Http\Request\RequestRedirect;
     }
 }

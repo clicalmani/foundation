@@ -74,11 +74,11 @@ interface CollectionInterface
     /**
      * Filter elements
      * 
-     * @param ?callable $closure A callback function which receive element value as its first argument and 
+     * @param callable $closure A callback function which receive element value as its first argument and 
      * element index as its second argument.
      * @return self
      */
-    public function filter(?callable $closure = null) : self;
+    public function filter(callable $closure) : self;
 
     /**
      * Merges provided elements to the existing ones.
@@ -106,9 +106,9 @@ interface CollectionInterface
     /**
      * Do a shallow copy of the storage.
      * 
-     * @return self The copy
+     * @return array The copy
      */
-    public function copy() : self;
+    public function copy() : array;
 
     /**
      * Populate storage with new elements by replacing the old ones.
@@ -197,9 +197,9 @@ interface CollectionInterface
      * Pluck a specific key from each element in the collection
      * 
      * @param string $key
-     * @return self
+     * @return \Clicalmani\Core\Collection\Map
      */
-    public function pluck(string $key): self;
+    public function pluck(string $key) : Map;
 
     /**
      * Get the number of public properties in the ArrayObject
@@ -229,10 +229,10 @@ interface CollectionInterface
     /**
      * Sorts the collection by a specific key.
      * 
-     * @param string|\Closure $key The key to sort by
+     * @param string $key The key to sort by
      * @return self
      */
-    public function sortBy(string|callable $key) : CollectionInterface;
+    public function sortBy(string $key) : self;
 
     /**
      * Sorts the collection by a specific key in descending order.
@@ -319,12 +319,4 @@ interface CollectionInterface
     public function slice(int $offset, ?int $length = null) : iterable;
 
     public function remove(mixed $element) : mixed;
-
-    public function values(): self;
-
-    public function push(mixed $value) : self;
-
-    public function search(mixed $value, bool $strict = true): int|string|false;
-
-    public function flatMap(callable $callback, int $depth = 1): self;
 }

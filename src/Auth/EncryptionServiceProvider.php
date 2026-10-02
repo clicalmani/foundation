@@ -25,19 +25,11 @@ class EncryptionServiceProvider
     public static function hash(mixed $data) : mixed
 	{
 		$config = static::$config;
-		$method = @ $config['algo'];
+		$method = $config['algo'] ?? 'sha256';
+		$secret = env('APP_KEY', 'Tonka');
 
-		$__func = fn($str) => hash($method, $str);
-		$__secret = env('APP_KEY', 'Tonka');
-    	
-    	$_ipad = substr($__secret, strlen($__secret), 0) ^ str_repeat(chr(0x36), strlen($__secret));
-    	$__opad = substr($__secret, 0, strlen($__secret)) ^ str_repeat(chr(0x5C), strlen($__secret));
-    	
-    	$__inner = @ pack('H32', $__func($_ipad . $data));
-    	$__digest = $__func($__opad . $__inner);
-    	
-    	return $__digest;
-    }
+		return hash_hmac($method, (string) $data, $secret);
+	}
     
 	/**
 	 * Create parameters hash
@@ -47,14 +39,13 @@ class EncryptionServiceProvider
 	 */
     public static function createParametersHash(array $params) : string
 	{
-    	$data = '';
+		$data = '';
+		foreach ($params as $key => $value) {
+			$data .= $key . $value;
+		}
 
-    	foreach ($params as $key => $value){
-    		$data .= $key . $value;
-    	}
-    	
-    	return strtoupper( substr( self::hash($data), strlen( self::iv() ), static::$config['hash_length'] ) );
-    }
+		return strtoupper(substr(self::hash($data), 0, static::$config['hash_length']));
+	}
 
 	/**
 	 * Verify parameters
@@ -63,27 +54,38 @@ class EncryptionServiceProvider
 	 */
     public static function verifyParameters() : bool
 	{
-    	$data = '';
+		$route = current_route();
+		if (!$route) return true;
+
 		$param = self::hashParameter();
+		if (!$param) return true;
 
-		if ( ! isset($_REQUEST[$param]) ) return true;
-		
-    	$request_hash = $_REQUEST[$param];
-		
-    	unset($_REQUEST[$param]);
-    	 
-    	foreach ($_REQUEST as $key => $value){
-    		$data .= $key . $value;
-    	}
-		
-		$hash = strtoupper( substr( self::hash($data), strlen( self::iv() ), static::$config['hash_length'] ) );
-    	
-    	if($request_hash === $hash){
-    		return true;
-    	}
+		$params = $_REQUEST;
+		unset($params[$param]);
 
-		return false;
-    }
+		// Recalcule la clé à partir des MÊMES données que celles utilisées à l'émission
+		$key = self::storageKey($route, $params);
+
+		$request_hash = cookie()->get($key) ?? session()->get($key) ?? ($_REQUEST[$param] ?? null);
+
+		if (!$request_hash) return true; // aucun hash émis pour ce lien précis
+
+		ksort($params);
+		$hash = strtoupper(substr(self::hash(implode('', array_map(
+			fn($k, $v) => $k . $v,
+			array_keys($params),
+			$params
+		))), 0, static::$config['hash_length']));
+
+		// logger()->info('verifyParameters', [
+		// 	'params' => $params, 'request_hash' => $request_hash, 'computed' => $hash,
+		// ]);
+
+		session()->remove($key);
+		cookie($key)->delete();
+
+		return hash_equals($request_hash, $hash);
+	}
 
 	/**
 	 * Create iv
@@ -184,6 +186,13 @@ class EncryptionServiceProvider
 	 */
 	public static function hashParameter() : string|null
 	{
-		return @ static::$config['hash_parameter'];
+		return static::$config['hash_parameter'] ?? null;
+	}
+
+	public static function storageKey(\Clicalmani\Routing\Route $route, array $params) : string
+	{
+		ksort($params);
+		$signature = $route->uri() . '|' . http_build_query($params);
+		return base64_encode(self::encrypt($signature));
 	}
 }

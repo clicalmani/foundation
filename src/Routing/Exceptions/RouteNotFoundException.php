@@ -1,6 +1,8 @@
 <?php
 namespace Clicalmani\Core\Routing\Exceptions;
 
+use App\Providers\RouteServiceProvider;
+
 /**
  * Class RouteNotFoundException
  * 
@@ -23,6 +25,11 @@ class RouteNotFoundException extends \Exception
 		 * Render response
 		 */
 		else {
+			// $tps = RouteServiceProvider::getProvidedTPS();
+			// if ($serviceClass = $tps['404'] ?? null) {
+			// 	RouteServiceProvider::resolveService('404', $serviceClass);
+			// 	die(app()->response);
+			// } else 
 			response()->notFound();
 		}
 	}

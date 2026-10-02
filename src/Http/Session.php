@@ -36,9 +36,9 @@ class Session implements SessionInterface
         $_SESSION = Arr::set($_SESSION, $this->name ?: $name, $this->value ?: $value);
     }
 
-    public function get(?string $name = null): mixed
+    public function get(?string $name = null, ?string $default = null): mixed
     {
-        return Arr::get(isset($_SESSION) ? $_SESSION: [], $name ?: $this->name);
+        return Arr::get(isset($_SESSION) ? $_SESSION: [], $name ?: $this->name, $default);
     }
 
     public function exists(?string $name = null): bool
@@ -51,11 +51,16 @@ class Session implements SessionInterface
         $_SESSION = Arr::forget(isset($_SESSION) ? $_SESSION: [], $name ?: $this->name);
     }
     
-    public function flush(array $data) : void
+    public function fill(array $data) : void
     {
         foreach ($data as $key => $value) {
             $this->set($key, $value);
         }
+    }
+
+    public function flush() : void
+    {
+        $_SESSION = [];
     }
 
     public function destroy(): void
@@ -91,6 +96,25 @@ class Session implements SessionInterface
     public function retrieveBackTrace() : ?string
     {
         return $this->get(\Clicalmani\Core\Providers\SessionStorageServiceProvider::backTraceIndex());
+    }
+
+    public function hash(array $parameters = []) : bool|string
+    {
+        $route = \Clicalmani\Routing\Registry::currentRoute();
+
+        if (!$route) {
+            throw new \RuntimeException('No current route found. Cannot generate hash without a route.');
+        }
+
+        $parameterName = \Clicalmani\Core\Auth\EncryptionServiceProvider::hashParameter();
+        
+        if (!isset($parameters)) {
+            return $this->get($route->uri . '::' . $parameterName);
+        }
+
+        $this->set($route->uri . '::' . $parameterName, create_parameters_hash($parameters));
+
+        return true;
     }
 
     public function __get($name)

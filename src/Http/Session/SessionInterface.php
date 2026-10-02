@@ -68,10 +68,17 @@ interface SessionInterface
     public function allValues(): array;
 
     /**
-     * Flush multiple session values at once.
+     * Flush session.
      * 
-     * @param array $data
      * @return void
      */
-    public function flush(array $data) : void;
+    public function flush() : void;
+
+    /**
+     * Fill session
+     * 
+     * @param $data
+     * @return void
+     */
+    public function fill(array $data) : void;
 }

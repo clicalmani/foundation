@@ -3,7 +3,7 @@ namespace Clicalmani\Core\Http;
 
 use Psr\Http\Message\StreamInterface;
 
-interface ResponseInterface extends Responses\StatusErrorInterface, Responses\JsonResponseInterface
+interface ResponseInterface extends Response\StatusErrorInterface, Response\JsonResponseInterface
 {
     /**
      * Send a json response

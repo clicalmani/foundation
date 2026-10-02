@@ -12,7 +12,7 @@ use Clicalmani\Routing\Group;
  * @package Clicalmani\Core
  * @author @Clicalmani\Core
  */
-abstract class Middleware 
+abstract class Middleware implements MiddlewareInterface
 {
     /**
      * Global middlewares
@@ -24,16 +24,6 @@ abstract class Middleware
         'web' => ['web']
     ];
     
-    /**
-     * Handler
-     * 
-     * @param \Clicalmani\Core\Http\RequestInterface $request Request object
-     * @param \Clicalmani\Core\Http\ResponseInterface $response Response object
-     * @param \Closure $next Next middleware function
-     * @return \Clicalmani\Core\Http\ResponseInterface|\Clicalmani\Core\Http\RedirectInterface
-     */
-    public abstract function handle(RequestInterface $request, ResponseInterface $response, \Closure $next) : ResponseInterface|RedirectInterface;
-
     /**
      * Bootstrap
      * 

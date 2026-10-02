@@ -82,7 +82,7 @@ class TemplateLoader implements LoaderInterface
             return $this->cache[$name] = $template_path;
         }
 
-        $this->errorCache[$name] = sprintf('Unable to find template "%s" (looked into: %s).', $name, resources_path('/views'));
+        $this->errorCache[$name] = sprintf('Unable to find template "%s" (looked into: %s).', $name, $this->rootPath);
 
         if (!$throw) return null;
 

@@ -8,34 +8,39 @@ class Configure implements \ArrayAccess, \JsonSerializable
 {
     protected static $storage = [];
 
-    public function app(?string $key = null)
+    public function app(?string $key = null, mixed $default = null)
     {
-        return $key ? Arr::get(static::$storage['app'] ?? [], $key): static::$storage['app'];
+        return $key ? Arr::get(static::$storage['app'] ?? [], $key, $default): static::$storage['app'];
     }
 
-    public function mail(?string $key = null)
+    public function mail(?string $key = null, mixed $default = null)
     {
-        return $key ? Arr::get(static::$storage['mail'] ?? [], $key): static::$storage['mail'];
+        return $key ? Arr::get(static::$storage['mail'] ?? [], $key, $default): static::$storage['mail'];
     }
 
-    public function http(?string $key = null)
+    public function http(?string $key = null, mixed $default = null)
     {
-        return $key ? Arr::get(static::$storage['http'] ?? [], $key): static::$storage['http'];
+        return $key ? Arr::get(static::$storage['http'] ?? [], $key, $default): static::$storage['http'];
     }
 
-    public function bootstrap(?string $key = null)
+    public function bootstrap(?string $key = null, mixed $default = null)
     {
-        return $key ? Arr::get(static::$storage['bootstrap'] ?? [], $key): static::$storage['bootstrap'];
+        return $key ? Arr::get(static::$storage['bootstrap'] ?? [], $key, $default): static::$storage['bootstrap'];
     }
 
-    public function route(?string $key = null)
+    public function route(?string $key = null, mixed $default = null)
     {
-        return $key ? Arr::get(static::$storage['route'] ?? [], $key): static::$storage['route'];
+        return $key ? Arr::get(static::$storage['route'] ?? [], $key, $default): static::$storage['route'];
     }
 
-    public function database(?string $key = null)
+    public function database(?string $key = null, mixed $default = null)
     {
-        return $key ? Arr::get(static::$storage['database'] ?? [], $key): static::$storage['database'];
+        return $key ? Arr::get(static::$storage['database'] ?? [], $key, $default): static::$storage['database'];
+    }
+
+    public function broadcasting(?string $key = null, mixed $default = null)
+    {
+        return $key ? Arr::get(static::$storage['broadcasting'] ?? [], $key, $default): static::$storage['broadcasting'];
     }
 
     public function env(?string $key = null, ?string $default = null)

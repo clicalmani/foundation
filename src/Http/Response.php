@@ -216,7 +216,7 @@ class Response extends \Clicalmani\Psr\Response implements ResponseInterface
         bool $secure = false, 
         bool $httponly = false
     ) : \Clicalmani\Core\Http\ResponseInterface {
-        (new \Clicalmani\Cookie\Cookie(
+        (new \Clicalmani\Core\Http\Cookie(
             $name,
             $value,
             $expires,

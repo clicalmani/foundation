@@ -1,85 +1,59 @@
 <?php
 namespace Clicalmani\Core\Mail;
 
-use Symfony\Component\Mailer\Header\MetadataHeader;
-use Symfony\Component\Mailer\Header\TagHeader;
-use Symfony\Component\Mime\Address;
-use Symfony\Component\Mime\Email as SymfonyEmail;
-use Symfony\Component\Mime\Header\DateHeader;
-use Symfony\Component\Mime\Header\UnstructuredHeader;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mailer\Envelope;
+use Symfony\Component\Messenger\Stamp\DelayStamp;
 
-class Email extends SymfonyEmail
+/**
+ * @package clicalmani/core
+ * @author clicalmani
+ */
+class Email
 {
-    /**
-     * Create a new email instance.
-     *
-     * @param string $subject
-     * @param string $html
-     */
-    public function __construct(string $subject, string $html)
+    private array $to = [];
+    private ?DelayStamp $delayStamp = null;
+
+    public function __construct(
+        private MailerInterface $mailer
+    )
+    {}
+
+    public function to(string|array $email, ?string $name = null) : static
     {
-        parent::__construct();
-        $this->subject($subject)
-             ->html($html);
-        
-        if ($from = config('mail.from')) {
-            $this->from(new Address($from['address'], $from['name'] ?? null));
+        $this->to = ['email' => $email, 'name' => $name];
+        return $this;
+    }
+
+    public function send(MailableInterface $mailable, ?string $transport = null, ?Envelope $envelope = null) : void
+    {
+        if ($this->to) $mailable->to(...$this->to);
+
+        if ($transport) {
+            $mailer = new Mailer(
+                app()->getContainer()->get(Factory\MailerTransportFactory::class)
+            );
+            $mailer->send($mailable, $transport, $envelope);
+            return;
         }
 
-        if ($to = config('mail.to')) {
-            $this->to(new Address($to['address'], $to['name'] ?? null));
-        }
+        $this->mailer->send($mailable, $envelope ?? $this->delayStamp);
+    }
 
-        if ($reply_to = config('mail.reply_to')) {
-            $this->replyTo(new Address($reply_to['address'], $reply_to['name'] ?? null));
-        }
+    public function queue(MailableInterface $mailable, ?Envelope $envelope = null) : void
+    {
+        if ($this->to) $mailable->to(...$this->to);
 
-        if ($cc = config('mail.cc')) {
-            $this->cc(new Address($cc['address'], $cc['name'] ?? null));
-        }
+        /** @var \Symfony\Component\Mailer\Mailer */
+        $this->mailer = app()->getContainer()->get('mailer');
+        $this->mailer->send($mailable, $envelope);
+    }
 
-        if ($bcc = config('mail.bcc')) {
-            $this->bcc(new Address($bcc['address'], $bcc['name'] ?? null));
-        }
-
-        if ($tag_headers = config('mail.headers.tags', [])) {
-            foreach ($tag_headers as $tag) {
-                $this->getHeaders()->add(new TagHeader($tag));
-            }
-        }
-
-        if ($metadata_headers = config('mail.headers.metadata', [])) {
-            foreach ($metadata_headers as $key => $value) {
-                $this->getHeaders()->add(new MetadataHeader($key, $value));
-            }
-        }
-
-        if ($headers = config('mail.headers.mailbox', [])) {
-            foreach ($headers as $key => $value) {
-                if (is_array($value)) {
-                    $this->getHeaders()->addMailboxListHeader($key, $value);
-                } else {
-                    $this->getHeaders()->addMailboxHeader($key, $value);
-                }
-            }
-        }
-
-        if ($dates = config('mail.headers.dates', [])) {
-            foreach ($dates as $key => $date) {
-                $this->getHeaders()->add(new DateHeader($key, $date));
-            }
-        }
-
-        if ($unstructured_headers = config('mail.headers.unstructured', [])) {
-            foreach ($unstructured_headers as $key => $value) {
-                $this->getHeaders()->add(new UnstructuredHeader($key, $value));
-            }
-        }
-
-        if ($paths = config('mail.headers.paths', [])) {
-            foreach ($paths as $key => $path) {
-                $this->getHeaders()->addPathHeader($key, $path);
-            }
-        }
+    public function later(int $delay) : static
+    {
+        $this->delayStamp = new DelayStamp($delay/1000);
+        /** @var \Symfony\Component\Mailer\Mailer */
+        $this->mailer = app()->getContainer()->get('mailer');
+        return $this;
     }
 }

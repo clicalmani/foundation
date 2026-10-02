@@ -2,7 +2,7 @@
 namespace Clicalmani\Core\Http;
 
 use Clicalmani\Core\Collection\CollectionInterface;
-use Clicalmani\Core\Http\Requests\FileInterface;
+use Clicalmani\Core\Http\Request\FileInterface;
 
 interface RequestInterface extends \Psr\Http\Message\ServerRequestInterface
 {
@@ -36,9 +36,11 @@ interface RequestInterface extends \Psr\Http\Message\ServerRequestInterface
      * @override
      * 
      * Validate
-     * @return void
+     * @return array
      */
-    public function validate() : void;
+    public function validate() : array;
+
+    public function validated() : array;
 
     /**
      * (non-PHPDoc)
@@ -190,10 +192,10 @@ interface RequestInterface extends \Psr\Http\Message\ServerRequestInterface
      * Get the value of a specific input parameter.
      * 
      * @param ?string $name The name of the input parameter.
-     * @param ?string $default The default value to return if the parameter is not found.
+     * @param mixed $default The default value to return if the parameter is not found.
      * @return mixed
      */
-    public function input(?string $name = null, ?string $default = null) : mixed;
+    public function input(?string $name = null, mixed $default = null) : mixed;
 
     /**
      * Collect input data as an array.

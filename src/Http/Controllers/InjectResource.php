@@ -5,7 +5,7 @@ use Clicalmani\Database\Factory\Models\Elegant;
 use Clicalmani\Core\Exceptions\ModelNotFoundException;
 use Clicalmani\Core\Http\Request;
 use Clicalmani\Core\Support\Facades\Str;
-use Clicalmani\Routing\Memory;
+use Clicalmani\Routing\Registry;
 use Clicalmani\Validation\AsValidator;
 
 class InjectResource extends InjectionLocator
@@ -41,7 +41,7 @@ class InjectResource extends InjectionLocator
 	private function bindResources() : array
     {
 		/** @var \Clicalmani\Routing\Route */
-		$route = Memory::currentRoute();
+		$route = Registry::currentRoute();
 
 		if ( ! $route->isResourceful() ) {
 			throw new \Exception("Route " . $route->uri . " is not resourceful. Cannot inject resource.");

@@ -4,10 +4,10 @@ namespace Clicalmani\Core\Http;
 use Clicalmani\Core\Auth\EncryptionServiceProvider;
 use Clicalmani\Core\Collection\Collection;
 use Clicalmani\Core\Collection\CollectionInterface;
-use Clicalmani\Core\Http\Requests\Cookie;
-use Clicalmani\Core\Http\Requests\HttpOutputStream;
-use Clicalmani\Core\Http\Requests\HttpRequest;
-use Clicalmani\Core\Http\Requests\Redirect;
+use Clicalmani\Core\Http\Request\Cookie;
+use Clicalmani\Core\Http\Request\HttpOutputStream;
+use Clicalmani\Core\Http\Request\HttpRequest;
+use Clicalmani\Core\Http\Request\Redirect;
 use Clicalmani\Core\Http\RequestInterface;
 use Clicalmani\Core\Http\Session;
 use Clicalmani\Core\Providers\AuthServiceProvider;
@@ -15,6 +15,7 @@ use Clicalmani\Core\Support\Facades\Arr;
 use Clicalmani\Psr\Headers;
 use Clicalmani\Psr\Stream;
 use Clicalmani\Psr\Uri;
+use Clicalmani\Validation\Validator;
 
 class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \JsonSerializable 
 {
@@ -59,9 +60,22 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
         return true;
     }
 
-    public function validate(?array $signatures = []) : void
+    public function validate(?array $signatures = []) : array
     {
-        $this->merge($signatures);
+        $validator = Validator::make($signatures, $this->all(), Validator::ERROR_SILENCE);
+        return !$validator->hasErrors() ? $validator->validated(): [];
+    }
+
+    public function validated() : array
+    {
+        return $this->validator->validated();
+    }
+
+    public function messages() : array
+    {
+        return [
+            // Custom error messages
+        ];
     }
 
     /**
@@ -327,7 +341,7 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
         return preg_match("/^$pattern$/", $this->getMethod()) === 1;
     }
 
-    public function input(?string $name = null, ?string $default = null) : mixed
+    public function input(?string $name = null, mixed $default = null) : mixed
     {
         return Arr::get($this->attributes, $name, $default);
     }
@@ -541,5 +555,10 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
     public function getSignatures() : array
     {
         return $this->signatures;
+    }
+
+    public function setSignatures(array $newSignatures) : void
+    {
+        $this->signatures = $newSignatures;
     }
 }

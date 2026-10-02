@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Core\Http\Requests;
+namespace Clicalmani\Core\Http\Request;
 
 trait HttpInputStream
 {
@@ -12,7 +12,7 @@ trait HttpInputStream
     public function file(string $name) : UploadedFile|null
     {
         if ( $this->hasFile($name) ) {
-            return new \Clicalmani\Core\Http\Requests\UploadedFile($name);
+            return new \Clicalmani\Core\Http\Request\UploadedFile($name);
         }
 
         return null;

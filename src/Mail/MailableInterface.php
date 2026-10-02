@@ -29,13 +29,7 @@ interface MailableInterface
      */
     public function to(string $email, ?string $name = null): self;
 
-    /**
-     * Attach a file to the email from a given path.
-     *
-     * @param string $path The file path to attach.
-     * @param string|null $name The name of the attachment (optional).
-     * @param string|null $contentType The content type of the attachment (optional).
-     * @return self
-     */
-    public function attachFromPath(string $path, ?string $name = null, ?string $contentType = null);
+    public function getLayout() : ?string;
+
+    public function layoutDisabled() : bool;
 }

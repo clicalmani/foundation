@@ -2,6 +2,7 @@
 namespace Clicalmani\Core\Acme;
 
 use Clicalmani\Core\Exceptions\MiddlewareException;
+use Clicalmani\Core\Http\Middlewares\HandlesMiddleware;
 use Clicalmani\Core\Http\Request;
 use Clicalmani\Core\Http\Response;
 use Clicalmani\Core\Providers\ServiceProvider;
@@ -17,6 +18,8 @@ use Clicalmani\Core\Providers\ServiceProvider;
  */
 class Controller
 {
+    use HandlesMiddleware;
+    
     protected static function getFacadeAccessor() : string
     {
         return 'controller';
@@ -58,28 +61,7 @@ class Controller
      */
     public function isAuthorized(string $name_or_class) : int
     {
-        $middleware = null;
-
-        if ($middleware = ServiceProvider::getProvidedMiddleware(\Clicalmani\Core\Support\Facades\Route::gateway(), $name_or_class)) ;
-        else {
-            if ( class_exists($name_or_class) ) $middleware = $name_or_class;
-            else throw new MiddlewareException(
-                sprintf("Can not find a global middleware named %s", $name_or_class)
-            );
-        }
-        
-        if ( NULL !== $middleware )
-            with( new $middleware )->handle(
-                Request::current(),
-                new Response(),
-                fn() => http_response_code()
-            );
-
-        $response_code = http_response_code();
-        
-        if (200 !== $response_code) return $response_code;
-
-        return 200; // Authorized
+        return $this->checkMiddleware($name_or_class, Request::current());
     }
 
     /**

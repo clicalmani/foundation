@@ -1,7 +1,7 @@
 <?php
-namespace Clicalmani\Core\Mail;
+namespace Clicalmani\Core\Mail\Factory;
 
-interface TransportInterface
+interface TransportFactoryInterface
 {
     /**
      * Creates a mailer transport instance.

@@ -4,6 +4,7 @@ namespace Clicalmani\Core\Resources;
 use Clicalmani\Core\Acme\Container;
 use Clicalmani\Psr\NonBufferedBody;
 use Clicalmani\Psr\Response;
+use Clicalmani\Routing\Registry;
 
 class View extends Response implements ViewInterface
 {

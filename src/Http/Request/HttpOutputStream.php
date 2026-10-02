@@ -1,5 +1,5 @@
 <?php
-namespace Clicalmani\Core\Http\Requests;
+namespace Clicalmani\Core\Http\Request;
 
 trait HttpOutputStream
 {
