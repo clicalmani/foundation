@@ -19,7 +19,7 @@ final class MiddlewareAccessor implements MiddlewareAccessorInterface
      *
      * @var array<int, string>
      */
-    private static array $pairs = [];
+    private array $pairs = [];
     
     /**
      * The fully qualified class name of the resolved middleware.
@@ -36,8 +36,10 @@ final class MiddlewareAccessor implements MiddlewareAccessorInterface
      */
     public static function fromName(string $name): self
     {
-        self::$pairs = explode(':', $name);
-        return new self();
+        $accessor = new self();
+        $accessor->pairs = explode(':', $name);
+
+        return $accessor;
     }
 
     /**
@@ -47,7 +49,7 @@ final class MiddlewareAccessor implements MiddlewareAccessorInterface
      */
     public function name(): string
     {
-        return self::$pairs[0] ?? '';
+        return $this->pairs[0] ?? '';
     }
 
     /**
@@ -57,7 +59,9 @@ final class MiddlewareAccessor implements MiddlewareAccessorInterface
      */
     public function params(): array
     {
-        return explode(',', self::$pairs[1] ?? '');
+        $raw = $this->pairs[1] ?? '';   
+
+        return $raw === '' ? [] : explode(',', $raw);
     }
 
     /**

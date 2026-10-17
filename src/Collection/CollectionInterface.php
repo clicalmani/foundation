@@ -101,7 +101,7 @@ interface CollectionInterface
      * @param int $index element index to check
      * @return bool true on success, or false otherwise.
      */
-    public function exists(int $index) : bool;
+    public function exists(int|string $index) : bool;
 
     /**
      * Do a shallow copy of the storage.
@@ -232,7 +232,7 @@ interface CollectionInterface
      * @param string $key The key to sort by
      * @return self
      */
-    public function sortBy(string $key) : self;
+    public function sortBy(string|callable $key, bool $descending = false) : static;
 
     /**
      * Sorts the collection by a specific key in descending order.
@@ -240,7 +240,7 @@ interface CollectionInterface
      * @param string $key The key to sort by
      * @return self
      */
-    public function sortByDesc(string $key) : self;
+    public function sortByDesc(string|callable $key) : static;
 
     /**
      * Checks if the collection is not empty.
@@ -319,4 +319,35 @@ interface CollectionInterface
     public function slice(int $offset, ?int $length = null) : iterable;
 
     public function remove(mixed $element) : mixed;
+
+    /**
+     * Flatten a multi-dimensional collection into a single dimension.
+     *
+     * Nested arrays and Traversable instances (including Collection/Map/Set)
+     * are recursively merged into a flat list. Depth can be limited via $depth.
+     *
+     * @param int $depth Maximum nesting level to flatten (default: unlimited)
+     * @return \Clicalmani\Core\Collection\CollectionInterface
+     */
+    public function flatten(int $depth = PHP_INT_MAX) : CollectionInterface;
+
+    public function flatMap(callable $callback) : self;
+
+    public function tap(callable $callback) : self;
+
+    public function pipe(callable $callback) : mixed;
+
+    public function take(int $n) : self;
+
+    public function skip(int $n) : self;
+    
+    public function groupBy(string|callable $key) : Map;
+
+    public function chunk(int $size) : self;
+
+    public function min() : int|float|null;
+
+    public function max() : int|float|null;
+
+    public function avg() : int|float|null;
 }

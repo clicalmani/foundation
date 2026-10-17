@@ -2,37 +2,41 @@
 namespace Clicalmani\Core\Http\Controllers;
 
 use Clicalmani\Core\Http\Request;
+use Clicalmani\Core\Http\RequestInterface;
 use Clicalmani\Validation\AsValidator;
 
 class InjectRequest extends InjectionLocator
 {
     public function handle(): ?object
     {
-        if (is_subclass_of($this->class, \Clicalmani\Core\Http\Request::class) ||
-					$this->class === \Clicalmani\Core\Http\Request::class || $this->class === \Clicalmani\Core\Http\RequestInterface::class) {
+        if (!is_subclass_of($this->class, Request::class) 
+            && $this->class !== Request::class 
+            && $this->class !== RequestInterface::class) {
+            return null;
+        }
 
-			$this->createInstance();
+        $this->createInstance();
+        $current = Request::current();
+        $data = $current->all();
 
-            $request = Request::current();
-		
-            $data = $request->all();
-            /** @var \Clicalmani\Core\Http\Request */
-            $request = $this->instance;
-            $request->extend($data);
+        /** @var Request $request */
+        $request = $this->instance;
+        $request->extend($data);
 
-            if ($this->reflector instanceof MethodReflector) {
-                if ($attribute = (new \ReflectionMethod($this->reflector->getClass(), $this->reflector->getName()))->getAttributes(AsValidator::class)) {
-                    $request->merge($attribute[0]->newInstance()->args);
-                }
+        if ($this->reflector instanceof MethodReflector) {
+            $method = new \ReflectionMethod(
+                $this->reflector->getClass(),
+                $this->reflector->getName()
+            );
+            if ($attrs = $method->getAttributes(AsValidator::class)) {
+                $request->merge($attrs[0]->newInstance()->args);
             }
-            
-            Request::current($request);
-			self::validateRequest($request);
-
-            return $request;
         }
         
-        return null;
+        Request::current($request);
+        self::validateRequest($request);
+        
+        return $request;
     }
 
     /**

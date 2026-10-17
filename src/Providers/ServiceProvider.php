@@ -30,7 +30,9 @@ abstract class ServiceProvider implements ServiceProviderInterface
      * @return void
      */
     #[Override]
-    public abstract function boot(): void;
+    public abstract function boot(
+        ?\Clicalmani\Core\Acme\Container $container = null
+    ): void;
 
     /**
      * Register core application service dependencies into the container container.

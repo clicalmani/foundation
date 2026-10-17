@@ -99,4 +99,15 @@ class Controller
 
 		exit;
 	}
+
+    public function __call($name, $args)
+    {
+        $controller = new \Clicalmani\Core\Http\Controllers\RequestController;
+
+        if (method_exists($controller, $name)) {
+            return $controller->{$name}(...$args);
+        }
+
+        return null;
+    }
 }

@@ -38,4 +38,14 @@ abstract class Route extends Facade
     {
         return 'router';
     }
+
+    /**
+     * @param string $method
+     * @param array $arguments
+     * @return mixed
+     */
+    public static function __callStatic(string $method, array $arguments): mixed
+    {
+        return static::getFacadeRoot()?->$method(...$arguments);
+    }
 }

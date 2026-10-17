@@ -13,7 +13,7 @@ abstract class Facade
      * @param array $args
      * @return mixed
      */
-    public static function __callStatic($method, $args) : mixed
+    public static function __callStatic(string $method, array $arguments): mixed
     {
         try {
             $service = static::resolveFacadeService();
@@ -22,7 +22,7 @@ abstract class Facade
                 return null;
             }
 
-            return static::dispatch($service, $method, $args);
+            return static::dispatch($service, $method, $arguments);
         } catch (ServiceNotFoundException $e) {
             return null;
         }
@@ -56,84 +56,11 @@ abstract class Facade
     protected static function dispatch(mixed $service, string $method, array $args) : mixed
     {
         if (method_exists($service, $method)) {
-            if ($service instanceof \Clicalmani\Core\Resources\View) {
-                return static::callView($method, $args);
-            }
-
-            if ($service instanceof \Clicalmani\Core\Acme\Model) {
-                logger()->info('Elegant');
-            }
 
             return $service->{$method}(...$args);
         }
-
-        if ($service instanceof \Clicalmani\Core\Acme\Controller) {
-            return static::callController($method, $args);
-        }
-
-        if ($service instanceof \Clicalmani\Core\Http\Response) {
-            return response();
-        }
-
-        if ($service instanceof \Clicalmani\Core\Acme\Configure) {
-            return static::callConfigure($service, $method, $args);
-        }
         
         return null;
-    }
-
-    /**
-     * Forward dynamic calls to the View instance.
-     * 
-     * @param string $method
-     * @param array $args
-     * @return mixed
-     */
-    protected static function callView(string $method, array $args) : mixed
-    {
-        if ($method === 'render') {
-            return view(...$args);
-        }
-
-        return view('')->{$method}(...$args);
-    }
-
-    /**
-     * Forward dynamic calls to the RequestController instance.
-     * 
-     * @param string $method
-     * @param array $args
-     * @return mixed
-     */
-    protected static function callController(string $method, array $args) : mixed
-    {
-        $controller = new \Clicalmani\Core\Http\Controllers\RequestController;
-
-        if (method_exists($controller, $method)) {
-            return $controller->{$method}(...$args);
-        }
-
-        return null;
-    }
-
-    /**
-     * Cast configuration values retrieved from the Configure instance.
-     * 
-     * @param mixed $service
-     * @param string $method
-     * @param array $args
-     * @return mixed
-     */
-    protected static function callConfigure(mixed $service, string $method, array $args) : mixed
-    {
-        return match($method) {
-            'string'  => (string) $service->get(...$args),
-            'integer' => (int) $service->get(...$args),
-            'array'   => (array) $service->get(...$args),
-            'float'   => (float) $service->get(...$args),
-            'boolean' => (bool) $service->get(...$args),
-            default   => null,
-        };
     }
 
     /**
@@ -144,5 +71,10 @@ abstract class Facade
     protected static function getFacadeAccessor() : string
     {
         return '';
+    }
+
+    protected static function getFacadeRoot() : ?object
+    {
+        return self::resolveFacadeService();
     }
 }

@@ -28,7 +28,6 @@ class StorageServiceProvider implements ServiceProviderInterface
         // Load the framework's filesystem structure rules directly into memory context
         $app_config = require config_path('/storage.php');
         
-        // Primary management service engine coordinating custom filesystem disk actions
         app()->addService('storage.manager', 
             \Clicalmani\Core\Filesystem\StorageManager::class,
             fn(ServiceConfigurator|DefaultsConfigurator $config) => $config->args([
@@ -46,7 +45,9 @@ class StorageServiceProvider implements ServiceProviderInterface
      * @return void
      */
     #[Override]
-    public function boot(): void
+    public function boot(
+        ?\Clicalmani\Core\Acme\Container $container = null
+    ): void
     {
         if ( is_file(config_path('/storage.php')) ) {
             app()->config->set('storage', require config_path('/storage.php'));

@@ -14,10 +14,17 @@ class Collection extends SPLCollection implements CollectionInterface
 {
     public function __construct(iterable $elements = [])
     {
-        $this->add( ...$elements );
+        parent::__construct(
+            is_array($elements) ? $elements : iterator_to_array($elements)
+        );
     }
 
-    public function add(mixed ...$elements) : \Clicalmani\Core\Collection\CollectionInterface
+    protected function newInstance(iterable $elements = []) : static
+    {
+        return new static($elements);
+    }
+
+    public function add(mixed ...$elements) : CollectionInterface
     {
         foreach ($elements as $element) $this[] = $element;
 
@@ -29,16 +36,30 @@ class Collection extends SPLCollection implements CollectionInterface
         $this->add($value);
     }
 
+    public function push(mixed ...$elements) : static
+    {
+        foreach ($elements as $element) {
+            $this[] = $element;
+        }
+
+        return $this;
+    }
+
+    public function put(mixed $key, mixed $value) : static
+    {
+        $this[$key] = $value;
+        return $this;
+    }
+
     public function get(int|string $index) : mixed
     {
-        return @ $this[$index];
+        return $this->offsetExists($index) ? $this[$index] : null;
     }
 
     public function index(mixed $value) : int
     {
         foreach ($this as $k => $v) {
-            if (is_callable($value) && FALSE === is_callable($value) && Func::isInternal($value) && FALSE != $value($v, $k)) return $k;
-            elseif ($value === $v) return $k;
+            if ($value === $v) return $k;
         }
 
         return -1;
@@ -46,7 +67,9 @@ class Collection extends SPLCollection implements CollectionInterface
 
     public function first() : mixed
     {
-        return $this->get(0);
+        $array = $this->toArray();
+        $key   = array_key_first($array);
+        return $key === null ? null : $array[$key];
     }
 
     public function all() : array
@@ -56,10 +79,12 @@ class Collection extends SPLCollection implements CollectionInterface
 
     public function last() : mixed
     {
-        return $this->count() ? $this[$this->count() - 1]: null;
+        $array = $this->toArray();
+        $key   = array_key_last($array);
+        return $key === null ? null : $array[$key];
     }
 
-    public function map(callable $closure) : \Clicalmani\Core\Collection\CollectionInterface
+    public function map(callable $closure) : CollectionInterface
     {
         foreach ($this as $key => $value) {
             $this[$key] = $closure($value, $key);
@@ -68,17 +93,17 @@ class Collection extends SPLCollection implements CollectionInterface
         return $this;
     }
 
-    public function each(callable $closure) : \Clicalmani\Core\Collection\CollectionInterface
+    public function each(callable $closure) : CollectionInterface
     {
         $arr = $this->toArray();
         array_walk($arr, $closure);
         return $this;
     }
 
-    public function filter(callable $closure) : \Clicalmani\Core\Collection\CollectionInterface
+    public function filter(callable $closure) : CollectionInterface
     {
-        // return $this->exchange(array_values(array_filter($this->toArray(), $closure)));
         $new = [];
+
         foreach ($this as $key => $value)
         {
             if ($closure($value, $key)) {
@@ -89,9 +114,9 @@ class Collection extends SPLCollection implements CollectionInterface
         return $this->exchange($new);
     }
 
-    public function merge(mixed $value) : \Clicalmani\Core\Collection\CollectionInterface
+    public function merge(mixed $value) : CollectionInterface
     {
-        if ( $value instanceof \Clicalmani\Core\Collection\CollectionInterface ) $value = $value->toArray();
+        if ( $value instanceof CollectionInterface ) $value = $value->toArray();
         elseif ( !is_array($value) ) $value = [$value];
 
         $this->exchange(
@@ -106,7 +131,7 @@ class Collection extends SPLCollection implements CollectionInterface
         return $this->count() === 0;
     }
 
-    public function exists(int $index) : bool
+    public function exists(int|string $index) : bool
     {
         return isset($this[$index]);
     }
@@ -116,16 +141,18 @@ class Collection extends SPLCollection implements CollectionInterface
         return $this->getArrayCopy();
     }
 
-    public function exchange(array $new_elements) : \Clicalmani\Core\Collection\CollectionInterface
+    public function exchange(array $new_elements) : CollectionInterface
     {
         $this->exchangeArray($new_elements);
 
         return $this;
     }
 
-    public function unique(mixed $closure = null) : \Clicalmani\Core\Collection\CollectionInterface
+    public function unique(mixed $closure = null) : CollectionInterface
     {
-        if (!isset($closure)) return $this->exchange(array_unique( $this->toArray() ));
+        if (!isset($closure)) {
+            return $this->exchange(array_values(array_unique($this->toArray(), SORT_REGULAR)));
+        }
 
         $stack  = [];
         $filter = [];
@@ -143,14 +170,13 @@ class Collection extends SPLCollection implements CollectionInterface
         return $this->exchange($stack);
     }
 
-    public function uniqueBy(string $key) : \Clicalmani\Core\Collection\CollectionInterface
+    public function uniqueBy(string $key) : CollectionInterface
     {
         $stack  = [];
         $filter = [];
 
-        foreach ($this as $key => $value)
-        {
-            if (is_array($value) && isset($value[$key])) {
+        foreach ($this as $index => $value) {
+            if (is_array($value) && array_key_exists($key, $value)) {
                 $v = $value[$key];
             } elseif (is_object($value) && isset($value->{$key})) {
                 $v = $value->{$key};
@@ -158,8 +184,8 @@ class Collection extends SPLCollection implements CollectionInterface
                 continue;
             }
 
-            if (!in_array($v, $filter)) {
-                $stack[] = $value;
+            if (!in_array($v, $filter, true)) {
+                $stack[]  = $value;
                 $filter[] = $v;
             }
         }
@@ -176,12 +202,12 @@ class Collection extends SPLCollection implements CollectionInterface
         return null;
     }
 
-    public function has($element) : bool
+    public function has(mixed $element) : bool
     {
-        return !!$this->find(fn($value) => $value === $element);
+        return $this->contains($element);
     }
 
-    public function sort(callable $closure) : \Clicalmani\Core\Collection\CollectionInterface
+    public function sort(callable $closure) : CollectionInterface
     {
         $this->uasort($closure);
         return $this;
@@ -202,7 +228,7 @@ class Collection extends SPLCollection implements CollectionInterface
         return (array) $this;
     }
 
-    public function toObject() : \Clicalmani\Core\Collection\CollectionInterface
+    public function toObject() : CollectionInterface
     {
         $this->setFlags(parent::ARRAY_AS_PROPS);
         return $this;
@@ -245,24 +271,32 @@ class Collection extends SPLCollection implements CollectionInterface
         return $this;
     } 
 
-    public function sortBy(string $key) : \Clicalmani\Core\Collection\CollectionInterface
+    public function sortBy(string|callable $key, bool $descending = false) : static
     {
-        $this->uasort(function ($a, $b) use ($key) { 
-            if ((is_array($a) && is_array($b)) || (is_object($a) && is_object($b))) return $a[$key] <=> $b[$key];
-            throw new TypeError("Both elements must be arrays or objects to sort by key '$key'.");
+        $extract = static function (mixed $item) use ($key) : mixed {
+            if (!is_string($key)) return $key($item);
+            if (is_array($item))  return $item[$key] ?? null;
+            if (is_object($item)) return $item->{$key} ?? null;
+            return null;
+        };
+
+        $this->uasort(function ($a, $b) use ($extract, $descending) : int {
+            $va = $extract($a);
+            $vb = $extract($b);
+            if (null === $va) return null === $vb ? 0 : 1;
+            if (null === $vb) return -1;
+            $cmp = $va <=> $vb;
+            return $descending ? -$cmp : $cmp;
         });
+
+        $this->exchange(array_values($this->toArray()));
 
         return $this;
     }
 
-    public function sortByDesc(string $key) : \Clicalmani\Core\Collection\CollectionInterface
+    public function sortByDesc(string|callable $key) : static
     {
-        $this->uasort(function ($a, $b) use ($key) { 
-            if ((is_array($a) && is_array($b)) || (is_object($a) && is_object($b))) return -1*($a[$key] <=> $b[$key]);
-            throw new TypeError("Both elements must be arrays or objects to sort by key '$key'.");
-        });
-
-        return $this;
+        return $this->sortBy($key, true);
     }
 
     public function isNotEmpty() : bool
@@ -321,20 +355,116 @@ class Collection extends SPLCollection implements CollectionInterface
 
     public function __toString() : string
     {
-        return json_encode($this->toArray());
+        return json_encode($this->toArray()) ?: '';
     }
 
-    public function slice(int $offset, ?int $length = null) : iterable
+    public function slice(int $offset, ?int $length = null) : static
     {
-        return $this->exchange(array_slice($this->toArray(), $offset, $length))->toArray();
+        return $this->newInstance(
+            array_slice($this->toArray(), $offset, $length)
+        );
     }
 
     public function remove(mixed $element) : mixed
     {
-        if (-1 !== $index = $this->index($element)) {
-            return array_splice($this->toArray(), $index, 1)[0];
+        $index = $this->index($element);
+        if ($index === -1) return null;
+
+        $removed = $this[$index];
+        $array   = $this->toArray();
+        unset($array[$index]);          // suppression par clé, pas par offset
+        $this->exchange($array);
+        return $removed;
+    }
+
+    public function flatten(int $depth = PHP_INT_MAX) : CollectionInterface
+    {
+        $flat = [];
+
+        $walk = function (iterable $items, int $level) use (&$walk, &$flat) : void {
+            foreach ($items as $item) {
+                if ($level > 0 && (is_array($item) || $item instanceof \Traversable)) {
+                    $walk($item, $level - 1);
+                } else {
+                    $flat[] = $item;
+                }
+            }
+        };
+
+        $walk($this, $depth);
+
+        return $this->exchange($flat);
+    }
+
+    public function flatMap(callable $callback) : self
+    {
+        return $this->map($callback)->flatten();
+    }
+
+    public function tap(callable $callback) : self
+    {
+        $callback($this);
+        return $this;
+    }
+
+    public function pipe(callable $callback) : mixed
+    {
+        return $callback($this);
+    }
+
+    public function take(int $n) : static
+    {
+        return $this->slice(0, $n);
+    }
+
+    public function skip(int $n) : self
+    {
+        return $this->slice($n);
+    }
+
+    public function groupBy(string|callable $key) : Map
+    {
+        $map = new Map;
+        foreach ($this as $item) {
+            $k = is_callable($key)
+                ? $key($item)
+                : (is_array($item) ? ($item[$key] ?? null) : ($item->{$key} ?? null));
+            if ($k === null) continue;
+            if (!isset($map[$k])) $map[$k] = new static;
+            $map[$k]->add($item);
+        }
+        return $map;
+    }
+
+    public function chunk(int $size) : static
+    {
+        if ($size < 1) {
+            throw new \InvalidArgumentException('Chunk size must be >= 1.');
         }
 
-        return null;
+        $chunks = [];
+        foreach (array_chunk($this->toArray(), $size) as $c) {
+            $chunks[] = $this->newInstance($c);
+        }
+
+        return $this->newInstance($chunks);
+    }
+
+    public function min() : int|float|null
+    {
+        $v = $this->toArray();
+        return $v ? min($v) : null;
+    }
+
+    public function max() : int|float|null
+    {
+        $v = $this->toArray();
+        return $v ? max($v) : null;
+    }
+
+    public function avg() : int|float|null
+    {
+        $count = $this->count();
+        return $count > 0 ? floatval($this->sum() / $count) : null;
     }
 }

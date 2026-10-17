@@ -128,7 +128,7 @@ class Paginator implements \IteratorAggregate, \Countable
 	 */
 	public function getIterator() : \Traversable
 	{
-		return $this->items;
+		return $this->items->getIterator();
 	}
 
 	/**
@@ -153,5 +153,26 @@ class Paginator implements \IteratorAggregate, \Countable
 			'from'        => $this->firstItem(),
 			'to'          => $this->lastItem(),
 		];
+	}
+
+	public function toJson(int $options = 0) : string
+	{
+		return json_encode($this->toArray(), $options) ?: '';
+	}
+
+	public function links(string $baseUrl = '?page=') : array
+	{
+		$last = $this->lastPage();
+		if ($last === null) return [];
+
+		$links = [];
+		for ($i = 1; $i <= $last; $i++) {
+			$links[] = [
+				'page'    => $i,
+				'url'     => $baseUrl . $i,
+				'active'  => $i === $this->currentPage,
+			];
+		}
+		return $links;
 	}
 }

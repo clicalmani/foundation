@@ -73,7 +73,9 @@ class JwtServiceProvider implements ServiceProviderInterface
      * @return void
      */
     #[Override]
-    public function boot(): void
+    public function boot(
+        ?\Clicalmani\Core\Acme\Container $container = null
+    ): void
     {
         // Reserved; no runtime initialization tasks are required for stateless token parameters
     }

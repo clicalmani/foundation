@@ -14,7 +14,7 @@ use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
  * @package Clicalmani\Core\Providers
  * @author @clicalmani
  */
-class ContainerServiceProvider extends ServiceProvider
+class ContainerServiceProvider
 {
     /**
      * The structural application service container builder instance.

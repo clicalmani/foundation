@@ -179,7 +179,7 @@ if ( ! function_exists( 'env' ) ) {
     }
 }
 
-if ( ! function_exists( 'assets' ) ) {
+if ( ! function_exists( 'asset' ) ) {
 
     /**
      * Get asset
@@ -187,7 +187,7 @@ if ( ! function_exists( 'assets' ) ) {
      * @param ?string $path Asset path
      * @return string
      */
-    function assets(?string $path = '/') : string {
+    function asset(?string $path = '/') : string {
         $app_url = app()->getUrl($path);
         $protocol = '';
         if (preg_match('/^http/', $app_url) == false) {
@@ -912,22 +912,9 @@ if (! function_exists('cache')) {
      * @param mixed $default
      * @return mixed|\Symfony\Component\Cache\Adapter\AdapterInterface
      */
-    function cache(?string $key = null, mixed $default = null)
+    function cache(?string $store = null): \Clicalmani\Core\Cache\CacheStore
     {
-        $cache = container()->get('cache.app');
-
-        // Si aucune clé n'est fournie, on retourne l'instance complète
-        if (null === $key) {
-            return $cache;
-        }
-
-        // Utilisation simplifiée (type PSR-16)
-        $item = $cache->getItem($key);
-        if (!$item->isHit()) {
-            return $default;
-        }
-
-        return $item->get();
+        return container()->get('cache')->store($store);
     }
 }
 
@@ -935,13 +922,13 @@ if (! function_exists('storage')) {
     /**
      * Access the Tonka Filesystem
      * 
-     * @return \League\Flysystem\Filesystem
+     * @return \Clicalmani\Core\Acme\StorageManager
      */
     function storage(?string $disk = null)
     {
-        /** @var \Clicalmani\Core\Filesystem\StorageManager $manager */
-        $manager = container()->get('storage.manager');
-        return $manager->disk($disk);
+        /** @var \Clicalmani\Core\Acme\StorageManager $manager */
+        $manager = container()->get('storage');
+        return $manager->drive($disk);
     }
 }
 
@@ -949,9 +936,9 @@ if (! function_exists('event')) {
     /**
      * Dispatch un événement système ou applicatif
      */
-    function event(object $event): object
+    function event(object $event, ?string $name = null): object
     {
-        return container()->get('events.discovery')->dispatch($event);
+        return container()->get('events.discovery')->dispatch($event, $name);
     }
 }
 
@@ -963,5 +950,30 @@ if (! function_exists('enc')) {
      */
     function enc(): \Clicalmani\Core\Auth\EncryptionServiceProvider {
         return container()->get('encryption');
+    }
+}
+
+if (! function_exists('metrics')) {
+    function metrics(?string $method = null, mixed ...$args)
+    {
+        $manager = \Clicalmani\Core\Support\Facades\Metrics::getFacadeRoot();
+
+        return $method === null
+            ? $manager
+            : $manager->{$method}(...$args);
+    }
+}
+
+if (! function_exists('db_profile')) {
+    function db_profile(): \Clicalmani\Database\Profiling\QueryProfiler
+    {
+        return app()->getContainer()->get('query_profiler');
+    }
+}
+
+if (! function_exists('queue')) {
+    function queue(): \Clicalmani\Queue\QueueManager
+    {
+        return app()->getContainer()->get('queue.manager');
     }
 }

@@ -290,7 +290,7 @@ class RouteServiceProvider extends ServiceProvider
      * @return void
      */
     #[Override]
-    public function boot(): void
+    public function register(): void
     {
         if ( ! defined('TEST_ENV') ) {
             static::$route_settings = require_once config_path('/routing.php');
@@ -324,4 +324,9 @@ class RouteServiceProvider extends ServiceProvider
             '__channel__' => [],
         ]);
     }
+
+    public function boot(
+        ?\Clicalmani\Core\Acme\Container $container = null
+    ): void
+    {}
 }

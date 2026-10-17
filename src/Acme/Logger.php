@@ -123,11 +123,11 @@ class Logger extends LogServiceProvider
      */
     private function maybeCreateLog()
     {
-        if ( ! file_exists( storage_path('/errors') ) ) {
-            mkdir( storage_path('/errors') );
+        if ( ! file_exists( storage_path('/logs') ) ) {
+            mkdir( storage_path('/logs') );
         }
 
-        return storage_path('/errors/' . static::ERROR_LOG);
+        return storage_path('/logs/' . static::ERROR_LOG);
     }
 
     private function stringify(mixed ...$args)

@@ -36,7 +36,7 @@ class EnvServiceProvider extends ServiceProvider
      * 
      * @return void
      */
-    public function boot(): void
+    public function register(): void
     {
         $this->environment->enablePutenv();
 
@@ -53,4 +53,9 @@ class EnvServiceProvider extends ServiceProvider
             app()->config->set('database', require_once config_path('/database.php'));
         }
     }
+
+    public function boot(
+        ?\Clicalmani\Core\Acme\Container $container = null
+    ): void
+    {}
 }

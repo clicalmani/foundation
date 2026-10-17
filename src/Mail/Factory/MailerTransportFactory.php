@@ -19,15 +19,7 @@ class MailerTransportFactory implements TransportFactoryInterface
 
     public function create(?string $name = null) : SymfonyTransportInterface
     {
-        $container = app()->getContainer();
-
-        if ($name && $container && $transport = $container->get("{$name}.mailer")) {
-            return $transport;
-        }
-
-        $mailerName = $name ?? config('mail.default', 'smtp');
-
-        return $this->resolve($mailerName);
+        return $this->resolve($name ?? config('mail.default', 'smtp'));
     }
 
     /**

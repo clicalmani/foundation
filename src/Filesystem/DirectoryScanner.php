@@ -110,7 +110,7 @@ final class DirectoryScanner
     {
         $found = [];
 
-        $entries = scandir($path);
+        $entries = @ scandir($path);
 
         if (false === $entries) {
             return $found;

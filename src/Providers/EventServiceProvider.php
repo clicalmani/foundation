@@ -6,12 +6,12 @@ use Broadcaster\Event\ShouldBroadcastInterface;
 use Broadcaster\SystemBroadcastListener;
 use Clicalmani\Core\Events\BroadcastEventDispatcher;
 use Clicalmani\Core\Events\CoreEventDispatcher;
-use Clicalmani\Core\Events\Listeners\NoticeableListener;
-use Clicalmani\Core\Events\Listeners\SystemNoticeableListener;
+use Clicalmani\Core\Events\Listeners\SystemQueryListener;
 use Clicalmani\Core\Events\MailableEventDispatcher;
-use Clicalmani\Core\Events\NoticeableEventDispatcher;
+use Clicalmani\Core\Events\QueryEventDispatcher;
 use Clicalmani\Core\Mail\MailableListener;
 use Clicalmani\Core\Mail\SystemMailableListener;
+use Clicalmani\Database\Profiling\QueryProfiler;
 use Symfony\Component\DependencyInjection\Loader\Configurator\DefaultsConfigurator;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ServiceConfigurator;
 use Override;
@@ -68,16 +68,6 @@ class EventServiceProvider implements ServiceProviderInterface
             static function(ServiceConfigurator|DefaultsConfigurator $config) {}
         );
 
-        app()->addService(SystemNoticeableListener::class, 
-            SystemNoticeableListener::class,
-            static function(ServiceConfigurator|DefaultsConfigurator $config) {}
-        );
-
-        app()->addService(NoticeableListener::class, 
-            NoticeableListener::class,
-            static function(ServiceConfigurator|DefaultsConfigurator $config) {}
-        );
-
         // Wire the specialized event dispatchers with their corresponding system listeners
         app()->addService(BroadcastEventDispatcher::class, 
             BroadcastEventDispatcher::class,
@@ -97,11 +87,29 @@ class EventServiceProvider implements ServiceProviderInterface
             }
         );
 
-        app()->addService(NoticeableEventDispatcher::class, 
-            NoticeableEventDispatcher::class,
+        app()->addService(QueryProfiler::class, 
+            QueryProfiler::class,
+            static function(ServiceConfigurator|DefaultsConfigurator $config) {
+                $config->args([])
+                    ->call('maybeEnable', [config('database.profiling_enabled', false)]);
+            },
+            ['query_profiler', QueryProfiler::class]
+        );
+
+        app()->addService(SystemQueryListener::class, 
+            SystemQueryListener::class,
             static function(ServiceConfigurator|DefaultsConfigurator $config) {
                 $config->args([
-                    app()->dependency('service', SystemNoticeableListener::class)
+                    app()->dependency('service', QueryProfiler::class)
+                ]);
+            }
+        );
+
+        app()->addService(QueryEventDispatcher::class, 
+            QueryEventDispatcher::class,
+            static function(ServiceConfigurator|DefaultsConfigurator $config) {
+                $config->args([
+                    app()->dependency('service', SystemQueryListener::class)
                 ]);
             }
         );
@@ -112,9 +120,9 @@ class EventServiceProvider implements ServiceProviderInterface
             static function(ServiceConfigurator|DefaultsConfigurator $config) {
                 $config->args([
                     [
+                        app()->dependency('service', QueryEventDispatcher::class),
                         app()->dependency('service', BroadcastEventDispatcher::class),
                         app()->dependency('service', MailableEventDispatcher::class),
-                        app()->dependency('service', NoticeableEventDispatcher::class),
                     ]
                 ]);
             }
@@ -139,7 +147,9 @@ class EventServiceProvider implements ServiceProviderInterface
      * @return void
      */
     #[Override]
-    public function boot(): void
+    public function boot(
+        ?\Clicalmani\Core\Acme\Container $container = null
+    ): void
     {
         // Reserved for sub-dependency initialization routines
     }

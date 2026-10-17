@@ -6,7 +6,6 @@ namespace Clicalmani\Core\Maker;
  * Class ServiceDefinition
  * 
  * Represents a normalized service registration metadata wrapper within the DI container framework.
- * Encapsulates service identity, target FQCN, initialization hooks/configurators, aliases, and service types.
  * 
  * @package Clicalmani\Core
  * @author @clicalmani

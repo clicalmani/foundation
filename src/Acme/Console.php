@@ -840,7 +840,7 @@ class Console
 
             if (FALSE === $check) {
                 if (NULL === $this->dump_file) $entity->{$command}();
-                else $entity->{$command}(false, $this->dump_file);
+                else $entity->{$command}(true, $this->dump_file);
 
                 $this->writeln('Success', true, 'info');
                 

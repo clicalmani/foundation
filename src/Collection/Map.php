@@ -18,8 +18,11 @@ class Map extends Collection
 
     public function __construct(iterable $elements = [])
     {
-        foreach ($elements as $key => $value) $this[$key] = $value;
+        foreach ($elements as $key => $value) {
+            $this->set($key, $value);
+        }
     }
+    
     /**
      * (non-PHPdoc)
      * @override
@@ -30,13 +33,9 @@ class Map extends Collection
      */
     public function set(mixed $key, mixed $value) : static
     {
+        $isNew = !isset($this[$key]);
         $this[$key] = $value;
-
-        // Increase size if it was set
-        if (isset($this->size) && !isset($this[$key])) {
-            $this->size = $this->count();
-        }
-
+        if ($isNew) $this->size = $this->count();
         return $this;
     }
 
@@ -57,15 +56,16 @@ class Map extends Collection
      * @param mixed $key
      * @return static
      */
-    public function delete(mixed $key) : static
+    public function delete(mixed ...$keys) : static
     {
-        unset($this[$key]);
+        foreach ($keys as $key) unset($this[$key]);
+        $this->size = $this->count();
+        return $this;
+    }
 
-        // Decrease size if it was set
-        if (isset($this->size) && $this->size > 0) {
-            $this->size = $this->count();
-        }
-
+    public function update(array $entries) : static
+    {
+        foreach ($entries as $k => $v) $this->set($k, $v);
         return $this;
     }
 
@@ -113,25 +113,36 @@ class Map extends Collection
         return $this;
     }
 
-    public function filter(callable $closure) : \Clicalmani\Core\Collection\CollectionInterface
+    public function filter(callable $closure) : static
     {
-        return $this->exchange(
-            array_filter($this->toArray(), $closure, ARRAY_FILTER_USE_BOTH)
-        );
+        $result = new static;
+
+        foreach ($this->toArray() as $key => $value) {
+            if ($closure($value, $key)) {
+                $result->set($key, $value);
+            }
+        }
+
+        return $result;
     }
 
-    public function map(callable $closure): CollectionInterface
+    public function map(callable $closure): static
     {
-        return $this->exchange(
-            array_map($closure, $this->toArray(), array_keys($this->toArray()))
-        );
+        $result = new static;
+
+        foreach ($this->toArray() as $key => $value) {
+            $result->set($key, $closure($value, $key));
+        }
+
+        return $result;
     }
 
-    public function each(callable $closure): CollectionInterface
+    public function each(callable $closure): static
     {
-        $arr = $this->toArray();
-        array_walk($arr, $closure);
-        return $this->exchange($arr);
+        foreach ($this->toArray() as $key => $value) {
+            $closure($value, $key, $this);
+        }
+        return $this;
     }
 
     public function contains(mixed $key): bool
@@ -142,5 +153,17 @@ class Map extends Collection
     public function __toString() : string
     {
         return json_encode($this->toArray());
+    }
+
+    public function offsetSet(mixed $key, mixed $value) : void
+    {
+        parent::offsetSet($key, $value);
+        $this->size = $this->count();
+    }
+
+    public function offsetUnset(mixed $key) : void
+    {
+        parent::offsetUnset($key);
+        $this->size = $this->count();
     }
 }

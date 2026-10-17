@@ -134,6 +134,23 @@ class UploadedFile implements \Psr\Http\Message\UploadedFileInterface
     }
 
     /**
+     * Nom du fichier tel que déclaré par le client (clé « name » de $_FILES).
+     * 
+     * L'interface PSR-7 impose ?string : en multi-fichiers, seul le nom du
+     * premier fichier est renvoyé (getName() renvoie la liste complète).
+     * 
+     * @return ?string
+     */
+    public function getClientFilename() : ?string
+    {
+        $name = $this->getFile()->name;
+
+        if (is_array($name)) $name = collection()->exchange($name)->firstOrNull();
+
+        return is_string($name) ? $name : null;
+    }
+
+    /**
      * Get file size
      * 
      * @return ?int
@@ -151,6 +168,46 @@ class UploadedFile implements \Psr\Http\Message\UploadedFileInterface
     public function getType() : string
     {
         return $this->type;
+    }
+
+    /**
+     * Type MIME déclaré par le client (clé « type » de $_FILES).
+     * 
+     * À distinguer de getType() qui renvoie le type détecté côté serveur par
+     * mime_content_type(). L'interface PSR-7 impose ?string : en multi-fichiers,
+     * seul le type du premier fichier est renvoyé.
+     * 
+     * @return ?string
+     */
+    public function getClientMediaType() : ?string
+    {
+        $type = $this->getFile()->type;
+
+        if (is_array($type)) $type = collection()->exchange($type)->firstOrNull();
+
+        return is_string($type) ? $type : null;
+    }
+
+    /**
+     * Code d'erreur d'upload (constantes UPLOAD_ERR_*).
+     * 
+     * L'interface PSR-7 impose un int : en fichier simple on renvoie le code
+     * stocké dans $_FILES, en multi-fichiers UPLOAD_ERR_OK lorsque tous les
+     * fichiers sont passés, sinon le premier code d'erreur rencontré.
+     * 
+     * @return int
+     */
+    public function getError() : int
+    {
+        $error = $this->getFile()->error;
+
+        if (FALSE === is_array($error)) return (int) $error;
+
+        $failed = collection()->exchange($error)
+                    ->filter(fn($code) => (int) $code !== UPLOAD_ERR_OK)
+                    ->firstOrNull();
+
+        return NULL === $failed ? UPLOAD_ERR_OK : (int) $failed;
     }
 
     /**
@@ -253,7 +310,7 @@ class UploadedFile implements \Psr\Http\Message\UploadedFileInterface
      * @param ?string $name New file name. If omitted the uploaded file name will be used.
      * @return bool
      */
-    public function move(?string $dir = null, string|array $name = null)  : bool
+    public function move(?string $dir = null, string|array|null $name = null)  : bool
     {
         if (!$dir) {
             storage()->mkdir(storage_path('/public'));

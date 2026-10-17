@@ -53,7 +53,7 @@ trait HandlesMiddleware
         $auth = $middleware->handle(
             $request,
             $response,
-            function (mixed $req = null, mixed $resp = null) use (&$request, &$response) {
+            function (mixed $req = null, mixed $resp = null) use ($request, $response) {
                 $response = $resp ?? $response;
                 $request  = $req ?? $request;
                 return $response->status(http_response_code());

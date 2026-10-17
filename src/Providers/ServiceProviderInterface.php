@@ -18,7 +18,9 @@ interface ServiceProviderInterface
      * 
      * @return void
      */
-    public function boot(): void;
+    public function boot(
+        ?\Clicalmani\Core\Acme\Container $container = null
+    ): void;
 
     /**
      * Registers architectural core components, factory logic, and bound references 

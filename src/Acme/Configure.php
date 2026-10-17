@@ -85,4 +85,16 @@ class Configure implements \ArrayAccess, \JsonSerializable
     {
         return static::$storage;
     }
+
+    public function __call(string $name, array $args): mixed
+    {
+        return match($name) {
+            'string'  => (string) $this->get(...$args),
+            'integer' => filter_var($this->get(...$args), FILTER_VALIDATE_INT),
+            'array'   => (array) $this->get(...$args),
+            'float'   => filter_var($this->get(...$args), FILTER_VALIDATE_FLOAT),
+            'boolean' => filter_var($this->get(...$args), FILTER_VALIDATE_BOOLEAN),
+            default   => null,
+        };
+    }
 }

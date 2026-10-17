@@ -1,6 +1,7 @@
 <?php
 
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 /**
  * Dependency Injection Service Registry Manifest.
@@ -11,7 +12,7 @@ use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigura
  * @param \Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator $container The container configurator wrapper.
  * @return void
  */
-return static function (ContainerConfigurator $container): void {
+return static function (ContainerConfigurator $container, ContainerBuilder $builder): void {
     
     // Initialize defaults, enable intelligent autowire resolution, and register core framework subsystems
     app()->initServices(
@@ -19,5 +20,5 @@ return static function (ContainerConfigurator $container): void {
             ->defaults()
             ->autowire()
             ->autoconfigure()
-    )->registerCoreContainerServices();
+    )->registerCoreContainerServices($builder);
 };

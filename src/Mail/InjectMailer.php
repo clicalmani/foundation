@@ -12,30 +12,17 @@ class InjectMailer extends InjectionLocator
 
     public function handle(): ?object
     {
-        if (is_subclass_of($this->class, Mailer::class) || $this->class === MailerInterface::class) {
-
-            $mailers = app()->config('mail.mailers', []);
-
-            foreach ($mailers as $name => $mailer) {
-                if ($this->container->has("$name.mailer")) {
-
-                    /** @var ?\Clicalmani\Core\Mail\MailerInterface */
-                    $instance = $this->container->get("$name.mailer");
-
-                    if ($instance instanceof $this->class) {
-                        return $instance;
-                    }
-
-                    break;
-                }
-            }
+        if (!is_subclass_of($this->class, Mailer::class) 
+            && $this->class !== MailerInterface::class) {
+            return null;
         }
-
-        return null;
+        
+        return $this->container->get('mailer');
     }
 
-    public function setType(string $class) : void
+    public function setType(string $class) : static
     {
         $this->class = $class;
+        return $this;
     }
 }

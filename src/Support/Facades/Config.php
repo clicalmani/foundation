@@ -31,4 +31,14 @@ class Config extends Facade
     {
         return 'config';
     }
+
+    /**
+     * @param string $method
+     * @param array $arguments
+     * @return mixed
+     */
+    public static function __callStatic(string $method, array $arguments): mixed
+    {
+        return static::getFacadeRoot()?->$method(...$arguments);
+    }
 }

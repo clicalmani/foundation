@@ -18,7 +18,7 @@ class HelpersServiceProvider extends ServiceProvider
      * 
      * @return void
      */
-    public function boot(): void
+    public function register(): void
     {
         /**
          * |---------------------------------------------------------------------------
@@ -30,4 +30,9 @@ class HelpersServiceProvider extends ServiceProvider
          */
         \Clicalmani\Core\Support\Helper::include();
     }
+
+    public function boot(
+        ?\Clicalmani\Core\Acme\Container $container = null
+    ): void
+    {}
 }

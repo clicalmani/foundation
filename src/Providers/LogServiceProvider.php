@@ -17,7 +17,7 @@ class LogServiceProvider extends ServiceProvider
      * 
      * @var string
      */
-    protected const ERROR_LOG = 'errors.log';
+    protected const ERROR_LOG = 'tonka.log';
 
     /**
      * Internal operational flag tracking application verbose debug mode states.
@@ -32,7 +32,7 @@ class LogServiceProvider extends ServiceProvider
      * 
      * @return void
      */
-    public function boot(): void
+    public function register(): void
     {
         // Parse the dynamic environment configuration variable safely matching alternative value models
         if (is_string(env('APP_DEBUG'))) {
@@ -42,12 +42,17 @@ class LogServiceProvider extends ServiceProvider
         }
 
         // Ensure the absolute target logging subsystem directory exists on the filesystem
-        if ( !file_exists(storage_path('/errors')) ) {
-            mkdir(storage_path('/errors'), 0775, true);
+        if ( !file_exists(storage_path('/logs')) ) {
+            mkdir(storage_path('/logs'), 0775, true);
         }
         
         // Bind framework processing indicators to native PHP runtime configuration spaces
         ini_set('log_errors', 1);
-        ini_set('error_log', storage_path('/errors/' . static::ERROR_LOG));
+        ini_set('error_log', storage_path('/logs/' . static::ERROR_LOG));
     }
+
+    public function boot(
+        ?\Clicalmani\Core\Acme\Container $container = null
+    ): void
+    {}
 }

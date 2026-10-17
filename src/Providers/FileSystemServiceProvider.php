@@ -18,11 +18,14 @@ class FileSystemServiceProvider extends ServiceProvider
      * 
      * @return void
      */
-    public function boot(): void
+    public function register(): void
     {
         /**
          * Initialize the default framework storage error logging registry.
          */
         \Clicalmani\Core\Support\Facades\Log::init(root_path());
     }
+
+    public function boot(): void
+    {}
 }

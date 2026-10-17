@@ -14,20 +14,17 @@ class InjectResource extends InjectionLocator
 
     public function handle(): ?object
     {
-        if (is_subclass_of($this->class, \Clicalmani\Database\Factory\Models\Elegant::class)) {
-
-            $this->resources = $this->bindResources();
-
-            return @$this->resources[0];
+        if (!is_subclass_of($this->class, Elegant::class)) {
+            return null;
         }
-        
-        return null;
+
+        $this->resources = $this->bindResources();
+        return $this->resources[0] ?? null;
     }
 
     public function inject(array &$args, mixed $value, int $pos): void
     {
         $args[$pos] = $value;
-
         if ($arr = $this->reflector->getNestedResource()) {
             $args[$arr['pos']] = $this->resources[1];
         }

@@ -13,7 +13,6 @@ final class MailerServiceConfig implements ServiceConfiguratorInterface
     public function __invoke(ServiceConfigurator|DefaultsConfigurator $services, Application $app): void
     {
         $services->args([
-            $app->dependency('service', 'mailer'),
             $app->config['mail']['default_layout'] ?? ''
         ]);
     }

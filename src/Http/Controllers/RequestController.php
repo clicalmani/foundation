@@ -5,6 +5,7 @@ use Clicalmani\Core\Http\Request;
 use Clicalmani\Core\Exceptions\ModelNotFoundException;
 use Clicalmani\Database\Factory\Models\Elegant;
 use Clicalmani\Core\Acme\Container;
+use Clicalmani\Core\Http\Events\HttpRequest;
 use Clicalmani\Core\Http\Middlewares\MiddlewareAccessor;
 use Clicalmani\Core\Providers\RouteServiceProvider;
 use Clicalmani\Core\Routing\Exceptions\RouteNotFoundException;
@@ -181,62 +182,47 @@ class RequestController
 	 * Invoke the method with the given reflector.
 	 * 
 	 * @param \Clicalmani\Core\Http\Controllers\ReflectorInterface $reflector
-	 * @return \Psr\Http\Message\ResponseInterface|\Clicalmani\Core\Http\RedirectInterface
+	 * @return \Psr\Http\Message\ResponseInterface|\Clicalmani\Core\Http\ResponseInterface|\Clicalmani\Core\Http\RedirectInterface
 	 */
-	public function invokeMethod(ReflectorInterface $reflector) : \Psr\Http\Message\ResponseInterface|\Clicalmani\Core\Http\ResponseInterface|\Clicalmani\Core\Http\RedirectInterface
+	public function invokeMethod(
+		ReflectorInterface $reflector
+	): \Psr\Http\Message\ResponseInterface|\Clicalmani\Core\Http\ResponseInterface|\Clicalmani\Core\Http\RedirectInterface
 	{
-		$request = Request::current();
-		if (!$request) {
-			$request = new Request;
-			Request::current($request);
-		}
-		
-		/** @var \ReflectionParameter[] */
-		$parameters = $reflector->getParameters();
-		$route_parameters = collection($this->route->getParameters())->map(fn($segment) => $segment->value)->toArray();
-		
-		$args = collection($parameters)->map(fn() => null)->toArray();
-		$services = array_filter($this->container->builder()->getServiceIds(), fn(string $id) => str_starts_with($id, '*.'));
-		
-		foreach ($parameters as $i => $param) {
-			$param_type = $param->getType();
+		$request = Request::current() ?? tap(new Request, fn($r) => Request::current($r));
 
-			if ($param_type?->isBuiltin()) {
-				$args[$i] = array_shift($route_parameters);
-				continue;
-			}
-			
-			foreach (Reflector::listTypes($param) as $listedType) {
-
-				try {
-					foreach ($services ?? [] as $id) {
-						/** @var \Clicalmani\Core\Http\Controllers\InjectionLocator */
-						$obj = $this->container->get($id);
-						$obj->setType($listedType);
-						$obj->setReflection($reflector);
-						$obj->setRoute($this->route);
-						if ($inst = $obj->handle()) {
-							$obj->inject($args, $inst, $i);
-							break 2;
-						}
-					}
-				} catch(ModelNotFoundException $e) {
-					return $this->handleMissingResource($e->getMessage());
-				}
-			}
-		}
+		/** @var InjectionManager $injection */
+		$injection = $this->container->get(InjectionManager::class);
 		
 		try {
-			if ($reflector instanceof MethodReflector) return $reflector($this->container->getClassIntance($reflector->getClass()), ...$args);
-			return $reflector(...$args);
+			$args = $injection->resolve($reflector, $this->route);
+		} catch (ModelNotFoundException $e) {
+			return $this->handleMissingResource($e->getMessage());
+		}
+
+		try {
+			event($request, 'http.request.started');
+			
+			$response = $reflector instanceof MethodReflector
+				? $reflector($this->container->getClassIntance($reflector->getClass()), ...$args)
+				: $reflector(...$args);
+
+			$request->responseSize = method_exists($response, 'getContent')
+				? strlen($response->getContent())
+				: 0;
+			$request->status = $response->getStatusCode();
+
+			event($request, 'http.request.finished');
+
+			return $response;
 		} catch (ModelNotFoundException $e) {
 			return $this->handleMissingResource($e->getMessage());
 		} catch (\Throwable $e) {
+			$request->status = 500;
+			event($request, 'http.request.finished');
 			if ( ! app()->environment('production') ) {
-				(new \Clicalmani\Core\Resources\ErrorRenderer)->render($e);
-			}
-
-			exit;
+                (new \Clicalmani\Core\Resources\ErrorRenderer)->render($e);
+            }
+			throw $e;
 		}
 	}
 
@@ -252,7 +238,7 @@ class RequestController
 		if ($scope = $this->route->scoped()) {
 			$scope_name = collection(explode('_', $model))->map(fn(string $part) => ucfirst($part))->join('');
 			$keyName = $scope[$scope_name];
-		} else $keyName = $model->getKey();
+		} else $keyName = $model->getKey()->scalarName();
 
 		// Resolve route binding inside the model
 		$reflector = new MethodReflector(new \ReflectionMethod($model, 'resolveRouteBinding'));

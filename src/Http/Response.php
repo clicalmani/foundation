@@ -167,7 +167,8 @@ class Response extends \Clicalmani\Psr\Response implements ResponseInterface
 
     public function sendFile(string $file, ?string $name = null, ?string $type = null) : never
     {
-        $this->withHeader('Content-Type', $type ?? mime_content_type($file))
+        $name ??= basename($file);
+        $this->withHeader('Content-Type', $type ?? storage()->mimeType($file))
             ->withHeader('Content-Disposition', "attachment; filename=\"$name\"")
             ->withBody(\Clicalmani\Psr\Stream::createFromFile($file, 'r'))
             ->send();

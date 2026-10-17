@@ -97,12 +97,14 @@ class Application
      */
     private array $coreServices = [];
 
+    private array $customServices = [];
+
     /**
      * Application dependency injection container instance.
      * 
-     * @var \Clicalmani\Core\Acme\Container|null
+     * @var ?\Symfony\Component\DependencyInjection\ContainerBuilder
      */
-    private $container;
+    private $container = null;
 
     /**
      * Time-tracking event listeners registered for performance profiling.
@@ -212,11 +214,11 @@ class Application
     /**
      * Retrieves the active service container instance with strict PSR-11 typing.
      * 
-     * @return \Psr\Container\ContainerInterface
+     * @return \Symfony\Component\DependencyInjection\ContainerBuilder
      */
     public function getContainer()
     {
-        return \Clicalmani\Core\Providers\ContainerServiceProvider::get();
+        return $this->container;
     }
 
     /**
@@ -425,8 +427,14 @@ class Application
      */
     public function boot() : void
     {
-        $this->addKernel(\App\Http\Kernel::class);
-        \Clicalmani\Core\Providers\ServiceProvider::provideServices($this->config['app']['providers']);
+        try {
+            $this->addKernel(\App\Http\Kernel::class);
+            \Clicalmani\Core\Providers\ServiceProvider::provideServices($this->config['app']['providers']);
+        } catch (\Throwable $e) {throw $e;
+            if ( ! $this->environment('production') ) {
+                (new \Clicalmani\Core\Resources\ErrorRenderer)->render($e);
+            }
+        }
     }
 
     /**
@@ -529,10 +537,10 @@ class Application
      * @param \Clicalmani\Core\Providers\ServiceProviderInterface $service
      * @return void
      */
-    public function register(\Clicalmani\Core\Providers\ServiceProviderInterface $service)
+    public function register(\Clicalmani\Core\Providers\ServiceProviderInterface $service): void
     {
-        $service->boot();
         $service->register();
+        $this->customServices[] = $service;
     }
 
     /**
@@ -611,11 +619,20 @@ class Application
      * 
      * @return void
      */
-    public function registerCoreContainerServices(): void
-    {
+    public function registerCoreContainerServices(
+        \Symfony\Component\DependencyInjection\ContainerBuilder $builder
+    ): void {
         if (!$this->services) return;
+        
+        $this->container = $builder;
 
+        $injectables = [];
+        
         foreach ($this->coreServices as $definition) {
+            if (is_subclass_of($definition->class, \Clicalmani\Core\Http\Controllers\InjectionResolverInterface::class)) {
+                $injectables[] = $definition->id;
+            }
+
             $this->services = $this->services->set($definition->id, $definition->class);
 
             $definition->config?->__invoke($this->services, $this);
@@ -625,8 +642,21 @@ class Application
                 $this->services->alias($aliasId, $referenceId);
             }
         }
-
-        $this->services->set('view', \Clicalmani\Core\Resources\View::class);
+        
+        // Injections
+        $this->services->set(
+            \Clicalmani\Core\Http\Controllers\InjectionManager::class,
+            \Clicalmani\Core\Http\Controllers\InjectionManager::class
+        )
+        ->args([$this->dependency('service', 'service_container')])
+        ->call('registerResolvers', [
+            [...array_map(fn(string $id) => $this->dependency('service', $id), $injectables)]
+        ])->alias('injection.manager', \Clicalmani\Core\Http\Controllers\InjectionManager::class);
+        
+        // Boot custom services
+        foreach ($this->customServices as $service) {
+            $service->boot(\Clicalmani\Core\Acme\Container::getInstance($this->rootPath));
+        }
     }
 
     /**
@@ -659,7 +689,7 @@ class Application
         return [
             'logger'     => new ServiceDefinition('logger', \Clicalmani\Core\Acme\Logger::class, type: ServiceType::Core),
             'str'        => new ServiceDefinition('str', \Clicalmani\Core\Acme\Stringable::class, type: ServiceType::Core),
-            'router'     => new ServiceDefinition('router', \Clicalmani\Core\Acme\Router::class, type: ServiceType::Core),
+            'router'     => new ServiceDefinition('router', \Clicalmani\Routing\Router::class, type: ServiceType::Core),
             'array'      => new ServiceDefinition('array', \Clicalmani\Core\Acme\Arrayable::class, type: ServiceType::Core),
             'env'        => new ServiceDefinition('env', \Clicalmani\Core\Acme\Environment::class, type: ServiceType::Core),
             'config'     => new ServiceDefinition('config', \Clicalmani\Core\Acme\Configure::class, type: ServiceType::Core),
@@ -680,9 +710,8 @@ class Application
             '*.request'   => new ServiceDefinition('*.request', \Clicalmani\Core\Http\Controllers\InjectRequest::class, type: ServiceType::Namespace),
             '*.resource'  => new ServiceDefinition('*.resource', \Clicalmani\Core\Http\Controllers\InjectResource::class, type: ServiceType::Namespace),
             '*.mailer'    => new ServiceDefinition('*.mailer', \Clicalmani\Core\Mail\InjectMailer::class, type: ServiceType::Namespace),
-            '*.mailer.service' => new ServiceDefinition('*.mailer.service', \Clicalmani\Core\Mail\MailerService::class, \Clicalmani\Core\Providers\Config\ControllerResolverConfig::class, type: ServiceType::Namespace),
+            '*.mailer.service' => new ServiceDefinition('*.mailer.service', \Clicalmani\Core\Mail\MailerService::class, \Clicalmani\Core\Providers\Config\MailerServiceConfig::class, type: ServiceType::Namespace),
             '*.messenger' => new ServiceDefinition('*.messenger', \Clicalmani\Core\Messenger\Inject::class, \Clicalmani\Core\Providers\Config\MessengerConfig::class, type: ServiceType::Namespace),
-            // '*.event-dispatch' => new ServiceDefinition('*.event-dispatcher', \Clicalmani\Core\Events\InjectDispatcher::class, \Clicalmani\Core\Providers\Config\MessengerConfig::class, type: ServiceType::Namespace),
         ];
     }
 }

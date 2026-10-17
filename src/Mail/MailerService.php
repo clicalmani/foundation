@@ -1,15 +1,16 @@
 <?php
 namespace Clicalmani\Core\Mail;
 
+use Clicalmani\Core\Http\Controllers\InjectionLocator;
+use ReflectionParameter;
+use Clicalmani\Core\Http\Controllers\ReflectorInterface;
+use Clicalmani\Routing\Route;
+use Symfony\Component\Mailer\Mailer;
 use Symfony\Component\Mailer\MailerInterface;
 
-final class MailerService
+final class MailerService extends InjectionLocator
 {
     public function __construct(
-        private MailerInterface $mailer,
-        /**
-         * Layout par défaut défini en config (app.mail.default_layout).
-         */
         private string $defaultLayout
     ) {}
 
@@ -19,7 +20,7 @@ final class MailerService
 
         $this->applyLayout($mailable);
 
-        $this->mailer->send($mailable);
+        $this->container->get('mailer')->send($mailable);
     }
 
     /**
@@ -46,5 +47,16 @@ final class MailerService
             // Le template de vue utilisera {% extends layout %}
             $mailable->context([...$mailable->getContext(), 'layout' => $layout]);
         }
+    }
+
+    public function handle(): ?object
+    {
+        if (!is_subclass_of($this->class, Mailer::class) 
+            && $this->class !== Mailer::class 
+            && $this->class !== MailerInterface::class) {
+            return null;
+        }
+
+        return $this->container->get('mailer');
     }
 }

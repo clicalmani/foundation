@@ -107,7 +107,9 @@ class MailerServiceProvider implements ServiceProviderInterface
      * @return void
      */
     #[Override]
-    public function boot(): void
+    public function boot(
+        ?\Clicalmani\Core\Acme\Container $container = null
+    ): void
     {
         // Reserved for sub-dependency initialization routines
     }

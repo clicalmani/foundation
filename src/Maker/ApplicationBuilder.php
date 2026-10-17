@@ -65,7 +65,7 @@ class ApplicationBuilder
         \Clicalmani\Core\Providers\ServiceProvider::provideServices([
             \Clicalmani\Core\Providers\EnvServiceProvider::class
         ]);
-        
+
         foreach ($this->kernels as $kernel) {
             $this->app->addKernel($kernel);
         }
@@ -229,6 +229,22 @@ class ApplicationBuilder
 
         if ($registry) call_user_func($registry);
         
+        return $this;
+    }
+
+    public function withMetrics(): static
+    {
+        $this->app->register(
+            new \Clicalmani\Metrics\MetricsServiceProvider
+        );
+        return $this;
+    }
+
+    public function withQueue(): static
+    {
+        $this->app->register(
+            new \Clicalmani\Queue\QueueServiceProvider
+        );
         return $this;
     }
 }

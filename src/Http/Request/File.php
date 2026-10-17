@@ -160,7 +160,7 @@ class File implements FileInterface, \JsonSerializable
         return $this->error === UPLOAD_ERR_OK;
     }
 
-    public function store(?string $disk = null, ?string $filename): string
+    public function store(?string $filename, ?string $disk = null): string
     {
         $disk = $disk ?: $this->disk;
         $name = $filename ?? slugify(pathinfo($this->name, PATHINFO_FILENAME));
@@ -172,6 +172,7 @@ class File implements FileInterface, \JsonSerializable
 
         try {
             $this->manager->disk($disk)->writeStream($name . '.' . $extension, $stream);
+            $this->moved = true;
         } finally {
             if (is_resource($stream)) fclose($stream);
         }

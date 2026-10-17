@@ -113,7 +113,9 @@ abstract class Authenticate extends ServiceProvider implements \JsonSerializable
 		return $this->user?->{$name}(...$arguments);
 	}
 
-	public function boot(): void
+	public function boot(
+		?\Clicalmani\Core\Acme\Container $container = null
+	): void
 	{
 		//
 	}

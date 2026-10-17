@@ -179,7 +179,9 @@ class MessengerServiceProvider implements ServiceProviderInterface
      * @return void
      */
     #[Override]
-    public function boot(): void
+    public function boot(
+        ?\Clicalmani\Core\Acme\Container $container = null
+    ): void
     {
         if ( is_file(config_path('/messenger.php')) ) {
             app()->config->set('messenger', require_once config_path('/messenger.php'));

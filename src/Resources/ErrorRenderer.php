@@ -1,6 +1,8 @@
 <?php
 namespace Clicalmani\Core\Resources;
 
+use Clicalmani\Core\Http\Request;
+
 class ErrorRenderer
 {
     // Configuration
@@ -19,11 +21,11 @@ class ErrorRenderer
             'request'  => $this->getRequestContext(),
         ];
 
-        if ( ! \Clicalmani\Core\Support\Facades\Route::isApi() ) {
-            return response('', 500)->view('500', ['error' => $data]);
+        if ( \Clicalmani\Core\Support\Facades\Route::isApi() ) {
+            return response()->status(500)->json($data);
         }
-
-        return response()->status(500)->json($data);
+        
+        return response()->status(500)->view('500', ['error' => $data]);
     }
 
     private function getSnippet(string $file, int $line, int $context = 10): array

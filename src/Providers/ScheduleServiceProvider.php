@@ -101,7 +101,9 @@ class ScheduleServiceProvider implements ServiceProviderInterface
      * @return void
      */
     #[Override]
-    public function boot(): void
+    public function boot(
+        ?\Clicalmani\Core\Acme\Container $container = null
+    ): void
     {
         if ( is_file(config_path('/scheduler.php')) ) {
             app()->config->set('scheduler', require_once config_path('/scheduler.php'));
