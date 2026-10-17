@@ -3,7 +3,7 @@
     "description": "Tonka fundation",
     "type": "library",
     "require": {
-        "php": ">=8.0",
+        "php": "^8.4",
         "vlucas/phpdotenv": ">=5.5.0",
         "nesbot/carbon": ">=2.16",
         "twig/twig": ">=3.0",
