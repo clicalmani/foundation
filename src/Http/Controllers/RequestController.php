@@ -188,10 +188,13 @@ class RequestController
 				? $reflector($this->container->getClassIntance($reflector->getClass()), ...$args)
 				: $reflector(...$args);
 			
-			$response
-				->status(http_response_code());
+			if (method_exists($response, 'status')) {
+				$response
+					->status(http_response_code());
+			}
+			
 				
-			if (!$response instanceof \Clicalmani\Core\Http\RedirectInterface) {
+			if (method_exists($response, 'withHeaders')) {
 				$response->withHeaders(app()->response->getHeaders());
 			}
 
@@ -202,7 +205,7 @@ class RequestController
 			$request->responseSize = method_exists($response, 'getContent')
 				? strlen($response->getContent())
 				: 0;
-			$request->status = $response->getStatusCode();
+			$request->status = http_response_code();
 
 			event($request, 'http.request.finished');
 

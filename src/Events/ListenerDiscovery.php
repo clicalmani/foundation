@@ -16,6 +16,10 @@ class ListenerDiscovery
 
     public function discover(): void
     {
+        if (!is_dir($this->path)) {
+            mkdir($this->path, 0755, true);
+        }
+
         $directory = new \RecursiveDirectoryIterator($this->path, \RecursiveDirectoryIterator::SKIP_DOTS);
         $filter = new \RecursiveCallbackFilterIterator($directory, function ($current, $key, $iterator) {
             if ($iterator->hasChildren()) {

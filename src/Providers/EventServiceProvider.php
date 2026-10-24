@@ -49,15 +49,6 @@ class EventServiceProvider implements ServiceProviderInterface
     #[Override]
     public function register(): void
     {
-        // Register core event handlers and structural bridge listeners
-        app()->addService(
-            SystemBroadcastListener::class,
-            SystemBroadcastListener::class,
-            static function(ServiceConfigurator|DefaultsConfigurator $config) {
-                // Instantiated strictly for initial service visibility inside the container
-            }
-        );
-
         app()->addService(SystemMailableListener::class, 
             SystemMailableListener::class,
             static function(ServiceConfigurator|DefaultsConfigurator $config) {}
@@ -68,15 +59,25 @@ class EventServiceProvider implements ServiceProviderInterface
             static function(ServiceConfigurator|DefaultsConfigurator $config) {}
         );
 
-        // Wire the specialized event dispatchers with their corresponding system listeners
-        app()->addService(BroadcastEventDispatcher::class, 
-            BroadcastEventDispatcher::class,
-            static function(ServiceConfigurator|DefaultsConfigurator $config) {
-                $config->args([
-                    app()->dependency('service', SystemBroadcastListener::class)
-                ]);
-            }
-        );
+        if (class_exists(\Broadcaster\BroadcastManager::class)) {
+            app()->addService(
+                SystemBroadcastListener::class,
+                SystemBroadcastListener::class,
+                static function(ServiceConfigurator|DefaultsConfigurator $config) {
+                    // Instantiated strictly for initial service visibility inside the container
+                }
+            );
+
+            // Wire the specialized event dispatchers with their corresponding system listeners
+            app()->addService(BroadcastEventDispatcher::class, 
+                BroadcastEventDispatcher::class,
+                static function(ServiceConfigurator|DefaultsConfigurator $config) {
+                    $config->args([
+                        app()->dependency('service', SystemBroadcastListener::class)
+                    ]);
+                }
+            );
+        }
 
         app()->addService(MailableEventDispatcher::class, 
             MailableEventDispatcher::class,
@@ -118,13 +119,19 @@ class EventServiceProvider implements ServiceProviderInterface
         app()->addService(CoreEventDispatcher::class, 
             CoreEventDispatcher::class,
             static function(ServiceConfigurator|DefaultsConfigurator $config) {
-                $config->args([
-                    [
-                        app()->dependency('service', QueryEventDispatcher::class),
-                        app()->dependency('service', BroadcastEventDispatcher::class),
-                        app()->dependency('service', MailableEventDispatcher::class),
-                    ]
-                ]);
+                $args = [
+                    app()->dependency('service', QueryEventDispatcher::class)
+                ];
+
+                if (class_exists(\Symfony\Component\Mailer\Transport::class)) {
+                    $args[] = app()->dependency('service', MailableEventDispatcher::class);
+                }
+
+                if (class_exists(\Broadcaster\BroadcastManager::class)) {
+                    $args[] = app()->dependency('service', BroadcastEventDispatcher::class);
+                }
+
+                $config->args([$args]);
             }
         );
 
