@@ -46,9 +46,8 @@ class JwtServiceProvider implements ServiceProviderInterface
         app()->addService('mercure.jwt.key', 
             InMemory::class,
             static function(ServiceConfigurator|DefaultsConfigurator $config) {
-                $secret = $_ENV['MERCURE_JWT_SECRET']
-                    ?? throw new \RuntimeException('MERCURE_JWT_SECRET environment variable is missing.');
-                
+                $secret = env('MERCURE_JWT_SECRET');
+                    
                 $config->factory([InMemory::class, 'plainText'])
                     ->args([$secret]);
             }

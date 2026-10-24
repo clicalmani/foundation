@@ -22,7 +22,7 @@ interface SessionInterface
      * 
      * @return ?string
      */
-    public function get(?string $name = null): mixed;
+    public function get(?string $name = null, ?string $default = null): mixed;
 
     /**
      * Check if session exists

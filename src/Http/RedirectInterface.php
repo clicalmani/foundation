@@ -27,6 +27,8 @@ interface RedirectInterface
      */
     public function withError(string $message = ''): RedirectInterface;
 
+    public function withErrors(array $errors, ?string $bag = null): RedirectInterface;
+
     /**
      * Flash a success message to the session.
      * 
@@ -47,9 +49,9 @@ interface RedirectInterface
      * Set the HTTP status code for the redirect.
      * 
      * @param int $code
-     * @return RedirectInterface
+     * @return ResponseInterface
      */
-    public function status(int $code) : RedirectInterface;
+    public function status(int $code) : ResponseInterface;
 
     /**
      * Returns the status code.
@@ -79,8 +81,8 @@ interface RedirectInterface
     /**
      * Redirect to an external URL.
      * 
-     * @param string $url
+     * @param ?string $url
      * @return RedirectInterface
      */
-    public function away(string $url) : RedirectInterface;
+    public function away(?string $url = '/') : RedirectInterface;
 }

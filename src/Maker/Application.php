@@ -470,12 +470,20 @@ class Application
     {
         if (isset($data)) $this->viewSharedData = $data;
         else {
-            if ( is_array($this->viewSharedData)) return $this->viewSharedData;
+            $data = [];
+            if ( is_array($this->viewSharedData)) $data = $this->viewSharedData;
             elseif ( is_callable($this->viewSharedData) && !$this->viewDataShared ) {
                 $response = call($this->viewSharedData, Request::getcurrent() ?? new Request);
                 $this->viewDataShared = true;
-                return $response;
+                $data = $response;
             }
+
+            $data = array_map(function(mixed $value) {
+                if (is_callable($value)) $value = $value();
+                return $value;
+            }, $data);
+
+            return $data;
         }
 
         return [];
@@ -551,19 +559,6 @@ class Application
     public function getServices()
     {
         return $this->services;
-    }
-
-    /**
-     * Attaches a profiling callback associated with a specific temporal metric or hook.
-     * Used for measuring execution intervals across micro-benchmarks.
-     * 
-     * @param string $event Event name to observe.
-     * @param callable $handler Callback executed when the event triggers.
-     * @return void
-     */
-    public function setTimeTracker(string $event, $handler)
-    {
-        $this->cumulative_time_listeners[$event][] = $handler;
     }
 
     /**
@@ -703,15 +698,15 @@ class Application
             'view'       => new ServiceDefinition('view', \Clicalmani\Core\Resources\View::class, type: ServiceType::Core),
             'encryption' => new ServiceDefinition('encryption', \Clicalmani\Core\Auth\EncryptionServiceProvider::class, type: ServiceType::Core),
             'resolver'   => new ServiceDefinition('resolver', \Clicalmani\Core\Acme\ControllerResolver::class, \Clicalmani\Core\Providers\Config\ControllerResolverConfig::class, type: ServiceType::Core),
-            'notification' => new ServiceDefinition('notification', \Clicalmani\Notification\NotificationManager::class, type: ServiceType::Core),
-            'mail.simple'  => new ServiceDefinition('mail.simple', \Clicalmani\Core\Mail\Email::class, \Clicalmani\Core\Providers\Config\SimpleMailConfig::class, type: ServiceType::Core),
+            // 'notification' => new ServiceDefinition('notification', \Clicalmani\Notification\NotificationManager::class, type: ServiceType::Core),
+            // 'mail.simple'  => new ServiceDefinition('mail.simple', \Clicalmani\Core\Mail\Email::class, \Clicalmani\Core\Providers\Config\SimpleMailConfig::class, type: ServiceType::Core),
 
             // Namespace-based fallback structural shortcuts: Resolved dynamically depending on the suffix of the dependency.
             '*.request'   => new ServiceDefinition('*.request', \Clicalmani\Core\Http\Controllers\InjectRequest::class, type: ServiceType::Namespace),
             '*.resource'  => new ServiceDefinition('*.resource', \Clicalmani\Core\Http\Controllers\InjectResource::class, type: ServiceType::Namespace),
-            '*.mailer'    => new ServiceDefinition('*.mailer', \Clicalmani\Core\Mail\InjectMailer::class, type: ServiceType::Namespace),
-            '*.mailer.service' => new ServiceDefinition('*.mailer.service', \Clicalmani\Core\Mail\MailerService::class, \Clicalmani\Core\Providers\Config\MailerServiceConfig::class, type: ServiceType::Namespace),
-            '*.messenger' => new ServiceDefinition('*.messenger', \Clicalmani\Core\Messenger\Inject::class, \Clicalmani\Core\Providers\Config\MessengerConfig::class, type: ServiceType::Namespace),
+            // '*.mailer'    => new ServiceDefinition('*.mailer', \Clicalmani\Core\Mail\InjectMailer::class, type: ServiceType::Namespace),
+            // '*.mailer.service' => new ServiceDefinition('*.mailer.service', \Clicalmani\Core\Mail\MailerService::class, \Clicalmani\Core\Providers\Config\MailerServiceConfig::class, type: ServiceType::Namespace),
+            // '*.messenger' => new ServiceDefinition('*.messenger', \Clicalmani\Core\Messenger\Inject::class, \Clicalmani\Core\Providers\Config\MessengerConfig::class, type: ServiceType::Namespace),
         ];
     }
 }

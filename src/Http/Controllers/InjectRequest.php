@@ -65,13 +65,13 @@ class InjectRequest extends InjectionLocator
 		if (method_exists($request, 'messages')) {
 			$messages = $request->messages();  // Set custom error messages
 			$sigs = $request->getSignatures();
-
+			
 			foreach ($messages as $field => $message) {
 				if (isset($sigs[$field])) {
 					$sigs[$field] .= '|message:' . $message;
 				}
 			}
-
+			
 			$request->setSignatures($sigs);
 		}
 

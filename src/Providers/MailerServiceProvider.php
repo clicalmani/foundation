@@ -99,6 +99,37 @@ class MailerServiceProvider implements ServiceProviderInterface
             },
             [MailerInterface::class, 'mailer'] // Shared runtime aliases for seamless DI injection or facade bindings
         );
+
+        // Mailer Service
+        app()->addService(
+            '*.mailer.service', 
+            \Clicalmani\Core\Mail\MailerService::class,
+            function(ServiceConfigurator|DefaultsConfigurator $config) {
+                $config->args([
+                    app()->config['mail']['default_layout'] ?? ''
+                ]);
+            },
+        );
+
+        // Injector
+        app()->addService(
+            '*.mailer', 
+            \Clicalmani\Core\Mail\InjectMailer::class,
+            function(ServiceConfigurator|DefaultsConfigurator $config) {
+                $config->args([]);
+            },
+        );
+
+        // Simple Mailer
+        app()->addService(
+            'mail.simple', 
+            \Clicalmani\Core\Mail\Email::class,
+            function(ServiceConfigurator|DefaultsConfigurator $config) {
+                $config->args([
+                    app()->dependency('service', 'mailer.raw')
+                ]);
+            },
+        );
     }
 
     /**

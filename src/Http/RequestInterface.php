@@ -42,6 +42,8 @@ interface RequestInterface extends \Psr\Http\Message\ServerRequestInterface
 
     public function validated() : array;
 
+    public function validationErrors() : array;
+
     /**
      * (non-PHPDoc)
      * @override

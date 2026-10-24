@@ -95,24 +95,6 @@ class RequestController
 				$middleware->terminate(Request::current(), $response);
 			}
 		}
-
-		// Session cookie
-		if ($this->route->isProtected()) {
-			$params = array_merge(
-				...collect($this->route->getParameters())
-					->map(fn($seg) => [ltrim($seg->name, '?:') => $seg->value])
-					->toArray()
-			);
-			ksort($params);
-
-			$hash = enc()->createParametersHash($params);
-			$key  = enc()::storageKey($this->route, $params); // même méthode que verifyParameters
-
-			session($key, $hash)->set();
-			cookie($key, $hash, 60 * 60 * 24 * 7)->set();
-
-			logger()->info('RController', ['params' => $params, 'key' => $key, 'hash' => $hash]);
-		}
 		
 		die($response);
 	}
@@ -145,8 +127,8 @@ class RequestController
 			Registry::currentRoute($route);
 			Request::current($request);
 			
-			if ( $response_code = $this->route->isAuthorized($request) ) {
-				$this->handleResponseCode($response_code);
+			if ( $responseCode = $this->route->isAuthorized($request) ) {
+				$this->handleResponseCode($responseCode);
 			}
 			
 			return $this->action;
@@ -205,6 +187,17 @@ class RequestController
 			$response = $reflector instanceof MethodReflector
 				? $reflector($this->container->getClassIntance($reflector->getClass()), ...$args)
 				: $reflector(...$args);
+			
+			$response
+				->status(http_response_code());
+				
+			if (!$response instanceof \Clicalmani\Core\Http\RedirectInterface) {
+				$response->withHeaders(app()->response->getHeaders());
+			}
+
+			if (!$response instanceof \Psr\Http\Message\ResponseInterface AND !$response instanceof \Clicalmani\Core\Http\ResponseInterface AND !$response instanceof \Clicalmani\Core\Http\RedirectInterface) {
+				throw new \RuntimeException('Controller action must return a valid response object.');
+			}
 
 			$request->responseSize = method_exists($response, 'getContent')
 				? strlen($response->getContent())
@@ -216,7 +209,7 @@ class RequestController
 			return $response;
 		} catch (ModelNotFoundException $e) {
 			return $this->handleMissingResource($e->getMessage());
-		} catch (\Throwable $e) {
+		} catch (\Throwable $e) {throw $e;
 			$request->status = 500;
 			event($request, 'http.request.finished');
 			if ( ! app()->environment('production') ) {
@@ -260,15 +253,34 @@ class RequestController
 		return with( new TestController )->new($action);
 	}
 
+	public function fakeCall(
+		\Clicalmani\Routing\Route $route, 
+		ReflectorInterface $reflector,
+		Request $request
+	): \Psr\Http\Message\ResponseInterface|\Clicalmani\Core\Http\ResponseInterface|\Clicalmani\Core\Http\RedirectInterface
+	{
+		$this->container = container();
+		$this->route = $route;
+		
+		Request::current($request);
+		
+		return $this->invokeMethod($reflector);
+	}
+
 	private function redirect()
 	{
 		$this->sendStatus($this->route->redirect);
 	}
 
-	private function handleResponseCode(int $response_code) : void
+	private function handleResponseCode(int $responseCode) : void
 	{
-		if (200 !== $response_code) {
-			$this->sendStatus($response_code);
+		if (defined('TEST_ENV')) {
+			http_response_code($responseCode);
+			return;
+		}
+
+		if (200 !== $responseCode) {
+			$this->sendStatus($responseCode);
 			EXIT;
 		}
 	}

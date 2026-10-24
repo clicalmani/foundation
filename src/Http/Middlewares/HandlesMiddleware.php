@@ -61,11 +61,16 @@ trait HandlesMiddleware
         );
 
         if ($auth instanceof \Clicalmani\Core\Http\Redirect) {
-            die($auth);
+            // Set the response status and Location header for the redirect
+            $response
+                ->status($auth->getStatusCode())
+                ->header('Location', $auth->getLocation());
+
+            if (!defined('TEST_ENV')) die($auth);
         }
 
         Request::current($request);
-        app()->response = $response;
+        app()->response = $auth;
 
         return $auth->getStatusCode();
     }

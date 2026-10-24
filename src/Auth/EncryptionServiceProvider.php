@@ -77,10 +77,6 @@ class EncryptionServiceProvider
 			$params
 		))), 0, static::$config['hash_length']));
 
-		// logger()->info('verifyParameters', [
-		// 	'params' => $params, 'request_hash' => $request_hash, 'computed' => $hash,
-		// ]);
-
 		session()->remove($key);
 		cookie($key)->delete();
 

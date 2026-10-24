@@ -3,11 +3,14 @@ namespace Clicalmani\Core\Test;
 
 use Clicalmani\Database\Factory\Sequence;
 use Clicalmani\Core\Auth\EncryptionServiceProvider;
+use Clicalmani\Core\Http\Controllers\FunctionReflector;
+use Clicalmani\Core\Http\Controllers\MethodReflector;
 use Clicalmani\Core\Http\Request;
 use Clicalmani\Core\Test\TestInterface;
 use Clicalmani\Core\Maker\Application;
 use Clicalmani\Core\Support\Facades\DB;
 use Clicalmani\Core\Support\Facades\Config;
+use Clicalmani\Routing\Registry;
 use Clicalmani\Validation\AsValidator;
 use Clicalmani\Validation\Validator;
 use PHPUnit\Framework\TestCase as BaseTestCase;
@@ -26,6 +29,27 @@ use PHPUnit\Framework\TestCase as BaseTestCase;
 abstract class TestCase extends BaseTestCase implements TestInterface
 {
     /**
+     * Holds the pending request headers.
+     *
+     * @var array
+     */
+    protected array $httpHeaders = [];
+
+    /**
+     * Holds the pending session data.
+     *
+     * @var array
+     */
+    protected array $httpSession = [];
+
+    /**
+     * The fake user ID for the next request.
+     *
+     * @var int|null
+     */
+    protected ?int $httpUserId = null;
+
+    /**
      * Request controller
      * 
      * @var \Clicalmani\Core\Http\RequestController
@@ -33,56 +57,13 @@ abstract class TestCase extends BaseTestCase implements TestInterface
     protected $controller;
 
     /**
-     * Holds the current action to be tested.
-     * 
-     * @var string
-     */
-    private $action;
-
-    private Request $request;
-
-    /**
-     * Holds the request parameters to be used for the test.
-     * 
-     * @var array
-     */
-    protected $parameters = [];
-
-    /**
-     * Holds the fake test user if test should
-     * be driven in a user environment.
-     * 
-     * @var int
-     */
-    private $user;
-
-    /**
-     * Holds the number of time to repeat the test.
-     * 
-     * @var int
-     */
-    private $counter = 1;
-    
-    /**
-     * Holds parameters hash.
-     * 
-     * @var string|\Clicalmani\Database\Factory\Sequence
-     */
-    private $hash;
-
-    /**
-     * Holds the request headers.
-     * 
-     * @var array|\Clicalmani\Database\Factory\Sequence
-     */
-    private $headers;
-
-    /**
      * Faker instance
      * 
      * @var \Clicalmani\Database\Faker\Faker
      */
     protected \Clicalmani\Database\Faker\Faker $faker;
+
+    protected $request;
 
     protected function setUp(): void
     {
@@ -142,197 +123,188 @@ abstract class TestCase extends BaseTestCase implements TestInterface
     }
 
     /**
-     * Merges parameters
-     * 
-     * @param ?array $parameters
-     * @return array 
-     */
-    private function merge(?array $parameters = []) : array
-    {
-        return array_merge($this->parameters, $parameters);
-    }
-
-    /**
-     * Override parameters
-     * 
-     * @param array $parameters Only specified parameters will be overriden
-     * @return array New seed
-     */
-    private function override(?array $parameters = [])
-    {
-        $this->parameters = $this->merge($parameters);
-        $parameters = $this->{$this->action}();
-        
-        foreach ($this->parameters as $key => $value) {
-            $parameters[$key] = $value;
-        }
-
-        return $parameters;
-    }
-
-    /**
-     * Set request hash
-     * 
-     * @return void
-     */
-    private function setHash() : void
-    {
-        $hash_parameter = EncryptionServiceProvider::hashParameter();
-        if ($this->hash instanceof Sequence) {
-            $this->override( [$hash_parameter => create_parameters_hash( call($this->hash) )]);
-        } else $this->override( [$hash_parameter => $this->hash] );
-    }
-
-    /**
-     * Set request headers
-     * 
-     * @return void
-     */
-    private function setHeaders() : void
-    {
-        if ($this->headers instanceof Sequence) $this->override( call($this->headers) );
-    }
-
-    /**
-     * Create a new test
-     * 
-     * @param string $action Action method
-     * @return static
-     */
-    public function new(string $action) : static
-    {
-        $this->action = $action;
-        return $this;
-    }
-
-    /**
-     * Manipulate the factory state
-     * 
-     * @param callable $callback A callable function that receive default attributes and return the 
-     * attributes to override by.
-     * @return static
-     */
-    public function state(?callable $callback) : static
-    {
-        $this->override( $callback( $this->{$this->action}() ) );
-        return $this;
-    }
-
-    /**
      * Provides a user for the test.
      * 
      * @param int|\Clicalmani\Database\Factory\Sequence $param
      * @return void
      */
-    public function actingAs(int $user_id) : void
+    public function actingAs(int $user_id) : static
     {
         $this->request->test_user_id = $user_id;
-    }
-
-    /**
-     * Repeat the test n times.
-     * 
-     * @param int $n Counter
-     * @return static
-     */
-    public function repeat($n = 1) : static
-    {
-        $this->counter = $n;
         return $this;
     }
 
     /**
-     * Make the test
-     * 
-     * @return void
+     * Update start
      */
-    public function make($attributes = []) : void
+
+    /**
+     * Set custom headers for the next request.
+     */
+    public function withHeaders(array $headers): static
     {
-        foreach (range(1, $this->counter) as $num) {
+        $this->httpHeaders = array_merge($this->httpHeaders, $headers);
+        return $this;
+    }
 
-            $request = new Request;
+    /**
+     * Set the Authorization header using a bearer token.
+     */
+    public function withToken(string $token): static
+    {
+        return $this->withHeaders(['Authorization' => "Bearer {$token}"]);
+    }
 
-            /**
-             * Request hash
-             */
-            if ($this->hash) $this->setHash();
+    /**
+     * Set session data for the next request.
+     */
+    public function withSession(array $session): static
+    {
+        $this->httpSession = array_merge($this->httpSession, $session);
+        return $this;
+    }
 
-            /**
-             * Headers
-             */
-            if ($this->headers) $this->setHeaders();
-            
-            $parameters = $this->override($attributes);
-            
-            /**
-             * Parameter sequence
-             */
-            foreach ($parameters as $key => $param) {
-                if ($param instanceof Sequence) $parameters[$key] = call( $param );
-            }
+    /**
+     * Simulate an authenticated user for the next request.
+     */
+    public function actingAsUser(int $userId): static
+    {
+        $this->httpUserId = $userId;
+        return $this;
+    }
 
-            $request->make( $attributes );
-            Request::current($request);
-            
-            /**
-             * User sequence
-             */
-            if ($this->user) {
-                if ($this->user instanceof Sequence) {
-                    $request->test_user_id = call( $this->user );
-                } else $request->test_user_id = $this->user;
-            }
-            
-            print_r( $this->controller::invokeMethod(
-                    new \Clicalmani\Core\Http\Controllers\MethodReflector(
-                        new \ReflectionMethod(
-                            \Clicalmani\Core\Support\Facades\RequestController::getInstance($this->controller), 
-                            $this->action
-                        )
-                    )
-                ) 
-            );
+    // ---------------------------------------------------------------
+    // HTTP verb shortcuts
+    // ---------------------------------------------------------------
 
-            if ($num < $this->counter) echo "\n";
+    public function get(string $uri, array $headers = []): TestResponse
+    {
+        return $this->call('GET', $uri, [], $headers);
+    }
+
+    public function getJson(string $uri, array $headers = []): TestResponse
+    {
+        return $this->json('GET', $uri, [], $headers);
+    }
+
+    public function post(string $uri, array $data = [], array $headers = []): TestResponse
+    {
+        return $this->call('POST', $uri, $data, $headers);
+    }
+
+    public function postJson(string $uri, array $data = [], array $headers = []): TestResponse
+    {
+        return $this->json('POST', $uri, $data, $headers);
+    }
+
+    public function put(string $uri, array $data = [], array $headers = []): TestResponse
+    {
+        return $this->call('PUT', $uri, $data, $headers);
+    }
+
+    public function putJson(string $uri, array $data = [], array $headers = []): TestResponse
+    {
+        return $this->json('PUT', $uri, $data, $headers);
+    }
+
+    public function patch(string $uri, array $data = [], array $headers = []): TestResponse
+    {
+        return $this->call('PATCH', $uri, $data, $headers);
+    }
+
+    public function patchJson(string $uri, array $data = [], array $headers = []): TestResponse
+    {
+        return $this->json('PATCH', $uri, $data, $headers);
+    }
+
+    public function delete(string $uri, array $data = [], array $headers = []): TestResponse
+    {
+        return $this->call('DELETE', $uri, $data, $headers);
+    }
+
+    public function deleteJson(string $uri, array $data = [], array $headers = []): TestResponse
+    {
+        return $this->json('DELETE', $uri, $data, $headers);
+    }
+
+    // ---------------------------------------------------------------
+    // Core request dispatcher
+    // ---------------------------------------------------------------
+
+    /**
+     * Dispatch an HTTP request through the application's router
+     * and return a testable response.
+     */
+    protected function call(string $method, string $uri, array $data = [], array $headers = []): TestResponse
+    {
+        $request = $this->buildHttpRequest($method, $uri, $data, $headers);
+        
+        Request::current($request);
+
+        $controller = container()->getClassIntance($this->controller);
+        $action = $controller->getAction();
+
+		if (is_array($action) AND count($action) === 2) {
+			$reflector = new MethodReflector(new \ReflectionMethod(container()->getClassIntance($action[0]), $action[1]));
+		} elseif( is_string($action) ) {
+			$reflector = new MethodReflector(new \ReflectionMethod(container()->getClassIntance($action), '__invoke'));
+		} elseif (is_callable($action)) {
+			$reflector = new FunctionReflector(new \ReflectionFunction($action));
+		}
+
+        $route = Registry::currentRoute();
+
+        $response = $controller->fakeCall($route, $reflector, $request);
+        
+        return new TestResponse($response);
+    }
+
+    /**
+     * Build a Request instance from the given parameters.
+     */
+    protected function buildHttpRequest(
+        string $method,
+        string $uri,
+        array $data = [],
+        array $headers = []
+    ): Request {
+        $request = new Request;
+
+        // Simulate the server 
+        $_SERVER['REQUEST_METHOD'] = strtoupper($method);
+        $_SERVER['REQUEST_URI']    = $uri;
+        $_SERVER['HTTP_HOST']      = $_SERVER['HTTP_HOST'] ?? 'localhost';
+
+        // Inject headers
+        foreach (array_merge($this->httpHeaders, $headers) as $name => $value) {
+            $key = 'HTTP_' . strtoupper(str_replace('-', '_', $name));
+            $_SERVER[$key] = $value;
         }
+
+        // Inject body data
+        $request->make($data);
+        
+        // Inject session
+        if (!empty($this->httpSession)) {
+            $request->session = $this->httpSession;
+        }
+
+        // Inject fake authenticated user
+        if ($this->httpUserId !== null) {
+            $request->test_user_id = $this->httpUserId;
+        }
+
+        return $request;
     }
 
     /**
-     * Provides a hash parameter for the request.
-     * 
-     * @param array|\Clicalmani\Database\Factory\Sequence $parameters
-     * @return static
+     * Same as call(), but sets JSON headers and serializes the body as JSON.
      */
-    public function hash(array|Sequence $parameters) : static
+    protected function json(string $method, string $uri, array $data = [], array $headers = []): TestResponse
     {
-        if ( is_array($parameters) ) $this->hash = with( new Request )->createParametersHash($parameters);
-        elseif ( $parameters instanceof Sequence ) $this->hash = $parameters;
-        return $this;
-    }
-
-    /**
-     * Set a request header.
-     * 
-     * @param string $name
-     * @param string $value
-     * @return static
-     */
-    public function header(string $name, string $value) : static
-    {
-        $this->override( [$name => $value] );
-        return $this;
-    }
-
-    /**
-     * Set request headers
-     * 
-     * @param array|\Clicalmani\Database\Factory\Sequence $headers
-     * @return static
-     */
-    public function headers(Sequence|array $headers) : static
-    {
-        if ( is_array($headers) ) $this->override( $headers );
-        elseif ( $headers instanceof Sequence ) $this->headers = $headers;
-        return $this;
+        return $this->call($method, $uri, $data, array_merge([
+            'Accept'       => 'application/json',
+            'Content-Type' => 'application/json',
+        ], $headers));
     }
 }

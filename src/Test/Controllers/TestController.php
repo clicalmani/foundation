@@ -17,7 +17,7 @@ use Clicalmani\Core\Test\TestInterface;
  * @license    MIT License
  * @link       https://github.com/clicalmani/foundation
  */
-abstract class TestController implements TestInterface
+class TestController implements TestInterface
 {
     /**
      * Request controller

@@ -171,6 +171,14 @@ class MessengerServiceProvider implements ServiceProviderInterface
                 ]
             ])
         );
+
+        // Injector
+        app()->addService('*.messenger', 
+            \Clicalmani\Core\Messenger\Inject::class,
+            static fn(ServiceConfigurator|DefaultsConfigurator $config) => $config->args([
+                app()->dependency('service', 'messenger')
+            ])
+        );
     }
 
     /**

@@ -17,6 +17,9 @@ class Web extends Middleware
     public function handle(RequestInterface $request, ResponseInterface $response, \Closure $next) : \Clicalmani\Core\Http\ResponseInterface|\Clicalmani\Core\Http\RedirectInterface
     {
         if (!in_array($request->getMethod(), ['get', 'options']) AND FALSE === $request->checkCSRFToken()) {
+            if (defined('TEST_ENV')) {
+                return $response->status(422)->json(['error' => 'CSRF token mismatch']);
+            }
             return $response->forbidden();
         }
 

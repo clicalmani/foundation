@@ -71,6 +71,11 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
         return $this->validator->validated();
     }
 
+    public function validationErrors() : array
+    {
+        return $this->validator->errors();
+    }
+
     public function messages() : array
     {
         return [

@@ -2,6 +2,8 @@
 namespace Clicalmani\Core\Providers;
 
 use Override;
+use Symfony\Component\DependencyInjection\Loader\Configurator\DefaultsConfigurator;
+use Symfony\Component\DependencyInjection\Loader\Configurator\ServiceConfigurator;
 
 class NotificationServiceProvider extends ServiceProvider implements ServiceProviderInterface
 {
@@ -10,6 +12,15 @@ class NotificationServiceProvider extends ServiceProvider implements ServiceProv
     {
         \Clicalmani\Notification\ChannelRegistry::registerMany(
             app()->config['bootstrap']['notifications'] ?? []
+        );
+
+        // Manager
+        app()->addService(
+            'notification', 
+            \Clicalmani\Notification\NotificationManager::class,
+            function(ServiceConfigurator|DefaultsConfigurator $config) {
+                $config->args([]);
+            },
         );
     }
 
