@@ -131,8 +131,9 @@ interface FileInterface
     /**
      * Store the file on the disk
      *
+     * @param ?string $filename
      * @param string|null $disk
      * @return string
      */
-    public function store(?string $disk = null) : string;
+    public function store(?string $filename, ?string $disk = null): string;
 }

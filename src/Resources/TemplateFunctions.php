@@ -22,9 +22,9 @@ class TemplateFunctions
         return new Json($value, $associative, $depth, $flags);
     }
 
-    public static function asset(?string $path = '/') : string
+    public static function assets(?string $path = '/') : string
     {
-        return asset($path);
+        return assets($path);
     }
 
     public static function session(string $name)

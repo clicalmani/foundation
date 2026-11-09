@@ -244,7 +244,7 @@ class Reflector
         if (is_subclass_of($instance, \Clicalmani\Core\Http\Request::class) ||
 					$instance::class === \Clicalmani\Core\Http\Request::class) {
 
-            $request = isConsoleMode() ? Request::current() : new Request; // Fallback to default request
+            $request = Request::current();
 		
             $data = $request->all();
             /** @var \Clicalmani\Core\Http\Request */

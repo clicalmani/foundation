@@ -33,8 +33,8 @@ class Redirect extends Response implements RedirectInterface
 
         $this->header('Location', $uri);
 
-        if (Request::current()?->hasHeader('X-Inertia') && 
-            in_array((new Request)->getMethod(), ['put', 'patch', 'delete'])) {
+        if ($request = Request::current() AND $request?->hasHeader('X-Inertia') AND 
+            in_array($request->getMethod(), ['put', 'patch', 'delete'])) {
             $this->status = 303;
         }
     }
@@ -152,10 +152,6 @@ class Redirect extends Response implements RedirectInterface
         
         if ($this->external && Request::current()?->hasHeader('X-Inertia')) {
             return Inertia::location($uri);
-        }
-
-        if (app()->response instanceof \Clicalmani\Core\Http\Redirect) {
-            return (string) app()->response;
         }
 
         app()->response?->status($this->status);

@@ -33,7 +33,7 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
     /**
      * Validator
      * 
-     * @var \Clicalmani\Core\Fundation\Validation\Validator
+     * @var \Clicalmani\Validation\Validator
      */
     private $validator;
     
@@ -62,18 +62,22 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
 
     public function validate(?array $signatures = []) : array
     {
-        $validator = Validator::make($signatures, $this->all(), Validator::ERROR_SILENCE);
-        return !$validator->hasErrors() ? $validator->validated(): [];
+        return $this->getValidator()->validated();
+    }
+
+    public function fails(): bool
+    {
+        return $this->getValidator()->hasErrors();
     }
 
     public function validated() : array
     {
-        return $this->validator->validated();
+        return $this->getValidator()->validated();
     }
 
-    public function validationErrors() : array
+    public function errors() : array
     {
-        return $this->validator->errors();
+        return $this->getValidator()->errors();
     }
 
     public function messages() : array
@@ -90,7 +94,7 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
      */
     public function __construct(private ?array $signatures = []) 
     {
-        $this->validator = new \Clicalmani\Validation\Validator;
+        $this->validator = new Validator;
         
         parent::__construct(
             $this->getMethod(),
@@ -110,13 +114,13 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
     {
         $inputs = array_merge($this->attributes, $this->uploadedFiles);
         
-        if ($this->validator->sanitize($inputs, $this->signatures ?? [])) \Clicalmani\Validation\Validator::passed($name);
+        if ($this->validator->sanitize($inputs, $this->signatures ?? [])) $this->validator->passed($name);
 
         if ( array_key_exists($name, $this->attributes) ) {
             $this->attributes[$name] = $inputs[$name] ?? null;
         }
         
-        return @ $this->attributes[$name];
+        return $this->attributes[$name] ?? null;
     }
 
     /**
@@ -565,5 +569,12 @@ class Request extends HttpRequest implements RequestInterface, \ArrayAccess, \Js
     public function setSignatures(array $newSignatures) : void
     {
         $this->signatures = $newSignatures;
+    }
+
+    private function getValidator(): Validator
+    {
+        $input = $this->all() + $this->getUploadedFiles();
+        $this->validator->sanitize($input, $this->signatures);
+        return $this->validator;
     }
 }

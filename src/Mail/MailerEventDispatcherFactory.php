@@ -1,10 +1,15 @@
 <?php
 namespace Clicalmani\Core\Mail;
 
+use Clicalmani\Core\Resources\TemplateLoader;
+use Clicalmani\Core\Resources\TonkaTwigExtension;
+use Symfony\Bridge\Twig\Mime\BodyRenderer;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Mailer\EventListener\EnvelopeListener;
+use Symfony\Component\Mailer\EventListener\MessageListener;
 use Symfony\Component\Mime\Address;
+use Twig\Environment;
 
 class MailerEventDispatcherFactory
 {
@@ -21,6 +26,18 @@ class MailerEventDispatcherFactory
             );
         }
 
+        $dispatcher->addSubscriber(
+            new MessageListener(null, new BodyRenderer($this->twig()))
+        );
+
         return $dispatcher;
+    }
+
+    private function twig(): Environment
+    {
+        $twig = new Environment(new TemplateLoader, []);
+        $twig->addExtension(new TonkaTwigExtension);
+
+        return $twig;
     }
 }

@@ -7,10 +7,18 @@ interface MailableInterface
      * Set the view template and data for the email.
      *
      * @param string $template The view template name.
-     * @param array $data The data to be passed to the view.
      * @return self
      */
-    public function view(string $template, array $data = []): self;
+    public function view(string $template): self;
+
+    /**
+     * Set the plain text body of the email.
+     *
+     * @param string $body The plain text body.
+     * @param string $charset The character set (default is 'utf-8').
+     * @return self
+     */
+    public function text(string $body, string $charset = 'utf-8'): self;
 
     /**
      * Set the subject of the email.
@@ -20,16 +28,15 @@ interface MailableInterface
      */
     public function subject(string $subject): self;
 
-    /**
-     * Set the recipient of the email.
-     *
-     * @param string $email The recipient's email address.
-     * @param string|null $name The recipient's name (optional).
-     * @return self
-     */
-    public function to(string $email, ?string $name = null): self;
-
     public function getLayout() : ?string;
 
     public function layoutDisabled() : bool;
+
+    /**
+     * Set the layout for the email.
+     *
+     * @param string $layout The layout name.
+     * @return self
+     */
+    public function with(array $data = []): self;
 }

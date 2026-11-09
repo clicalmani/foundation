@@ -2,11 +2,8 @@
 
 namespace Clicalmani\Core\Mail;
 
-use Override;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\Mime\Address;
-use Symfony\Component\Mime\Part\File;
-use Symfony\Component\Mime\Part\DataPart;
 
 /**
  * Class Mailable
@@ -22,17 +19,21 @@ abstract class Mailable extends TemplatedEmail implements MailableInterface
 
     abstract public function build(): static;
 
-    /**
-     * Binds a dedicated template layout identity path alongside an associated rendering payload to the instance.
-     *
-     * @param string $template The relative file path key or reference identifying the template view resource.
-     * @param array<string, mixed> $data Dynamic payload context variables mapped to the template scope.
-     * @return static
-     */
-    public function view(string $template, array $data = []): static
+    public function subject(string $subject): static
+    {
+        parent::subject($subject);
+        return $this;
+    }
+
+    public function view(string $template): static
     {
         $this->htmlTemplate($template);
-        $this->context($data);
+        return $this;
+    }
+
+    public function text($body, string $charset = 'utf-8'): static
+    {
+        parent::text($body, $charset);
         return $this;
     }
 
@@ -57,65 +58,85 @@ abstract class Mailable extends TemplatedEmail implements MailableInterface
     }
 
     /**
-     * Définit le(s) destinataire(s), en acceptant plusieurs formes d'entrée
-     * puis en délégant à Email::to() (qui attend des Address|string natifs).
-     *
      * Formes acceptées :
      *   ->to('a@x.com')
-     *   ->to('a@x.com', 'Alice')
+     *   ->to('a@x.com', 'Alice')                 (2e chaîne sans '@' = nom)
+     *   ->to('a@x.com', 'b@x.com')               (deux destinataires, comportement natif)
+     *   ->to(new Address('a@x.com'))
      *   ->to(['a@x.com', 'b@x.com'])
      *   ->to(['a@x.com' => 'Alice', 'b@x.com' => 'Bob'])
      *   ->to([['a@x.com', 'Alice'], ['b@x.com', null]])
-     *
-     * @param string|array<int|string, mixed> $email
-     * @param string|null $name Utilisé uniquement quand $email est une chaîne unique.
-     * @return static
      */
-    public function to(string|array $email, ?string $name = null): static
+    public function to(Address|string|array ...$addresses): static
     {
-        parent::to(...$this->toAddresses($email, $name));
+        parent::to(...$this->normalizeAddresses($addresses));
         return $this;
     }
 
     /**
      * Définit l'expéditeur, mêmes formes d'entrée que to().
-     *
-     * @param string|array<int|string, mixed> $email
-     * @param string|null $name
-     * @return static
      */
-    public function from(string|array $email, ?string $name = null): static
+    public function from(Address|string|array ...$addresses): static
     {
-        parent::from(...$this->toAddresses($email, $name));
+        parent::from(...$this->normalizeAddresses($addresses));
         return $this;
     }
 
-    public function attach(string $path, array $options = []): static
+    /**
+     * Compatible avec Email::attach($body, ?string $name, ?string $contentType)
+     * et avec la forme ->attach('/chemin/fichier.pdf', ['as' => 'x.pdf', 'mime' => '...']).
+     */
+    public function attach($body, string|array|null $name = null, ?string $contentType = null): static
     {
-        return parent::attach(new File($path), $options['as'] ?? null, $options['mime'] ?? null);
-    }
+        if (is_array($name)) {
+            $contentType = $name['mime'] ?? $contentType;
+            $name        = $name['as'] ?? null;
+        }
 
-    public function attachStream($stream, array $options = []) : static
-    {
-        return parent::addPart(new DataPart($stream), $options['as'] ?? null, $options['mime'] ?? null);
-    }
+        if (is_string($body) && is_file($body)) {
+            parent::attachFromPath($body, $name, $contentType);
+        } else {
+            parent::attach($body, $name, $contentType);
+        }
 
-    public function attachData(string $data, ?string $as = null, array $options = []) : static
-    {
-        return parent::addPart(new DataPart($data), $as ?? $options['as'] ?? null, $options['mime'] ?? null);
-    }
-
-    public function embed($body, array $options = []): static
-    {
-        return parent::addPart(((new DataPart($body, $options['as'] ?? null, $options['mime'] ?? null))->asInline()));
+        return $this;
     }
 
     /**
-     * Vide la liste des destinataires courants (en-tête To réel),
-     * pour repartir d'une enveloppe propre avant de rappeler to().
-     *
-     * @return static
+     * @param resource $stream
      */
+    public function attachStream($stream, array $options = []): static
+    {
+        parent::attach($stream, $options['as'] ?? null, $options['mime'] ?? null);
+        return $this;
+    }
+
+    public function attachData(string $data, ?string $as = null, array $options = []): static
+    {
+        parent::attach($data, $as ?? $options['as'] ?? null, $options['mime'] ?? null);
+        return $this;
+    }
+
+    /**
+     * Compatible avec Email::embed($body, ?string $name, ?string $contentType)
+     * et avec la forme ->embed($body, ['as' => 'logo.png', 'mime' => 'image/png']).
+     */
+    public function embed($body, string|array|null $name = null, ?string $contentType = null): static
+    {
+        if (is_array($name)) {
+            $contentType = $name['mime'] ?? $contentType;
+            $name        = $name['as'] ?? null;
+        }
+
+        if (is_string($body) && is_file($body)) {
+            parent::embedFromPath($body, $name, $contentType);
+        } else {
+            parent::embed($body, $name, $contentType);
+        }
+
+        return $this;
+    }
+
     public function clearTo(): static
     {
         $this->getHeaders()->remove('To');
@@ -123,10 +144,6 @@ abstract class Mailable extends TemplatedEmail implements MailableInterface
     }
 
     /**
-     * Retourne les destinataires actuels sous une forme simple [email, name],
-     * en lisant l'état réel de l'Email (pas une structure parallèle) —
-     * pratique pour du logging/debug sans manipuler des objets Address.
-     *
      * @return array<int, array{email: string, name: string}>
      */
     public function recipients(): array
@@ -137,42 +154,66 @@ abstract class Mailable extends TemplatedEmail implements MailableInterface
         );
     }
 
-    public function getLayout() : ?string
+    public function getLayout(): ?string
     {
         return $this->layout;
     }
 
-    public function layoutDisabled() : bool
+    public function layoutDisabled(): bool
     {
         return $this->layoutDisabled;
     }
 
     /**
-     * Normalise n'importe laquelle des formes acceptées par to()/from() en
-     * une liste d'objets Address, prête pour le parent::to()/from() natif.
+     * Normalise tous les formats acceptés par to()/from() en liste d'Address.
      *
-     * @param string|array<int|string, mixed> $email
-     * @param string|null $name
+     * @param array<int, Address|string|array> $args
      * @return Address[]
      */
-    private function toAddresses(string|array $email, ?string $name): array
+    private function normalizeAddresses(array $args): array
     {
-        if (is_string($email)) {
-            return [new Address($email, $name ?? '')];
+        // Cas "email, nom" : deux chaînes dont la 2e n'est pas une adresse
+        if (count($args) === 2
+            && is_string($args[0]) && is_string($args[1])
+            && !str_contains($args[1], '@')
+        ) {
+            return [new Address($args[0], $args[1])];
         }
 
         $addresses = [];
 
-        foreach ($email as $key => $value) {
+        foreach ($args as $arg) {
+            if (is_array($arg)) {
+                array_push($addresses, ...$this->expandArray($arg));
+            } else {
+                $addresses[] = $arg instanceof Address ? $arg : Address::create($arg);
+            }
+        }
+
+        return $addresses;
+    }
+
+    /**
+     * @param array<int|string, mixed> $list
+     * @return Address[]
+     */
+    private function expandArray(array $list): array
+    {
+        $addresses = [];
+
+        foreach ($list as $key => $value) {
             $addresses[] = match (true) {
-                // Forme paire explicite : [['a@x.com', 'Alice'], ...]
+                // Objet Address déjà prêt
+                $value instanceof Address => $value,
+
+                // Paire explicite : [['a@x.com', 'Alice'], ...]
                 is_array($value) => new Address($value[0], $value[1] ?? ''),
 
                 // Forme associative : ['a@x.com' => 'Alice', ...]
-                is_string($key) => new Address($key, $value),
+                is_string($key) => new Address($key, (string) $value),
 
-                // Forme liste simple : ['a@x.com', 'b@x.com', ...]
-                default => new Address($value, ''),
+                // Liste simple : ['a@x.com', 'b@x.com', ...]
+                default => Address::create($value),
             };
         }
 

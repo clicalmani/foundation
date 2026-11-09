@@ -5,6 +5,7 @@ use Clicalmani\Core\Mail\Transport\LogTransport;
 use Clicalmani\Core\Support\Facades\Arr;
 use Clicalmani\Core\Support\Facades\Env;
 use Clicalmani\Psr\Uri;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Mailer\Transport;
 use Symfony\Component\Mailer\Transport\TransportInterface as SymfonyTransportInterface;
 
@@ -16,6 +17,8 @@ class MailerTransportFactory implements TransportFactoryInterface
      * (voir resolve()) ; 'array' reste à implémenter.
      */
     private const UNRESOLVED_DRIVERS = ['array'];
+
+    public function __construct(private ?EventDispatcherInterface $dispatcher = null) {}
 
     public function create(?string $name = null) : SymfonyTransportInterface
     {
@@ -32,7 +35,7 @@ class MailerTransportFactory implements TransportFactoryInterface
         // 'log' n'a pas de scheme DSN Symfony natif : transport custom
         // instancié directement, sans passer par Transport::fromDsn().
         if ($mailerName === 'log') {
-            return new LogTransport();
+            return new LogTransport(null, $this->dispatcher);
         }
 
         $config = config("mail.mailers.$mailerName");
@@ -58,11 +61,11 @@ class MailerTransportFactory implements TransportFactoryInterface
                 default      => $joined,
             };
 
-            return Transport::fromDsn($dsn);
+            return Transport::fromDsn($dsn, $this->dispatcher);
         }
 
         // --- Mailer simple ---
-        return Transport::fromDsn((string) $this->buildDsn($mailerName));
+        return Transport::fromDsn((string) $this->buildDsn($mailerName), $this->dispatcher);
     }
 
     /**

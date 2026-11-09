@@ -30,6 +30,8 @@ trait JsonResponse
 
     private function sendJson(mixed $message) : self
     {
+        $this->body = new \Clicalmani\Psr\NonBufferedBody;
+        
         if ( defined('TEST_ENV') ) {
             $this->body->setContents($message);
         } else {

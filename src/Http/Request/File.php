@@ -180,7 +180,7 @@ class File implements FileInterface, \JsonSerializable
         return $destination;
     }
 
-    public function jsonSerialize(): array
+    public function toArray(): array
     {
         return [
             'name' => $this->getClientFilename(),
@@ -188,5 +188,10 @@ class File implements FileInterface, \JsonSerializable
             'size' => $this->getSize(),
             'error' => $this->getError(),
         ];
+    }
+
+    public function jsonSerialize(): array
+    {
+        return $this->toArray();
     }
 }

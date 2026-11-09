@@ -75,8 +75,18 @@ class Container extends Application implements ContainerInterface
 
     public function getClassIntance(string $class, bool $share = true)
     {
-        $this->set($class)->share($share);
-        return $this->get($class);
+        if ($share && isset($this->resolved[$class])) {
+            return $this->resolved[$class];
+        }
+
+        // Déjà connu du conteneur compilé (ex: service enregistré avant compile)
+        if ($this->has($class)) {
+            return $this->get($class);
+        }
+
+        $object = new $class(...$this->resolveArguments($class));
+
+        return $share ? $this->resolved[$class] = $object : $object;
     }
 
     public function getImplementingClassInstance(string $interface, bool $share = true)
@@ -105,6 +115,42 @@ class Container extends Application implements ContainerInterface
     public function getServiceIds()
     {
         return $this->builder()->getServiceIds();
+    }
+
+    private function resolveArguments(string $class): array
+    {
+        $constructor = (new \ReflectionClass($class))->getConstructor();
+        if (!$constructor) return [];
+
+        $args = [];
+
+        foreach ($constructor->getParameters() as $param) {
+            $type = $param->getType();
+
+            if ($type instanceof \ReflectionNamedType && !$type->isBuiltin()) {
+                $dep = $type->getName();
+
+                if ($this->has($dep)) {
+                    $args[] = $this->get($dep);                       // FQCN ou alias
+                } elseif ($this->has($slug = reference($dep))) {
+                    $args[] = $this->get($slug);                      // id slugifié
+                } elseif (interface_exists($dep)) {
+                    $args[] = $this->getImplementingClassInstance($dep);
+                } else {
+                    $args[] = $this->getClassIntance($dep);           // classe concrète, récursif
+                }
+            } elseif ($param->isDefaultValueAvailable()) {
+                $args[] = $param->getDefaultValue();
+            } elseif ($type?->allowsNull()) {
+                $args[] = null;
+            } else {
+                throw new ContainerDepencyException(
+                    sprintf('Cannot resolve $%s of %s::__construct()', $param->getName(), $class)
+                );
+            }
+        }
+
+        return $args;
     }
 }
 

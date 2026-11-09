@@ -179,7 +179,7 @@ if ( ! function_exists( 'env' ) ) {
     }
 }
 
-if ( ! function_exists( 'asset' ) ) {
+if ( ! function_exists( 'assets' ) ) {
 
     /**
      * Get asset
@@ -187,7 +187,7 @@ if ( ! function_exists( 'asset' ) ) {
      * @param ?string $path Asset path
      * @return string
      */
-    function asset(?string $path = '/') : string {
+    function assets(?string $path = '/') : string {
         $app_url = app()->getUrl($path);
         $protocol = '';
         if (preg_match('/^http/', $app_url) == false) {
@@ -694,7 +694,10 @@ if ( ! function_exists('config') ) {
 if ( ! function_exists('abort') ) {
     function abort(int $status, ?string $message = '') : never
     {
-        response($message, $status)->sendStatus();
+        (new \Clicalmani\Core\Http\Response(
+            $message,
+            $status,
+        ))->withBody(new \Clicalmani\Psr\NonBufferedBody)->sendStatus($status);
     }
 }
 

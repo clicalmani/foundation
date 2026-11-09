@@ -2,6 +2,7 @@
 
 namespace Clicalmani\Core\Mail\Transport;
 
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Mailer\SentMessage;
 use Symfony\Component\Mailer\Transport\AbstractTransport;
 use Symfony\Component\Mime\MessageConverter;
@@ -20,9 +21,9 @@ class LogTransport extends AbstractTransport
      */
     private ?string $logFile;
 
-    public function __construct(?string $logFile = null)
+    public function __construct(?string $logFile = null, ?EventDispatcherInterface $dispatcher = null)
     {
-        parent::__construct();
+        parent::__construct($dispatcher);
 
         $this->logFile = $logFile ?? $this->defaultLogFile();
     }

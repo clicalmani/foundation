@@ -44,7 +44,9 @@ class MailerServiceProvider implements ServiceProviderInterface
         app()->addService(MailerTransportFactory::class, 
             MailerTransportFactory::class,
             static function(ServiceConfigurator|DefaultsConfigurator $config) {
-                // Instantiated strictly for initial service visibility inside the container
+                $config->args([
+                    app()->dependency('service', EventDispatcherInterface::class),
+                ]);
             }
         );
 
@@ -97,7 +99,7 @@ class MailerServiceProvider implements ServiceProviderInterface
                     app()->dependency('service', EventDispatcherInterface::class)
                 ]);
             },
-            [MailerInterface::class, 'mailer'] // Shared runtime aliases for seamless DI injection or facade bindings
+            ['mailer', MailerInterface::class] // Shared runtime aliases for seamless DI injection or facade bindings
         );
 
         // Mailer Service

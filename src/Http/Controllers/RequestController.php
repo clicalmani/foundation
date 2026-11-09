@@ -59,9 +59,7 @@ class RequestController
     public function getInstance(string $class) : object
     {
 		if ($this->instance instanceof $class) return $this->instance;
-		
-		$this->container->set($class);
-		return $this->instance = $this->container->get($class);
+		return $this->instance = $this->container->getClassIntance($class);
     }
 
 	/**
@@ -170,7 +168,7 @@ class RequestController
 		ReflectorInterface $reflector
 	): \Psr\Http\Message\ResponseInterface|\Clicalmani\Core\Http\ResponseInterface|\Clicalmani\Core\Http\RedirectInterface
 	{
-		$request = Request::current() ?? tap(new Request, fn($r) => Request::current($r));
+		$request = Request::current();
 
 		/** @var InjectionManager $injection */
 		$injection = $this->container->get(InjectionManager::class);

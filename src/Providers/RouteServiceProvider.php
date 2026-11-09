@@ -53,7 +53,7 @@ class RouteServiceProvider extends ServiceProvider
      * 
      * @var mixed
      */
-    private static mixed $response_data;
+    private static mixed $responseData;
 
     /**
      * Map block capturing Cross-Origin Resource Sharing policy rules.
@@ -196,7 +196,7 @@ class RouteServiceProvider extends ServiceProvider
      */
     public static function responseHandler(callable $callback): void
     {
-        static::$response_data = $callback( (new Request)->user() );
+        static::$responseData = $callback( (new Request)->user() );
     }
 
     /**
@@ -206,7 +206,7 @@ class RouteServiceProvider extends ServiceProvider
      */
     public static function getResponseData(): mixed
     {
-        return static::$response_data;
+        return static::$responseData;
     }
 
     /**

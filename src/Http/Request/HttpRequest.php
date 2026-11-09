@@ -61,7 +61,12 @@ abstract class HttpRequest extends \Clicalmani\Psr\Request
             $this->headers[] = new Header('HTTP_HOST', (array)$this->uri->getHost());
         }
         
-        $input = $this->body->getContents();
+        $contentType = (string) ($serverParams['CONTENT_TYPE'] ?? '');
+
+        $needsBody = in_array($this->method, ['put', 'patch'], true)
+            || str_contains($contentType, 'application/json');
+
+        $input = $needsBody ? $this->body->getContents() : '';
         
         if (in_array($this->method, ['put', 'patch'])) {
 
@@ -161,14 +166,8 @@ abstract class HttpRequest extends \Clicalmani\Psr\Request
     {
         if ($this->hasFile($name)) {
             $request_signatures = request()->getSignatures();
-
-            $file = $this->uploadedFiles[$name];
             
-            if (array_key_exists($name, $request_signatures)) {
-                $validator = new \Clicalmani\Validation\Validator;
-                $inputs = [$name => $file];
-                $validator->sanitize($inputs, [$name => $request_signatures[$name]]);
-            }
+            $file = $this->uploadedFiles[$name];
 
             if ( is_string($file['name'])) {
                 return new File(
