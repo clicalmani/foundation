@@ -4,6 +4,8 @@ namespace Clicalmani\Core\Messenger;
 
 use Clicalmani\Core\Messenger\Stamp\ElegantTransportStamp;
 use Clicalmani\Core\Messenger\Stamp\RetryingStamp;
+use Clicalmani\Core\Support\Facades\DB;
+use Symfony\Component\Mailer\Messenger\SendEmailMessage;
 use Symfony\Component\Messenger\Transport\TransportInterface;
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\Transport\Serialization\SerializerInterface;
@@ -24,18 +26,19 @@ use Symfony\Component\Messenger\Stamp\DelayStamp;
  */
 class ElegantTransport implements TransportInterface
 {
+    private string $table;
+
     /**
      * ElegantTransport constructor.
      * 
-     * @param string $model The fully qualified class name of the Elegant ORM Model.
      * @param SerializerInterface|null $serializer Serializer instance for message payload encoding/decoding.
      * @param array<string, mixed> $options Transport run-time configuration attributes.
      */
     public function __construct(
-        protected string $model, 
         protected ?SerializerInterface $serializer = null,
         protected array $options = []
     ) {
+        $this->table      = $options['message_table'] ?? '';
         $this->serializer = $serializer ?? new PhpSerializer();
     }
 
@@ -48,7 +51,7 @@ class ElegantTransport implements TransportInterface
     public function get(): iterable
     {
         // Look for an undelivered message whose availability time has passed
-        $record = $this->model::where('delivered_at IS NULL AND available_at <= NOW()')
+        $record = DB::table($this->table)->where('delivered_at IS NULL AND available_at <= NOW()')
                     ->first();
         
         if (null === $record) {
@@ -56,7 +59,7 @@ class ElegantTransport implements TransportInterface
         }
 
         // Mark as "in progress" to prevent other workers from picking it up
-        $record->update(['delivered_at' => now()]);
+        DB::table($this->table)->where('id = ?', [$record->id])->update(['delivered_at' => now()]);
         
         // Deserialize to return an Envelope back to Symfony
         $envelope = $this->serializer->decode([
@@ -81,52 +84,37 @@ class ElegantTransport implements TransportInterface
     {
         $encoded = $this->serializer->encode($envelope);
 
-        /** @var RedeliveryStamp|null $redelivery */
-        $redelivery = $envelope->last(RedeliveryStamp::class);
-
-        /** @var ElegantTransportStamp|null $idStamp */
-        $idStamp = $envelope->last(ElegantTransportStamp::class);
-        
-        if ($redelivery !== null && $idStamp !== null) {
-            // ── Retry Execution Flow: Update existing historical record ───────────────────────
-            // Overwrite payload parameters without introducing disjointed row records.
-            // Reset delivery states to bring the message entity back into worker visibility.
-            $this->model::find($idStamp->getId())?->update([
-                'body'         => $encoded['body'],
-                'headers'      => json_encode($encoded['headers'] ?? []),
-                'delivered_at' => null,  
-                'available_at' => now(), 
-            ]);
-
-            return $envelope;
-        }
-
-        /** @var DelayStamp|null $delayStamp */
-        $delayStamp = $envelope->last(DelayStamp::class);
-
-        $availableAt = now(); 
+        $delayStamp  = $envelope->last(DelayStamp::class);
+        $availableAt = now();
 
         if (isset($this->options['delay'])) {
             $availableAt = now()->addSeconds((int) $this->options['delay'] / 1000);
         }
 
         if ($delayStamp) {
-            $seconds = (int) $delayStamp->getDelay() / 1000;
-            $availableAt = now()->addSeconds($seconds); 
+            $availableAt = now()->addSeconds((int) $delayStamp->getDelay() / 1000);
         }
 
-        // ── Standard Dispatch Flow: Persistent state insertion ───────────────────────
-        $model = new $this->model;
-        $model->body         = $encoded['body'];
-        $model->headers      = json_encode($encoded['headers'] ?? []);
-        $model->queue_name   = $this->options['queue_name'] ?? 'default';
-        $model->created_at   = now();
-        $model->available_at = $availableAt;
-        $model->save();
+        $message = $envelope->getMessage();
+        $queue   = $this->options['queue_name'] ?? 'default';
 
-        return $envelope->with(
-            new ElegantTransportStamp((int) $model->id)
-        );
+        if ($message instanceof SendEmailMessage) {
+            $email = $message->getMessage(); 
+            if (method_exists($email, 'queue')) {
+                $queue = $email->queue();
+            }
+        }
+        
+        // ── Standard Dispatch Flow: Persistent state insertion ───────────────────────
+        $id = DB::table($this->table)->insert([
+            'body'         => $encoded['body'],
+            'headers'      => json_encode($encoded['headers'] ?? []),
+            'queue_name'   => $queue,
+            'created_at'   => now(),
+            'available_at' => $availableAt,
+        ])->getId();
+
+        return $envelope->with(new ElegantTransportStamp((int) $id));
     }
 
     /**
@@ -144,11 +132,13 @@ class ElegantTransport implements TransportInterface
         if (null === $stamp) {
             return; 
         } 
+
+        $query = DB::table($this->table)->where('id = ?', [$stamp->getId()]);
         
         if (false === ($this->options['keep'] ?? false)) {
-            $this->model::find($stamp->getId())?->delete();
+            $query->delete();
         } else {
-            $this->model::find($stamp->getId())?->update(['completed_at' => now()]);
+            $query->update(['completed_at' => now()]);
         }
     }
 
@@ -172,10 +162,12 @@ class ElegantTransport implements TransportInterface
             return;
         }
 
+        $query = DB::table($this->table)->where('id = ?', [$stamp->getId()]);
+
         if (false === ($this->options['keep'] ?? false)) {
-            $this->model::find($stamp->getId())?->delete();
+            $query->delete();
         } else {
-            $this->model::find($stamp->getId())?->update([
+            $query->update([
                 'completed_at' => now(),
                 'delivered_at' => now(),
             ]);

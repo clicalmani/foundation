@@ -43,7 +43,7 @@ class Response extends \Clicalmani\Psr\Response implements ResponseInterface
 
     public function sendStatus(?int $code = null)
     {
-        http_response_code($this->status = $code ?: $this->status);
+        $this->setReponseCode($this->status = $code ?: $this->status);
         
         if (Route::isApi()) 
             $this->sendBody(
@@ -145,7 +145,7 @@ class Response extends \Clicalmani\Psr\Response implements ResponseInterface
         $content = $content ?: $this->message;
         
         if ( !headers_sent() ) {
-            http_response_code($this->status);
+            $this->setReponseCode($this->status);
             $this->sendHeaders();
             $this->sendBody($content);
         }
@@ -155,7 +155,7 @@ class Response extends \Clicalmani\Psr\Response implements ResponseInterface
 
     public function status(int $code) : \Clicalmani\Core\Http\ResponseInterface
     {
-        http_response_code($this->status = $code);
+        $this->setReponseCode($this->status = $code);
         return $this;
     }
 
@@ -252,5 +252,10 @@ class Response extends \Clicalmani\Psr\Response implements ResponseInterface
     {
         $this->sendHeaders();
         return new Stream(fopen($path, 'r', false, stream_context_create($context)));
+    }
+
+    private function setReponseCode(int $code) : void
+    {
+        if (!headers_sent()) http_response_code($code);
     }
 }

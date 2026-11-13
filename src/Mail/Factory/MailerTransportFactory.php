@@ -1,6 +1,7 @@
 <?php
 namespace Clicalmani\Core\Mail\Factory;
 
+use Clicalmani\Core\Mail\Transport\BuildingTransport;
 use Clicalmani\Core\Mail\Transport\LogTransport;
 use Clicalmani\Core\Support\Facades\Arr;
 use Clicalmani\Core\Support\Facades\Env;
@@ -11,18 +12,15 @@ use Symfony\Component\Mailer\Transport\TransportInterface as SymfonyTransportInt
 
 class MailerTransportFactory implements TransportFactoryInterface
 {
-    /**
-     * Pilotes propres à ce framework, sans équivalent DSN Symfony natif,
-     * pas encore câblés explicitement. 'log' est désormais géré directement
-     * (voir resolve()) ; 'array' reste à implémenter.
-     */
     private const UNRESOLVED_DRIVERS = ['array'];
 
     public function __construct(private ?EventDispatcherInterface $dispatcher = null) {}
 
     public function create(?string $name = null) : SymfonyTransportInterface
     {
-        return $this->resolve($name ?? config('mail.default', 'smtp'));
+        return new BuildingTransport(
+            $this->resolve($name ?? config('mail.default', 'smtp'))
+        );
     }
 
     /**

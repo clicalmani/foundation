@@ -17,6 +17,8 @@ abstract class Mailable extends TemplatedEmail implements MailableInterface
 
     public bool $layoutDisabled = false;
 
+    private bool $built = false;
+
     abstract public function build(): static;
 
     public function subject(string $subject): static
@@ -162,6 +164,15 @@ abstract class Mailable extends TemplatedEmail implements MailableInterface
     public function layoutDisabled(): bool
     {
         return $this->layoutDisabled;
+    }
+
+    public function ensureBuilt(): static
+    {
+        if (!$this->built) {
+            $this->built = true;
+            $this->build();
+        }
+        return $this;
     }
 
     /**

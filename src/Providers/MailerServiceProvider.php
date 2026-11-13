@@ -3,6 +3,7 @@ namespace Clicalmani\Core\Providers;
 
 use Clicalmani\Core\Mail\MailerEventDispatcherFactory;
 use Clicalmani\Core\Mail\Factory\MailerTransportFactory;
+use Clicalmani\Core\Support\Facades\Config;
 use Symfony\Component\Mailer\Mailer;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mailer\Transport\TransportInterface;
@@ -35,7 +36,6 @@ class MailerServiceProvider implements ServiceProviderInterface
     public function register(): void
     {
         // Load config
-        // Never try to load config from boot
         if (is_file(config_path('/mail.php'))) {
             app()->config->set('mail', require config_path('/mail.php'));
         }
@@ -155,7 +155,7 @@ class MailerServiceProvider implements ServiceProviderInterface
      */
     protected function resolveBusArgument(): mixed
     {
-        $queueEnabled = (bool) config('mail.queue.enabled', false);
+        $queueEnabled = Config::boolean('mail.queue.enabled', false);
 
         if (!$queueEnabled) {
             return null;

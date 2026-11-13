@@ -2,6 +2,7 @@
 
 namespace Clicalmani\Core\Providers;
 
+use Clicalmani\Core\Filesystem\DirectoryScanner;
 use Clicalmani\Core\Messenger\ElegantTransportFactory;
 use Clicalmani\Core\Providers\ServiceProviderInterface;
 use Clicalmani\Core\Filesystem\RecursiveFilter;
@@ -9,6 +10,7 @@ use Symfony\Component\DependencyInjection\Loader\Configurator\DefaultsConfigurat
 use Symfony\Component\DependencyInjection\Loader\Configurator\ServiceConfigurator;
 use Symfony\Component\DependencyInjection\Reference;
 use Override;
+use Symfony\Component\Mailer\Messenger\SendEmailMessage;
 
 /**
  * Class MessengerServiceProvider
@@ -50,6 +52,8 @@ class MessengerServiceProvider implements ServiceProviderInterface
      */
     protected array $config = [];
 
+    private array $handlersMapping = [];
+
     /**
      * Registers message bus infrastructure dependencies, discovery maps, and routing middlewares.
      * 
@@ -62,7 +66,7 @@ class MessengerServiceProvider implements ServiceProviderInterface
         $this->config = require config_path('/messenger.php');
 
         // Execute reflection routines to automatically construct message-to-handler maps
-        $handlersMapping = $this->discoverHandlers();
+        $this->discoverHandlers();
         
         // Register the framework's proprietary Elegant Transport Factory component
         app()->addService('messenger.transport_factory.elegant', 
@@ -100,13 +104,13 @@ class MessengerServiceProvider implements ServiceProviderInterface
         // Provision a specialized error handling transport engine for dead-letter processing
         app()->addService('messenger.transport.failed', 
             \Symfony\Component\Messenger\Transport\TransportInterface::class,
-            static function(ServiceConfigurator|DefaultsConfigurator $config) {
+            function(ServiceConfigurator|DefaultsConfigurator $config) {
                 $config->factory([
                     app()->dependency('service', 'messenger.transport_factory.elegant'), 
                     'createTransport'
                 ])->args([
                     'elegant://failed',
-                    ['table_name' => 'failed_messages'],
+                    $this->config + ['table_name' => 'failed_messages'],
                 ]);
             }
         );
@@ -148,8 +152,8 @@ class MessengerServiceProvider implements ServiceProviderInterface
         // Register the handler locator storage containing resolved invokable maps
         app()->addService('messenger.handlers_locator', 
             \Symfony\Component\Messenger\Handler\HandlersLocator::class,
-            static fn(ServiceConfigurator|DefaultsConfigurator $config) => $config->args([
-                $handlersMapping
+            fn(ServiceConfigurator|DefaultsConfigurator $config) => $config->args([
+                $this->handlersMapping
             ])
         );
         
@@ -160,6 +164,14 @@ class MessengerServiceProvider implements ServiceProviderInterface
                 app()->dependency('service', 'messenger.handlers_locator')
             ])
         );
+
+        // Mailable Middleware
+        app()->addService('messenger.middleware.mailable', 
+            \Clicalmani\Core\Mail\MailableMiddleware::class,
+            static fn(ServiceConfigurator|DefaultsConfigurator $config) => $config->args([
+                app()->dependency('service', \Symfony\Component\Mailer\Transport\TransportInterface::class)
+            ])
+        );
         
         // Core framework Message Bus orchestration service containing the sequenced middleware pipeline
         app()->addService('messenger', 
@@ -167,6 +179,7 @@ class MessengerServiceProvider implements ServiceProviderInterface
             static fn(ServiceConfigurator|DefaultsConfigurator $config) => $config->args([
                 [
                     app()->dependency('service', 'messenger.middleware.send_message'),
+                    app()->dependency('service', 'messenger.middleware.mailable'),
                     app()->dependency('service', 'messenger.middleware.handle_message'),
                 ]
             ])
@@ -192,7 +205,7 @@ class MessengerServiceProvider implements ServiceProviderInterface
     ): void
     {
         if ( is_file(config_path('/messenger.php')) ) {
-            app()->config->set('messenger', require_once config_path('/messenger.php'));
+            app()->config->set('messenger', require config_path('/messenger.php'));
         }
     }
 
@@ -233,56 +246,43 @@ class MessengerServiceProvider implements ServiceProviderInterface
      * Inspects the target filesystem to dynamically build an execution map 
      * binding typed parameter objects to invokable class handlers.
      * 
-     * @return array Calculated multidimensional message-to-handler execution map array.
+     * @return void
      */
-    protected function discoverHandlers(): array
+    protected function discoverHandlers(): void
     {
-        $handlersMapping = [];
+        if ($this->handlersMapping) return;
+        
         $handlersPath = root_path($this->handlersPath);
 
         if (!is_dir($handlersPath)) {
-            return $handlersMapping;
+            return;
         }
 
-        $directory = new \RecursiveDirectoryIterator($handlersPath, \RecursiveDirectoryIterator::SKIP_DOTS);
-        $filter = new \RecursiveCallbackFilterIterator($directory, function ($current, $key, $iterator) {
-            if ($iterator->hasChildren()) {
-                return true;
-            }
-            return $current->isFile() && preg_match('/\.php$/', $current->getFilename());
-        });
-
-        $rootPath = rtrim(realpath($handlersPath), DIRECTORY_SEPARATOR);
-        $baseNamespace = rtrim($this->namespace, '\\');
+        $scanner = (new DirectoryScanner(
+            rootPath: $handlersPath,
+            baseNamespace: $this->namespace,
+            ignore: ['.', '..']
+        ));
+        $classes = $scanner->classes();
 
         /** @var \SplFileInfo $file */
-        foreach (new \RecursiveIteratorIterator($filter) as $file) {
-            $currentSubDir = dirname($file->getRealPath());
-            $relativeSubDir = str_replace($rootPath, '', $currentSubDir);
-            $subNamespace = str_replace(DIRECTORY_SEPARATOR, '\\', $relativeSubDir);
-            $classNameOnly = $file->getBasename('.php');
-            
-            $className = $baseNamespace . $subNamespace . '\\' . $classNameOnly;
-            $className = str_replace('\\\\', '\\', $className); // Safeguard against trailing or double backslashes
+        foreach ($classes as $className) {
 
-            if (class_exists($className)) {
-                $reflection = new \ReflectionClass($className);
-                if ($reflection->hasMethod('__invoke') && $reflection->isInstantiable()) {
-                    $method = $reflection->getMethod('__invoke');
-                    $parameters = $method->getParameters();
-                    
-                    if (isset($parameters[0]) && $type = $parameters[0]->getType()) {
-                        // Protects against Union Types (PHP 8+) and scalar types
-                        if ($type instanceof \ReflectionNamedType && !$type->isBuiltin()) {
-                            $messageClass = $type->getName();
-                            app()->addService($className, $className);
-                            $handlersMapping[$messageClass][] = new Reference($className);
-                        }
+            $reflection = new \ReflectionClass($className);
+
+            if ($reflection->hasMethod('__invoke') && $reflection->isInstantiable()) {
+                $method = $reflection->getMethod('__invoke');
+                $parameters = $method->getParameters();
+                
+                if (isset($parameters[0]) && $type = $parameters[0]->getType()) {
+                    // Protects against Union Types (PHP 8+) and scalar types
+                    if ($type instanceof \ReflectionNamedType && !$type->isBuiltin()) {
+                        $messageClass = $type->getName();
+                        app()->addService($className, $className);
+                        $this->handlersMapping[$messageClass][] = new Reference($className);
                     }
                 }
             }
         }
-
-        return $handlersMapping;
     }
 }

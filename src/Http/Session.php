@@ -58,6 +58,21 @@ class Session implements SessionInterface
         }
     }
 
+    /**
+     * Pull and clear a session flash value.
+     *
+     * @param string $key
+     * @return string
+     */
+    public function flash(string $key) : string
+    {
+        $value = (string) $this->get($key, '');
+
+        if ($value !== '') $this->remove($key);
+
+        return $value;
+    }
+
     public function flush() : void
     {
         $_SESSION = [];

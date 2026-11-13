@@ -3,6 +3,7 @@
 namespace Clicalmani\Core\Messenger;
 
 use Clicalmani\Core\Messenger\Stamp\ElegantTransportStamp;
+use Clicalmani\Core\Support\Facades\DB;
 use Symfony\Component\Messenger\Transport\TransportInterface;
 use Symfony\Component\Messenger\Transport\Serialization\SerializerInterface;
 use Symfony\Component\Messenger\Transport\Serialization\PhpSerializer;
@@ -22,6 +23,8 @@ use Override;
  */
 class FailedTransport implements TransportInterface
 {
+    private string $table;
+
     /**
      * Serializer instance for message payload encoding/decoding operations.
      * 
@@ -39,15 +42,14 @@ class FailedTransport implements TransportInterface
     /**
      * FailedTransport constructor.
      * 
-     * @param string $model The fully qualified class name of the associated Elegant ORM Model.
      * @param SerializerInterface|null $serializer Serializer instance for envelope body handling.
      * @param array<string, mixed> $options Run-time configuration attributes.
      */
     public function __construct(
-        protected string $model, 
         ?SerializerInterface $serializer = null,
         protected array $options = []
     ) {
+        $this->table      = $options['failed_table'];
         $this->serializer = $serializer ?? new PhpSerializer();
     }
 
@@ -67,7 +69,7 @@ class FailedTransport implements TransportInterface
         $idStamp = $envelope->last(ElegantTransportStamp::class);
 
         if ($idStamp && isset($this->failedIds[$idStamp->getId()])) {
-            $this->model::find($idStamp->getId())?->update([
+            DB::table($this->table)->where('id = ?', [$idStamp->getId()])?->update([
                 'body'    => $encoded['body'],
                 'headers' => json_encode($encoded['headers'] ?? []),
             ]);
@@ -83,20 +85,20 @@ class FailedTransport implements TransportInterface
             $exceptionMessage = $errorStamp->getExceptionMessage();
         }
 
-        $model = new $this->model;
-        $model->body              = $encoded['body'];
-        $model->headers           = isset($encoded['headers']) && is_array($encoded['headers'])
-                                        ? json_encode($encoded['headers'])
-                                        : '[]';
-        $model->queue_name        = $this->options['queue_name'] ?? 'failed';
-        $model->exception_class   = $exceptionClass;
-        $model->exception_message = $exceptionMessage;
-        $model->save();
+        $id = DB::table($this->table)->insert([
+            'body'              => $encoded['body'],
+            'headers'           => isset($encoded['headers']) && is_array($encoded['headers'])
+                                            ? json_encode($encoded['headers'])
+                                            : '[]',
+            'queue_name'        => $this->options['queue_name'] ?? 'failed',
+            'exception_class'   => $exceptionClass,
+            'exception_message' => $exceptionMessage,
+        ])->getId();
 
-        $this->failedIds[(int) $model->id] = true;
+        $this->failedIds[(int) $id] = true;
 
         // Attach the DB ID to the envelope so ack()/reject() know what to delete
-        return $envelope->with(new ElegantTransportStamp((int) $model->id));
+        return $envelope->with(new ElegantTransportStamp((int) $id));
     }
 
     /**
@@ -107,8 +109,7 @@ class FailedTransport implements TransportInterface
     #[Override]
     public function get(): iterable
     {
-        $modelClass = $this->model;
-        $records    = $modelClass::where('queue_name = ?', [$this->options['queue_name'] ?? 'failed'])->get();
+        $records    = $DB::table($this->table)->where('queue_name = ?', [$this->options['queue_name'] ?? 'failed'])->get();
 
         foreach ($records as $record) {
             $envelope = $this->serializer->decode([
@@ -134,8 +135,7 @@ class FailedTransport implements TransportInterface
     {
         /** @var ElegantTransportStamp|null $stamp */
         if ($stamp = $envelope->last(ElegantTransportStamp::class)) {
-            $modelClass = $this->model;
-            $modelClass::where('id = ?', [$stamp->getId()])->delete();
+            DB::table($this->table)->where('id = ?', [$stamp->getId()])->delete();
         }
     }
 

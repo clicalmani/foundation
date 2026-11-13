@@ -30,19 +30,17 @@ class ElegantTransportFactory implements TransportFactoryInterface
     #[Override]
     public function createTransport(
         string $dsn, 
-        array $options, 
+        array $options,
         ?SerializerInterface $serializer = null
     ): TransportInterface {
         $serializer = $serializer ?? new PhpSerializer();
-        $model      = \App\Models\MessengerMessage::class;
         
         // Dynamically route to a dedicated failure model and transport engine if explicit options match
         if (isset($options['table_name']) && $options['table_name'] === 'failed_messages') {
-            $model = \App\Models\FailedMessage::class;
-            return new FailedTransport($model, $serializer, $options);
+            return new FailedTransport($serializer, $options);
         }
         
-        return new ElegantTransport($model, $serializer, $options);
+        return new ElegantTransport($serializer, $options);
     }
 
     /**
